@@ -1,0 +1,11 @@
+case: NACA0012
+exp_info:
+  Re: 1000000.0
+  mach: 0.7
+  Temp: 298.0
+  exp_data: exp_data/naca0012.txt
+AOA: 0.0
+refinement_level: L0
+wall_time: 88.62 sec
+fail_flag: 0
+out_dir: output/2024-10-31/2d_clean/NACA0012/exp_set_1/L0/aoa_0

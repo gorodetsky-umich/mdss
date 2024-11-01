@@ -1,0 +1,32 @@
+level_1:
+  hierarchy: 2d_clean
+  cases:
+    '1':
+      name: NACA0012
+      nRefinement: 1
+      mesh_file: grids/naca0012
+      geometry_info:
+        chordRef: 1.0
+        areaRef: 1.0
+      solver_parameters:
+        useANKSolver: true
+        nSubiterTurb: 20
+        useNKSolver: false
+        NKSwitchTol: 1.0e-06
+        ANKCoupledSwitchTol: 0.001
+        ANKSecondOrdSwitchTol: 1.0e-12
+        L2Convergence: 1.0e-08
+        nCycles: 150000
+      aoa_info:
+      - 0
+      - 5
+      exp_set:
+        '1':
+          Re: 1000000.0
+          mach: 0.7
+          Temp: 298.0
+          exp_data: exp_data/naca0012.txt
+          out_dir: output/2024-10-31/2d_clean/NACA0012/exp_set_1
+start_time: '2024-10-31 15:15:15'
+end_time: '2024-10-31 15:17:10'
+total_wall_time: 115.18 sec

@@ -1,0 +1,31 @@
+level_2:
+  hierarchy: 2d_high_lift
+  cases:
+    '1':
+      name: 30p-30n
+      nRefinement: 3
+      mesh_file: grids/30p-30n_overset
+      geometry_info:
+        chordRef: 1.0
+        areaRef: 1.0
+      solver_parameters:
+        useANKSolver: true
+        nSubiterTurb: 20
+        useNKSolver: false
+        NKSwitchTol: 0.0001
+        ANKCoupledSwitchTol: 1.0e-07
+        ANKSecondOrdSwitchTol: 1.0e-05
+        L2Convergence: 1.0e-10
+        nCycles: 150000
+        liftIndex: 2
+        nearWallDist: 0.01
+      aoa_info:
+      - 0
+      - 10
+      - 5
+      exp_set:
+        '1':
+          Re: 1000000.0
+          mach: 0.7
+          Temp: 298.0
+          exp_data: exp_data/30p-30n.txt

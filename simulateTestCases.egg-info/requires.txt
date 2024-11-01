@@ -1,0 +1,10 @@
+numpy
+scipy
+pyyaml
+matplotlib
+pandas
+mpi4py
+petsc4py
+openmdao
+adflow
+mphys
