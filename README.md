@@ -129,4 +129,73 @@ The example YAML files and `dict_to_yaml` script serve as templates to facilitat
 
 ### Naming Format for Grid Files
 
-Since ADflow supports only 'CGNS' format for multi-block or overset meshes, please ensure that input grid files use this format. Additionally, the naming convention for grid files should follow this structure: `<name>_L<level of refinement>.cgns`. This naming convention is essential for automating the simulation process. Here, refinement levels start from `L0` (the finest grid) to `Ln`, where `L{n-1}` is the coarsest grid, and `n` represents the number of refinement levels. For example, a valid grid file name would be `funfoil_L0.cgns`. Note that while there are no restrictions on the location of the grid file, adherence to this naming convention is required.
+Since ADflow supports only 'CGNS' format for multi-block or overset meshes, please ensure that input grid files use this format. Additionally, the naming convention for grid files should follow this structure: `<name>_L<level of refinement>.cgns`. This naming convention is essential for automating the simulation process. Here, refinement levels start from `L0` (the finest grid) to `L{n-1}`, where `L{n-1}` is the coarsest grid, and `n` represents the number of refinement levels. For example, a valid grid file name would be `funfoil_L0.cgns`. Note that while there are no restrictions on the location of the grid file, adherence to this naming convention is required.
+
+### Outputs
+The output directory structure is organized similarly to the YAML file structure, as shown below:
+
+```
+Output_Directory
+    |
+    |---- Date of Simulation
+            |
+            |---- Hierarchy
+            |       |
+            |       |---- case
+            |               |
+            |               |----Experimental Set
+            |                       |
+            |                       |--- Refinement Level
+            |                       |       |
+            |                       |       |---- AOA Directory
+            |                       |       |       |
+            |                       |       |       |---- ADflow Outputs
+            |                       |       |       |---- out.yaml
+            |                       |       |       |
+            |                       |       |---- '.csv' file with simulation data
+            |                       |
+            |                       |---- Plot of Experimental data vs simulated
+            |                             data in png format
+            |
+            |---- out.yaml                                                                                      
+```
+
+Within each **AOA Directory** (Angle of Attack), outputs from ADflow are stored. Additionally, the script generates two `out.yaml` files:
+- One is stored in each **AOA Directory**, containing simulation information specific to that angle of attack.
+- The other is located in the **Date** directory and contains simulation information for the entire run.
+
+A `.csv` file is also generated within each **Refinement Level** directory. This file includes `C_L`, `C_D`, and Wall Time for each angle of attack. Using the `post_process` method in `run_sim`, a `.png` plot can be generated comparing experimental data (if available) with simulated data across different levels of refinement.
+
+## Additonal information
+The script uses a set of segault solver options ad shown below. Changes to these parameters can be specified in the 'yaml' configuration file.
+
+```
+# I/O Parameters
+    "gridFile": f"grids/naca0012_L1.cgns", # Default grid file
+    "outputDirectory": ".",
+    "monitorvariables": ["resrho", "resturb", "cl", "cd", "yplus"],
+    "writeTecplotSurfaceSolution": True,
+    # Physics Parameters
+    "equationType": "RANS",
+    "liftindex": 3,  # z is the lift direction
+    # Solver Parameters
+    "smoother": "DADI",
+    "CFL": 0.5,
+    "CFLCoarse": 0.25,
+    "MGCycle": "sg",
+    "MGStartLevel": -1,
+    "nCyclesCoarse": 250,
+    # ANK Solver Parameters
+    "useANKSolver": True,
+    "nsubiterturb": 5,
+    "anksecondordswitchtol": 1e-4,
+    "ankcoupledswitchtol": 1e-6,
+    "ankinnerpreconits": 2,
+    "ankouterpreconits": 2,
+    "anklinresmax": 0.1,
+    # Termination Criteria
+    "L2Convergence": 1e-12,
+    "L2ConvergenceCoarse": 1e-2,
+    "nCycles": 75000,
+```
+For more details on ADflow, its installation, and available options, please refer to the [ADflow documentation](https://mdolab-adflow.readthedocs-hosted.com/en/latest/).
