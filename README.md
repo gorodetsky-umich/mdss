@@ -1,11 +1,11 @@
 # simulateTestCases
 
-`simulateTestCases` is a Python package designed for running a series of ADflow simulations using mphys and OpenMDAO. This package provides streamlined functions to automate simulation test cases, making it ideal for users working on computational fluid dynamics (CFD) applications.
+`simulateTestCases` is a Python package designed for running a series of ADflow simulations using mphys and OpenMDAO. This package provides streamlined functions to automate simulation test cases.
 
 ## Features
 
 - Simplifies running multiple simulation cases with ADflow.
-- Integrates with mphys and OpenMDAO for optimization and workflow management.
+- Integrates with mphys and OpenMDAO and provides a framework for data management.
 - Supports analysis and post-processing of simulation results.
 
 ## Installation
