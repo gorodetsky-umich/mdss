@@ -5,7 +5,7 @@
 ## Features
 
 - Simplifies running multiple simulation cases with ADflow.
-- Integrates with mphys and OpenMDAO and provides a framework for data management.
+- Integrates with mphys and OpenMDAO for optimization and workflow management.
 - Supports analysis and post-processing of simulation results.
 
 ## Installation
@@ -41,3 +41,19 @@ The package requires the following libraries, which are automatically installed 
 - `pandas`
 - `mpi4py`
 - `petsc4py`
+
+## Usage
+
+Here’s a quick example of how to use `simulateTestCases`:
+
+```python
+from simulateTestCases import SimulationRunner
+
+# Initialize the runner with configuration file
+runner = SimulationRunner(config_path="path/to/config.yaml")
+
+# Run the simulation series
+results = runner.run_all_cases()
+
+# Analyze results
+runner.plot_results(results)
