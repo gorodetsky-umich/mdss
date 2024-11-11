@@ -1,0 +1,12 @@
+# Core dependencies
+numpy>=1.21
+scipy>=1.7
+pyyaml
+matplotlib
+pandas
+mpi4py>=3.1.4
+petsc4py  # Version should match your installed PETSc version
+openmdao
+mdolab-baseclasses
+adflow  # Requires custom installation
+mphys  # Requires custom installation

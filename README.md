@@ -1,12 +1,31 @@
 # simulateTestCases
 
-`simulateTestCases` is a Python package designed for running a series of ADflow simulations using mphys and OpenMDAO. This package provides streamlined functions to automate simulation test cases.
+`simulateTestCases` is a Python package designed for running a series of ADflow simulations using Mphys and OpenMDAO. This package provides streamlined functions to automate simulation test cases.
 
 ## Features
 
 - Simplifies running multiple simulation cases with ADflow.
-- Integrates with mphys and OpenMDAO and provides a framework for data management.
+- Integrates with Mphys and OpenMDAO and provides a framework for data management.
 - Genrates a comparison plot for each experimental condition in each case.
+
+## Dependencies
+
+The package requires the following libraries, which can automatically be installed with `pip`:
+
+- `numpy>=1.21`
+- `scipy>=1.7`
+- `mpi4py>=3.1.4`
+- `pyyaml`
+- `matplotlib`
+- `pandas`
+- `petsc4py`
+
+Additionally, the following packages are also needed but may require manual installation:
+
+- `openmdao`
+- `mdolab-baseclasses`
+- `adflow`
+- `mphys`
 
 ## Installation
 
@@ -24,23 +43,19 @@ To install `simulateTestCases`, use the following commands:
     cd simulateTestCases
     ```
 
-3. Install the package with pip:
+3. To install the package without dependencies:
 
     ```bash
     pip install .
     ```
-
-### Dependencies
-
-The package requires the following libraries, which are automatically installed with `pip`:
-
-- `numpy`
-- `scipy`
-- `pyyaml`
-- `matplotlib`
-- `pandas`
-- `mpi4py`
-- `petsc4py`
+    To install the package along with dependencies listed in `requirements.txt`:
+    ```bash
+    pip install . -r requirements.txt
+    ```
+    For an editable installation:
+    ```bash
+    pip install -e .
+    ```
 
 ## Usage
 
@@ -167,7 +182,7 @@ Within each **AOA Directory** (Angle of Attack), outputs from ADflow are stored.
 A `.csv` file is also generated within each **Refinement Level** directory. This file includes `C_L`, `C_D`, and Wall Time for each angle of attack. Using the `post_process` method in `run_sim`, a `.png` plot can be generated comparing experimental data (if available) with simulated data across different levels of refinement.
 
 ## Additonal information
-The script uses a set of segault solver options ad shown below. Changes to these parameters can be specified in the 'yaml' configuration file.
+The script uses a set of default solver options ad shown below. Changes to these parameters can be specified in the 'yaml' configuration file.
 
 ```
 # I/O Parameters
