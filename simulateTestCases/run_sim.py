@@ -173,7 +173,7 @@ class run_sim():
         # Assuming 'message' is the list collecting validation messages
         with open(output_file, 'w') as file:
             # Write a summary header
-            error_count = sum(1 for msg in message if "Key not found" in msg or "Type mismatch" in msg)
+            error_count = sum(1 for msg in message if "Key not found" in msg or "Type mismatch" in msg or "File does not exist" in msg)
             file.write("YAML Validation Report\n")
             file.write("=" * 30 + "\n")
             file.write(f"Total Errors/Warnings Found: {error_count}\n\n")
@@ -272,10 +272,11 @@ class run_sim():
         if not os.path.exists(self.out_dir): # Create the directory if it doesn't exist
             if comm.rank == 0:
                 os.makedirs(self.out_dir)
-        output_file = f"self.out_dir/yaml_validation.txt"
+        output_file = f"{self.out_dir}/yaml_validation.txt"
         self.write_yaml_validation_text(output_file, message)
 
-        print(f"Validation complete. Results saved in {output_file}")
+        if comm.rank == 0:
+            print(f"Validation complete. Results saved in {output_file}")
 
     ################################################################################
     # Code for running simulations
@@ -337,7 +338,7 @@ class run_sim():
                             date_string = current_date.strftime("%Y-%m-%d")
 
                             # Define output directory -- Written to store in the parent directory
-                            output_dir = f"{self.out_dir}/{date_string}/{hierarchie_info['name']}/{case_info['name']}/exp_set_{exp_set}/{refinement_level}/aoa_{aoa}"
+                            output_dir = f"{self.out_dir}/{hierarchie_info['name']}/{case_info['name']}/exp_set_{exp_set}/{refinement_level}/aoa_{aoa}"
                             aero_options['outputDirectory'] = output_dir
 
 
@@ -484,19 +485,11 @@ class run_sim():
             'total_wall_time': f"{net_run_time:.2f} sec"
         }
 
-        final_out_yaml_dir = f"{self.out_dir}/{date_string}"
-
         # Define the initial file path
-        final_out_yaml_file_path = os.path.join(final_out_yaml_dir, "out.yaml")
-        counter = 1
-
-        # Increment the filename if the file already exists
+        final_out_yaml_file_path = f"{self.out_dir}/out.yaml"
         if comm.rank == 0:
-            while os.path.exists(final_out_yaml_file_path):
-                final_out_yaml_file_path = os.path.join(final_out_yaml_dir, f"out_{counter}.yaml")
-                counter += 1
-        with open(final_out_yaml_file_path, 'w') as final_out_yaml_handle:
-            yaml.dump(sim_out_info, final_out_yaml_handle, sort_keys=False)
+            with open(final_out_yaml_file_path, 'w') as final_out_yaml_handle:
+                yaml.dump(sim_out_info, final_out_yaml_handle, sort_keys=False)
 
     ################################################################################
     # Code for Post Processing
