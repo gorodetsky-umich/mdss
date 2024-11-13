@@ -34,7 +34,7 @@ To install `simulateTestCases`, use the following commands:
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/sinaendhran/simulateTestCases.git
+    git clone https://github.com/gorodetsky-umich/simulateTestCases.git
     ```
 
 2. Navigate into the directory:
@@ -67,6 +67,9 @@ from simulateTestCases.run_sim import run_sim
 # Initialize the runner with configuration file
 sim = run_sim('naca0012_simInfo.yaml', 'output_dir')
 
+# Check if the yaml file is compatible
+sim.check_yaml_file()
+
 # Run the simulation series
 sim.run_problem()
 
@@ -89,11 +92,11 @@ The `run_sim` class requires two inputs to configure and execute a simulation:
 The YAML file organizes simulation data into a structured hierarchy, enabling clear configuration of cases and experimental conditions. Below is the hierarchical structure used in the YAML file:
 
 ```
-Hierarchy Levels
+Hierarchies
 |
-|---- Level 1
+|---- Hierarchie 1
         |
-        |---- hierarchy
+        |---- name
         |---- cases:
         |       |
         |       |---- case 1
@@ -103,7 +106,6 @@ Hierarchy Levels
         |       |       |---- mesh file
         |       |       |---- Geometry Info
         |       |       |---- Solver Parameters
-        |       |       |---- AOA
         |       |       |---- Experimental Conditions:
         |       |               |
         |       |               |---- Condition 1
@@ -117,30 +119,33 @@ Hierarchy Levels
 
 #### Descriptions
 
-- **Hierarchy Levels**: Organizes the simulation data into a multi-level structure for easy navigation.
-- **Level 1**: The first level in the hierarchy, where main categories are defined.
-- **hierarchy**: Represents the name of the hierarchy within this level.
-- **cases**: Contains individual simulation cases under the hierarchy.
-  - **case 1**: An individual simulation case with detailed specifications.
-    - **name**: The name of the airfoil or the model used in the simulation.
-    - **nRefinement**: The number of refinement levels.
-    - **mesh file**: The path to the mesh file to be in the simulation.
-    - **Geometry Info**: Geometrical details like reference area and chord length for the geometry.
-    - **Solver Parameters**: Specific ADflow solver parameters for running the case.
-    - **AOA**: List of Angles of Attack to be used in the simulations.
-    - **Experimental Conditions**: Defines experimental conditions for validation.
-      - **Condition 1**: Includes details like Reynold's number, Mach number, temperature, and the location of experimental data.
-      - **Other conditions**: Additional conditions that may be present for comprehensive testing.
-- **Additional hierarchy levels**: Allows for adding more structured levels if needed.
+- **Hierarchies**: Organizes the simulation data into a multi-level structure for easy navigation.
+    - **Hierarchie 1**: The first level in the hierarchy, where main categories are defined.
+        - **name**: Represents the name of the hierarchy.
+        - **cases**: Contains individual simulation cases under the hierarchy.
+            - **case 1**: An individual simulation case with detailed specifications.
+                - **name**: The name of the airfoil or the model used in the simulation.
+                - **nRefinement**: The number of refinement levels.
+                - **mesh file**: The path to the mesh file to be in the simulation.
+                - **Geometry Info**: Geometrical details like reference area and chord length for the geometry.
+                - **Solver Parameters**: Specific ADflow solver parameters for running the case.
+                - **Experimental Conditions**: Defines experimental conditions for validation.
+                    - **Condition 1**: Includes details like Reynold's number, Mach number, temperature, list of Angle of Attacks and the location of experimental data.
+                - **Other conditions**: Additional conditions that may be present for comprehensive testing.
+        - **Other Cases**: Additional cases that may be present in current hierarchie.
+    - **Additional hierarchy levels**: Allows for adding more structured levels if needed.
 
 Please note that adherence to this structure is essential; any deviation may lead to errors when running simulations. Examples of correctly formatted YAML files are provided in the `examples` folder. These include:
 
 - A YAML file with simulation information for the **NACA 0012 airfoil**
 - A YAML file for the **McDonnell Douglas 30P-30N airfoil**
+- A YAML file for running both **NACA 0012 airfoil** and **McDonnell Douglas 30P-30N airfoil**
 
 Additionally, a Python script named `dict_to_yaml` is available to help convert a Python dictionary (structured according to the hierarchy above) into a `.yaml` file. This script can also be used as a starting point for generating custom YAML files.
 
 The example YAML files and `dict_to_yaml` script serve as templates to facilitate proper configuration.
+
+`check_yaml_file()` method helps to check if the yaml file is compatible. This method generates a report, saved as `<output>/yaml_validation.txt`, containing the error details.
 
 ### Naming Format for Grid Files
 
@@ -152,32 +157,30 @@ The output directory structure is organized similarly to the YAML file structure
 ```
 Output_Directory
     |
-    |---- Date of Simulation
-            |
-            |---- Hierarchy
-            |       |
-            |       |---- case
-            |               |
-            |               |----Experimental Set
-            |                       |
-            |                       |--- Refinement Level
-            |                       |       |
-            |                       |       |---- AOA Directory
-            |                       |       |       |
-            |                       |       |       |---- ADflow Outputs
-            |                       |       |       |---- out.yaml
-            |                       |       |       |
-            |                       |       |---- '.csv' file with simulation data
-            |                       |
-            |                       |---- Plot of Experimental data vs simulated
-            |                             data in png format
+    |---- Hierarchy
+            |           
+            |---- case
+            |       |       
+            |       |----Experimental Set
+            |             |
+            |             |--- Refinement Level
+            |             |       |
+            |             |       |---- AOA Directory
+            |             |       |       |
+            |             |       |       |---- ADflow Outputs
+            |             |       |       |---- out.yaml
+            |             |       |
+            |             |       |---- '.csv' file with simulation data
+            |             |
+            |             |---- Plot of Experimental data vs simulated
+            |                   data in png format
             |
             |---- out.yaml                                                                                      
 ```
 
 Within each **AOA Directory** (Angle of Attack), outputs from ADflow are stored. Additionally, the script generates two `out.yaml` files:
 - One is stored in each **AOA Directory**, containing simulation information specific to that angle of attack.
-- The other is located in the **Date** directory and contains simulation information for the entire run.
+- The other is located in the **Hierarchy** directory and contains simulation information for the entire run.
 
 A `.csv` file is also generated within each **Refinement Level** directory. This file includes `C_L`, `C_D`, and Wall Time for each angle of attack. Using the `post_process` method in `run_sim`, a `.png` plot can be generated comparing experimental data (if available) with simulated data across different levels of refinement.
 
@@ -185,6 +188,11 @@ A `.csv` file is also generated within each **Refinement Level** directory. This
 The script uses a set of default solver options ad shown below. Changes to these parameters can be specified in the 'yaml' configuration file.
 
 ```
+# Print Options
+"printIterations": False,
+"printAllOptions": False,
+"printIntro": False,
+"printTiming": False,
 # I/O Parameters
 "gridFile": f"grids/naca0012_L1.cgns", # Default grid file
 "outputDirectory": ".",
