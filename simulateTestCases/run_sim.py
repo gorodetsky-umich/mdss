@@ -113,11 +113,6 @@ class Top(Multipoint):
 
         # add dvs to ivc and connect
         self.dvs.add_output("aoa", val=aoa, units="deg")
-
-        # call the promote inputs to propagate aoa dvs
-        # TODO does not work now
-        # self.cruise._mphys_promote_inputs()
-        # so connect manually
         self.connect("aoa", ["cruise.coupling.aoa", "cruise.aero_post.aoa"])
 
 class run_sim():
