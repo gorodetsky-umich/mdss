@@ -1,2 +1,4 @@
 simulateTestCases/__pycache__/run_sim.cpython-39.pyc
+/build/
+*.egg-info/
 
