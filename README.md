@@ -27,6 +27,8 @@ Additionally, the following packages are also needed but may require manual inst
 - `adflow`
 - `mphys`
 
+A bash shell script is provided to download all the required dependencies and software programs provided by the MDO lab. It is assumed that the user is working on a local Debian based machine. 
+
 ## Installation
 
 To install `simulateTestCases`, use the following commands:
