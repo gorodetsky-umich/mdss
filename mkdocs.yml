@@ -1,0 +1,15 @@
+site_name: Simulate Test Cases
+
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Tutorials:
+    - Introduction: tutorials/introduction.md
+    - Inputs: tutorials/inputs.md
+    - outputs: tutorials/outputs.md
+
+markdown_extensions:
+  - md_in_html
+
+extra_css:
+  - styles/extra.css
