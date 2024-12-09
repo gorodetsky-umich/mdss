@@ -3,14 +3,18 @@ import sys
 import pandas as pd
 import yaml
 import time
+import copy
 import matplotlib.pyplot as plt
 from datetime import date, datetime
+
 from mphys.multipoint import Multipoint
 from mphys.scenario_aerodynamic import ScenarioAerodynamic
 from adflow.mphys import ADflowBuilder
 from baseclasses import AeroProblem
 import openmdao.api as om
 from mpi4py import MPI
+
+from simulateTestCases.utils import load_yaml_file, load_csv_data, check_input_yaml
 
 comm = MPI.COMM_WORLD
 
@@ -124,183 +128,69 @@ class run_sim():
             info_file: 'yaml' file conatining simulation info
             out_dir: Directory to store output
         """
+        # Validate the input yaml file
+        check_input_yaml(info_file)
+        if comm.rank == 0:
+            print(f"{'-' * 50}")
+            print("YAML file validation is successful")
+            print(f"{'-' * 50}")
+
         self.out_dir = out_dir
         self.info_file = info_file
-        try:
-            # Attempt to open and read the YAML file
-            with open(info_file, 'r') as file:
-                self.sim_info = yaml.safe_load(file)
-        except FileNotFoundError:
-            # Handle the case where the YAML file is not found
-            if comm.rank == 0:  # Only the root process prints this error
-                print(f"FileNotFoundError: The info file '{info_file}' was not found.")
-            sys.exit(1)
-        except yaml.YAMLError as ye:
-            # Errors in YAML parsing
-            if comm.rank == 0:  # Only the root process prints this error
-                print(f"YAMLError: There was an issue reading '{info_file}'. Check the YAML formatting. Error: {ye}")
-            sys.exit(1)
-        except Exception as e:
-            # General error catch in case of other unexpected errors
-            if comm.rank == 0:  # Only the root process prints this error
-                print(f"An unexpected error occurred while loading the info file: {e}")
-            sys.exit(1)
-    
-    ################################################################################
-    # Code to check the yaml file
-    ################################################################################
-    def check_expected_key(self, dict_to_ckeck, expected_keys):
-        error_flag = 0
-        msg = [f"Passed: Contains all the expected keys in the right format"]
-        # Check each expected key for presence and type
-        for key, expected_type in expected_keys.items():
-            if key not in dict_to_ckeck:
-                msg.append(f"Key not found: '{key}'")
-                error_flag = 1
-            elif not isinstance(dict_to_ckeck[key], expected_type):
-                actual_type = type(dict_to_ckeck[key]).__name__
-                expected_type_name = expected_type.__name__
-                msg.append(f"Type mismatch: '{key}' is expected to be {expected_type_name}, but found {actual_type}")
-                error_flag = 1
-        return error_flag, msg
+        self.final_out_file = f"{self.out_dir}/overall_sim_info.yaml" # Setting the overall simulation info file.
+        self.sim_info = load_yaml_file(self.info_file)
 
-    def write_yaml_validation_text(self, output_file, message):
-        # Assuming 'message' is the list collecting validation messages
-        with open(output_file, 'w') as file:
-            # Write a summary header
-            error_count = sum(1 for msg in message if "Key not found" in msg or "Type mismatch" in msg or "File does not exist" in msg)
-            file.write("YAML Validation Report\n")
-            file.write("=" * 30 + "\n")
-            file.write(f"Total Errors/Warnings Found: {error_count}\n\n")
-
-            # Write each line with formatting
-            for line in message:
-                if "Checking Hierarchy" in line:
-                    # Major heading for each hierarchy
-                    file.write("\n" + "=" * 50 + "\n")
-                    file.write(f"{line}\n")
-                    file.write("=" * 50 + "\n")
-                elif "Checking case" in line:
-                    # Subheading for each case
-                    file.write("\n" + "-" * 40 + "\n")
-                    file.write(f"{line}\n")
-                    file.write("-" * 40 + "\n")
-                elif "Checking exp_set" in line:
-                    # Subheading for each exp_set
-                    file.write("\n" + " " * 4 + line + "\n")
-                    file.write(" " * 4 + "-" * 36 + "\n")
-                elif "File does not exist" in line or "Type Error" in line:
-                    # Indented error message with a bullet point
-                    file.write(" " * 8 + "- " + line + "\n")
-                else:
-                    # General message with indentation
-                    file.write(" " * 4 + line + "\n")
-
-    def check_yaml_file(self):
-        """
-        This function checks the input yaml file and prints possible places where the code might fail.
-        """
-        expected_keys_in_hieraechy = {
-            'name': str,
-            'cases': dict,
-        }
-
-        expected_keys_in_case = {
-                            'name': str,
-                            'nRefinement': int,
-                            'solver_parameters': dict,
-                            'mesh_file': str,
-                            'geometry_info': dict,
-                            'exp_sets': dict,
-                        }
         
-        expected_keys_in_geometry_info = {
-            'chordRef': float,
-            'areaRef': float,
-        }
 
-        expected_keys_in_exp_set = {
-            'aoa_list': list,
-            'Re': float,
-            'mach': float,
-            'Temp': float,
-            'exp_data': str,
-        }
-
-        sim_info_copy = self.sim_info.copy() # Copying to run the loop
-        message = [f"Checking {self.info_file} for compatibility with simulateTestCases"]
-        if 'hierarchies' in sim_info_copy.keys(): 
-            for hierarchie, hierarchie_info in sim_info_copy['hierarchies'].items(): # loop for Hierarchy level
-                message.append(f"Checking Hierarchy: {hierarchie}")
-                hierarchy_error_flag, msg = self.check_expected_key(hierarchie_info, expected_keys_in_hieraechy)
-                message.extend(msg)
-                if hierarchy_error_flag == 0:
-                    for case, case_info in hierarchie_info['cases'].items(): # loop for cases in hierarchy
-                        message.append(f"Checking case: {case}")
-                        case_error_flag, msg = self.check_expected_key(case_info, expected_keys_in_case)
-                        message.extend(msg)
-                        if case_error_flag == 0:
-                            message.append(f"Checking if the mesh files are present.....")
-                            for ii in range(case_info['nRefinement']):
-                                refinement_level = f"L{ii}"
-                                mesh_file = f"{case_info['mesh_file']}_{refinement_level}.cgns"
-                                if not os.path.isfile(mesh_file):
-                                    message.append(f"File does not exist: {mesh_file}")
-                                else:
-                                    message.append(f"Passed: {mesh_file} exists")
-                            message.append(f"Checking the geometry_info dict.....")
-                            gemoetry_error_flag, msg = self.check_expected_key(case_info['geometry_info'], expected_keys_in_geometry_info)
-                            message.extend(msg)
-                            for exp_set, exp_set_info in case_info['exp_sets'].items(): # loop for experimental sets in each case
-                                message.append(F"Checking exp_set: {exp_set}")
-                                exp_set_error_flag , msg = self.check_expected_key(exp_set_info, expected_keys_in_exp_set)
-                                message.extend(msg)
-                                if exp_set_error_flag == 0:
-                                    if not all(isinstance(item, (float, int)) for item in exp_set_info['aoa_list']):
-                                        message.append(f"'Type Error: aoa_list contains values other than float and int'")
-                                    if not os.path.isfile(exp_set_info['exp_data']):
-                                        message.append(f"File does not exist: {exp_set_info['exp_data']}")
-        else:
-            message.append(f"Key not found: 'heirarchies' is not present in {self.info_file}")
-        
-        # Writing messages to a text file
-        if not os.path.exists(self.out_dir): # Create the directory if it doesn't exist
+        # Create the output directory if it doesn't exist
+        if not os.path.exists(self.out_dir): 
             if comm.rank == 0:
                 os.makedirs(self.out_dir)
-        output_file = f"{self.out_dir}/yaml_validation.txt"
-        self.write_yaml_validation_text(output_file, message)
-
-        if comm.rank == 0:
-            print(f"Validation complete. Results saved in {output_file}")
-
+    
     ################################################################################
     # Code for running simulations
     ################################################################################   
     def run_problem(self):
         """
-        This function sets up a openMDAO problem and runs it, generates a text tile to store the output and compile output info into two yaml files
-        - One file is stored in the user given output direcytory with information regarding the overall simulation
-        - The second file is specific to an angle of attack for each experimental scenario, and stored in the aoa directory
+        This function sets up a openMDAO problem and runs it.
+        
+        Inputs
+        ------
+        No additional inputs needed
+
+        Outputs
+        -------
+        - A csv file to store AOA, Cl, Cd. Stored in the refinemenr level directory
+        - A YAML with the ovarall simulation information. stored in the user given output directory.
+        - A YAML file, specific to an angle of attack for each experimental scenario. Stored in the aoa directory
+
         """
-        sim_info_copy = self.sim_info.copy() # Copying to run the loop
-        sim_out_info = self.sim_info.copy() # Copying to write the output YAML file
+
+        # Store a copy of input YAML file in output directory
+        input_yaml_file = f"{self.out_dir}/input_file.yaml"
+        if comm.rank == 0:
+            with open(input_yaml_file, 'w') as input_yaml_handle:
+                yaml.dump(self.sim_info, input_yaml_handle, sort_keys=False)
+        
+        sim_info_copy = copy.deepcopy(self.sim_info) # Copying to run the loop
+        sim_out_info = copy.deepcopy(self.sim_info) # Copying to write the output YAML file
         start_time = time.time()
         start_wall_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-        for hierarchie, hierarchie_info in sim_info_copy['hierarchies'].items(): # loop for Hierarchy level
+        for hierarchy, hierarchy_info in enumerate(sim_info_copy['hierarchies']): # loop for Hierarchy level
 
-            for case, case_info in hierarchie_info['cases'].items(): # loop for cases in hierarchy
+            for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
 
                 aero_options = default_aero_options.copy()
                 aero_options.update(case_info['solver_parameters']) # Update ADflow solver parameters
 
-                for exp_set, exp_info in case_info['exp_sets'].items(): # loop for experimental datasets that may present
+                for exp_set, exp_info in enumerate(case_info['exp_sets']): # loop for experimental datasets that may present
 
                     if comm.rank == 0:
                         print(f"{'#' * 30}")
                         print(f"{'SIMULATION INFO':^30}")
                         print(f"{'#' * 30}")
-                        print(f"{'Hierarchy':<20}: {hierarchie_info['name']}")
+                        print(f"{'Hierarchy':<20}: {hierarchy_info['name']}")
                         print(f"{'Case Name':<20}: {case_info['name']}")
                         print(f"{'Experimental Condition':<20}: {exp_set}")
                         print(f"{'Reynolds Number (Re)':<20}: {exp_info['Re']}")
@@ -312,7 +202,7 @@ class run_sim():
 
                     exp_sim_info = {} # Creating experimental level sim info dictionary for overall sim info file
 
-                    for ii in range(case_info['nRefinement']): # Loop for refinement levels
+                    for ii, mesh_file in enumerate(case_info['mesh_files']): # Loop for refinement levels
 
                         refinement_level = f"L{ii}"
                         CLList = []
@@ -323,7 +213,7 @@ class run_sim():
                         refinement_level_dict = {} # Creating refinement level sim info dictionary for overall sim info file
 
                         # Update Grid file
-                        aero_options['gridFile'] = f"{case_info['mesh_file']}_{refinement_level}.cgns"
+                        aero_options['gridFile'] = f"{case_info['meshes_folder_path']}/{mesh_file}"
 
                 
                         for aoa in aoa_list: # loop for angles of attack
@@ -333,8 +223,11 @@ class run_sim():
                             date_string = current_date.strftime("%Y-%m-%d")
 
                             # Define output directory -- Written to store in the parent directory
-                            output_dir = f"{self.out_dir}/{hierarchie_info['name']}/{case_info['name']}/exp_set_{exp_set}/{refinement_level}/aoa_{aoa}"
+                            output_dir = f"{self.out_dir}/{hierarchy_info['name']}/{case_info['name']}/exp_set_{exp_set}/{refinement_level}/aoa_{aoa}"
                             aero_options['outputDirectory'] = output_dir
+
+                            # name of the simulation info file at the aoa level directory
+                            aoa_info_file = f"{output_dir}/aoa_{aoa}.yaml" 
 
 
                             aoa_level_dict = {} # Creating aoa level sim info dictionary for overall sim info file
@@ -351,7 +244,6 @@ class run_sim():
                             # Checking for existing sucessful simualtion info, 
                             if os.path.exists(output_dir):
                                 try:
-                                    aoa_info_file = f"{output_dir}/out.yaml"
                                     with open(aoa_info_file, 'r') as aoa_file:
                                         aoa_sim_info = yaml.safe_load(aoa_file)
                                     fail_flag = aoa_sim_info['fail_flag']
@@ -415,6 +307,7 @@ class run_sim():
                             aoa_out_dic = {
                                 'case': case_info['name'],
                                 'exp_info': exp_info,
+                                'mesh_file_used': f"{case_info['meshes_folder_path']}/{mesh_file}",
                                 'AOA': float(aoa),
                                 'cl': float(prob["cruise.aero_post.cl"][0]),
                                 'cd': float(prob["cruise.aero_post.cd"][0]),
@@ -423,7 +316,7 @@ class run_sim():
                                 'fail_flag': int(fail_flag),
                                 'out_dir': output_dir,
                             }
-                            with open(f"{output_dir}/out.yaml", 'w') as interim_out_yaml:
+                            with open(aoa_info_file, 'w') as interim_out_yaml:
                                 yaml.dump(aoa_out_dic, interim_out_yaml, sort_keys=False)
                         
                             # To Store in the overall simulation out file
@@ -461,15 +354,15 @@ class run_sim():
 
                         # Add csv file location to the overall simulation out file
                         refinement_level_dict['csv_file'] = ADflow_out_file
-                        refinement_level_dict['out_dir'] = refinement_level_dir
+                        refinement_level_dict['refinement_out_dir'] = refinement_level_dir
 
                         # Add refinement level dict to exp level dict
                         exp_sim_info[f"{refinement_level}"] = refinement_level_dict
 
                     # Add experimental level simulation to the overall simulation out file
                     exp_out_dir = os.path.dirname(refinement_level_dir)
-                    exp_sim_info['out_dir'] = exp_out_dir
-                    sim_out_info['hierarchies'][hierarchie]['cases'][case]['exp_sets'][exp_set]['sim_info'] = exp_sim_info
+                    exp_sim_info['exp_set_out_dir'] = exp_out_dir
+                    sim_out_info['hierarchies'][hierarchy]['cases'][case]['exp_sets'][exp_set]['sim_info'] = exp_sim_info
 
         end_time = time.time()
         end_wall_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -480,38 +373,33 @@ class run_sim():
             'total_wall_time': f"{net_run_time:.2f} sec"
         }
 
-        # Define the initial file path
-        final_out_yaml_file_path = f"{self.out_dir}/out.yaml"
+        # Store the final simulation out file.
         if comm.rank == 0:
-            with open(final_out_yaml_file_path, 'w') as final_out_yaml_handle:
+            with open(self.final_out_file, 'w') as final_out_yaml_handle:
                 yaml.dump(sim_out_info, final_out_yaml_handle, sort_keys=False)
+        comm.Barrier()
 
     ################################################################################
     # Code for Post Processing
     ################################################################################
-    def load_csv_data(self, csv_file):
-        try:
-            df = pd.read_csv(csv_file)
-            return df
-        except FileNotFoundError:
-            if comm.rank == 0:
-                print(f"Error: The file '{csv_file}' was not found. Please check the file path.")
-        except pd.errors.EmptyDataError:
-            if comm.rank == 0:
-                print("Error: The file is empty. Please check if data has been written correctly.")
-        except pd.errors.ParserError:
-            if comm.rank == 0:
-                print("Error: The file could not be parsed. Please check the file format.")
-        except Exception as e:
-            if comm.rank == 0:
-                print(f"An unexpected error occurred: {e}")
-        return None # In case of error, return none.
     
     def post_process(self):
-            
-        for hierarchie, hierarchie_info in self.sim_info['hierarchies'].items(): # loop for Hierarchy level
-            for case, case_info in hierarchie_info['cases'].items(): # loop for cases in hierarchy
-                for exp_set, exp_info in case_info['exp_sets'].items(): # loop for experimental datasets that may present
+        ''' Function to generate plots comaring the experimenatal data vs the data from ADflow
+        
+        Inputs
+        ------
+        No Additional Inputs needed
+
+        Outputs
+        -------
+        A plot file stored in every experimental directory that compares the experimental data, if available with ADflow data at all the refinement levels for the corresponing
+        set of experimental conditions.
+        '''
+        sim_out_info = load_yaml_file(self.final_out_file)
+
+        for hierarchy, hierarchy_info in enumerate(sim_out_info['hierarchies']): # loop for Hierarchy level
+            for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
+                for exp_set, exp_info in enumerate(case_info['exp_sets']): # loop for experimental datasets that may present
                     
                     # Plot setup
                     fig, axs = plt.subplots(1, 2, figsize=(14, 6))
@@ -519,7 +407,7 @@ class run_sim():
 
                     # Load Experimental Data
                     try:
-                        exp_data = self.load_csv_data(exp_info['exp_data'])
+                        exp_data = load_csv_data(exp_info['exp_data'])
                     except:
                         exp_data = None
                         if comm.rank == 0:
@@ -530,12 +418,12 @@ class run_sim():
                         axs[1].plot(exp_data['Alpha'], exp_data['CD'], label='Experimental', color='black', linestyle='--', marker='o')
                 
                     # Load Simulated Data
-                    exp_out_dir = exp_info['sim_info']['out_dir']
+                    exp_out_dir = exp_info['sim_info']['exp_set_out_dir']
                     sim_data = {}
-                    for ii in range(case_info['nRefinement']): # Loop for refinement levels
+                    for ii, mesh_file in enumerate(case_info['mesh_files']): # Loop for refinement levels
                         refinement_level_dir = f"{exp_out_dir}/L{ii}"
                         ADflow_out_file = f"{refinement_level_dir}/ADflow_output.csv"
-                        sim_data = self.load_csv_data(ADflow_out_file)
+                        sim_data = load_csv_data(ADflow_out_file)
                         if sim_data is not None:  # Only plot if data loaded successfully
                             label = f"L{ii}"
                             axs[0].plot(sim_data['Alpha'], sim_data['CL'], label=label) # Plot CL vs Alpha for this refinement level

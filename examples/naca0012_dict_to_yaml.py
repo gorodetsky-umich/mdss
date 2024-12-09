@@ -2,14 +2,14 @@ import yaml
 import numpy as np
 
 data = {
-    'hierarchies':{
-        '1':{
+    'hierarchies':[
+        {
             'name': '2d_clean',
-            'cases': {
-                '1': {
+            'cases': [
+                {
                     'name': 'NACA0012',
-                    'nRefinement': 1,
-                    'mesh_file': '../grids/naca0012', # Add the refinement level and exptention later.
+                    'meshes_folder_path': '../grids', # path to the folder containing mesh files
+                    'mesh_files': ['naca0012_L0.cgns',], # List of mesh files intended for different levels of refinement
                     'geometry_info': {
                         'chordRef': 1.0,
                         'areaRef': 1.0,
@@ -29,8 +29,8 @@ data = {
                         "L2Convergence": 1e-8,
                         "nCycles": 150000,
                     },
-                    'exp_sets': { 
-                        '1': {
+                    'exp_sets': [ 
+                        {
                             'aoa_list': [0,5], # Info to construct array of aoa [start, end, interval]
                             'Re': 1e6, # Reynold's number
                             'mach': 0.7, # Mach number
@@ -38,11 +38,11 @@ data = {
                             'exp_data': 'exp_data/naca0012.txt', # Modify as required.
                         }
                     
-                    },
+                    ],
                 },
-            },
+            ],
         },
-    },
+    ],
 }
 # Write to a YAML file
 with open('naca0012_simInfo.yaml', 'w') as f:

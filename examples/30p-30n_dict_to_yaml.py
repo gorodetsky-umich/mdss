@@ -2,14 +2,16 @@ import yaml
 import numpy as np
 
 data = {
-    'hierarchies': {
-        '2':{
+    'hierarchies': [
+            {
             'name': '2d_high_lift',
-            'cases': {
-                '1': {
+            'cases': [
+                {
                     'name': '30p-30n',
-                    'nRefinement': 3,
-                    'mesh_file': '../grids/30p-30n_overset', # Add the refinement level and exptention later.
+                    'meshes_folder_path': '../grids', # path to the folder containing mesh files
+                    'mesh_files': ['30p-30n_overset_L0.cgns',
+                                   '30p-30n_overset_L1.cgns',
+                                   '30p-30n_overset_L2.cgns',], # List of mesh files intended for different levels of refinement
                     'geometry_info': {
                         'chordRef': 1.0,
                         'areaRef': 1.0,
@@ -32,19 +34,19 @@ data = {
                         # IHC Options
                         'nearWallDist': 0.01,
                     },                   
-                    'exp_sets': {
-                        '1': {
+                    'exp_sets': [
+                        {
                             'aoa_list': [0, 5], # Info to construct array of aoa [start, end, interval]
                             'Re': 1e6, # Reynold's number
                             'mach': 0.7, # Mach number
                             'Temp': 298.0, # Temperature at which experiment was conducted in kelvin
                             'exp_data': 'exp_data/30p-30n.txt', # Modify as required.
                         },  
-                    },
+                    ],
                 },
-            },
+            ],
         },
-    },
+    ],
 }
 
 # Write to a YAML file
