@@ -23,8 +23,8 @@ Hierarchies
         |       |---- case 1
         |       |       |
         |       |       |---- name
-        |       |       |---- nRefinement
-        |       |       |---- mesh file
+        |       |       |---- meshes folder path
+        |       |       |---- mesh files
         |       |       |---- Geometry Info
         |       |       |---- Solver Parameters
         |       |       |---- Experimental Conditions:
@@ -40,19 +40,19 @@ Hierarchies
 
 #### Descriptions
 
-- **Hierarchies**: Organizes the simulation data into a multi-level structure for easy navigation.
+- **Hierarchies**: A list to organize the simulation data into a multi-level structure for easy navigation.
     - **Hierarchie 1**: The first level in the hierarchy, where main categories are defined.
         - **name**: Represents the name of the hierarchy.
-        - **cases**: Contains individual simulation cases under the hierarchy.
+        - **cases**: A list containing individual simulation cases under the hierarchy.
             - **case 1**: An individual simulation case with detailed specifications.
                 - **name**: The name of the airfoil or the model used in the simulation.
-                - **nRefinement**: The number of refinement levels.
-                - **mesh file**: The path to the mesh file to be in the simulation.
-                - **Geometry Info**: Geometrical details like reference area and chord length for the geometry.
+                - **meshes folder path**: Path to the folder containg mesh files.
+                - **mesh files**: A list of mesh files
+                - **Geometry Info**: Geometrical details that are required: Reference area and chord length for the geometry.
                 - **Solver Parameters**: Specific ADflow solver parameters for running the case.
-                - **Experimental Conditions**: Defines experimental conditions for validation.
-                    - **Condition 1**: Includes details like Reynold's number, Mach number, temperature, list of Angle of Attacks and the location of experimental data.
-                - **Other conditions**: Additional conditions that may be present for comprehensive testing.
+                - **Experimental Conditions**: A list defining experimental conditions.
+                    - **Condition 1**: Details required to define an AeroProblem: Reynold's number, Mach number, temperature, list of Angle of Attacks and the location of experimental data.
+                - **Other conditions**: Additional experimental conditions that may be present.
         - **Other Cases**: Additional cases that may be present in current hierarchie.
     - **Additional hierarchy levels**: Allows for adding more structured levels if needed.
 
@@ -61,8 +61,6 @@ Please note that adherence to this structure is essential; any deviation may lea
 A Python script named `dict_to_yaml` is available to help convert a Python dictionary (structured according to the hierarchy above) into a `.yaml` file. This script can also be used as a starting point for generating custom YAML files.
 
 The example YAML files and `dict_to_yaml` script serve as templates to facilitate proper configuration.
-
-`check_yaml_file()` method helps to check if the yaml file is compatible. This method generates a report, saved as `<output>/yaml_validation.txt`, containing the error details.
 
 ### Solver Parameters
 The Solver parameters is a dictionary containing options specific to the ADflow CFD solver, allowing users to customize the solver's behavior to suit their simulation needs. Detailed descriptions of these parameters and their usage can be found in the [ADflow Documentation](https://mdolab-adflow.readthedocs-hosted.com/en/latest/options.html "ADflow Options"). 
@@ -106,26 +104,24 @@ If the dictionary is empty or if the default parameters are not modified, the co
 ```
 ### Experimental Conditions
 
-To define the problem, referred to as the *__AeroProblem__* (focused on aerodynamics), the *__mdolab-baseClasses__* repository is utilized. This repository simplifies the setup of an aerodynamic problem by allowing users to specify a subset of conditions (e.g., Mach number, temperature, or Reynolds number) while automatically computing the remaining properties using gas laws.
+To define the problem, referred to as the *__AeroProblem__* (focused on aerodynamics), the following conditions along with the Angle of Attack(AoA) and path to the experimental data:
 
-#### Example Usage:
-
-You can specify the following conditions along with the Angle of Attack(AoA) and path to the experimental data:
-    - Reynolds number
-    - Mach number
-    - Temperature
-    - Reynolds length (Computed from geometrical data)
+- Reynolds number
+- Mach number
+- Temperature
+- Reynolds length (Computed from geometrical data)
 
 Other properties, such as pressure or density, will be calculated automatically based on the specified values and the governing gas laws.
-
-For detailed information about the acceptable conditions and how to define an AeroProblem, refer to the [mdolab-baseClasses documentation](https://mdolab-baseclasses.readthedocs-hosted.com/en/latest/pyAero_problem.html "Documentation for AeroProblem").
 
 The `Angle of Attack (AoA)` is required to define the aerodynamic orientation of the flow. The `path to experimental data` can be left blank, as it will not affect the simulation. However, leaving it blank will generate a warning during the post-processing stage.
 
 
-### Naming Format for Grid Files
+### Location of Mesh Files
 
-Since ADflow supports only 'CGNS' format for multi-block or overset meshes, please ensure that input grid files use this format. Additionally, the naming convention for grid files should follow this structure: `<name>_L<level of refinement>.cgns`. This naming convention is essential for automating the simulation process. Here, refinement levels start from `L0` (the finest grid) to `L{n-1}`, where `L{n-1}` is the coarsest grid, and `n` represents the number of refinement levels. For example, a valid grid file name would be `funfoil_L0.cgns`. Note that while there are no restrictions on the location of the grid file, adherence to this naming convention is required.
+Specifying the location of the mesh files requires two inputs in every case: 
+
+- `meshes_folder_path` gets the path to the folder that contains the mesh files
+- `mesh_files` gets the list of file names, that to be run, in the folder specified above.
 
 ## 2. Output Directory Path
 

@@ -4,6 +4,7 @@ scipy>=1.7
 pyyaml
 matplotlib
 pandas
+pydantic
 mpi4py>=3.1.4
 petsc4py  # Version should match your installed PETSc version
 openmdao

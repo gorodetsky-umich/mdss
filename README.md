@@ -69,9 +69,6 @@ from simulateTestCases.run_sim import run_sim
 # Initialize the runner with configuration file
 sim = run_sim('naca0012_simInfo.yaml', 'output_dir')
 
-# Check if the yaml file is compatible
-sim.check_yaml_file()
-
 # Run the simulation series
 sim.run_problem()
 

@@ -1,5 +1,6 @@
 site_name: Simulate Test Cases
-
+theme:
+  name: readthedocs
 nav:
   - Home: index.md
   - Installation: installation.md
@@ -7,7 +8,8 @@ nav:
     - Introduction: tutorials/introduction.md
     - Inputs: tutorials/inputs.md
     - outputs: tutorials/outputs.md
-
+    - Usage: tutorials/usage.md
+  - Additional Information: additionalInfo.md
 markdown_extensions:
   - md_in_html
 
