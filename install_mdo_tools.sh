@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# @File    : install_mdo_tools.sh
-# @Time    : 3/12/2024
+# @File    : install_softwares.sh
+# @Date    : 9/12/2024
 # @Desc    : Clean setup MACH-AERO on a local system
 # @Author  : Galen Ng, edited by Sanjan CM
 
@@ -14,7 +14,7 @@ CHK_DIR="$PWD/.mach_install"
 BASHRC="$HOME/.bashrc"
 
 MDOLAB_PACKAGES_DIR="$PWD/packages"
-COMPILERS="GCC"
+COMPILERS="GFORTRAN"
 
 PIP="python3 -m pip"
 
@@ -240,8 +240,19 @@ openmpi() {
     local name="${FUNCNAME[0]}"
     install "$name" || return 0
 
-    OPENMPI_INSTALL_DIR="$MDOLAB_PACKAGES_DIR/openmpi-$OPENMPI_VERSION.0"
-    MPI_INSTALL_DIR="$OPENMPI_INSTALL_DIR/opt-gfortran"
+    MPI_INSTALL_DIR="$MDOLAB_PACKAGES_DIR/openmpi-$OPENMPI_VERSION.0/opt-gfortran"
+    
+    # Add PETSc environment variables to .bashrc
+    if ! grep -Fxq "# -- OpenMPI Installation" $BASHRC; then
+        echo "# -- OpenMPI Installation" >> $BASHRC
+        echo "export MPI_INSTALL_DIR=$MPI_INSTALL_DIR" >> $BASHRC
+        echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$MPI_INSTALL_DIR/lib" >> $BASHRC
+        echo "export PATH=\$MPI_INSTALL_DIR/bin:\$PATH" >> $BASHRC
+    else
+        echo "MPI environment variables already added to $BASHRC."
+    fi
+
+    source $BASHRC
 
     # Check if OpenMPI library already exists
     if [ -d "$MPI_INSTALL_DIR" ] && [ -f "$MPI_INSTALL_DIR/bin/mpicc" ]; then
@@ -252,19 +263,9 @@ openmpi() {
         wget -nv https://download.open-mpi.org/release/open-mpi/v$OPENMPI_VERSION/openmpi-$OPENMPI_VERSION.0.tar.gz
         tar -xzf openmpi-$OPENMPI_VERSION.0.tar.gz
         cd openmpi-$OPENMPI_VERSION.0
-        ./configure --prefix=$OPENMPI_INSTALL_DIR
+        ./configure --prefix=$MPI_INSTALL_DIR
         make all install || die "configure/compile/test openmpi failed"
         which mpicc || die "openmpi install failed"
-
-        # Add PETSc environment variables to .bashrc
-        if ! grep -Fxq "# -- OpenMPI Installation" $BASHRC; then
-            echo "# -- OpenMPI Installation" >> $BASHRC
-            echo "export MPI_INSTALL_DIR=$OPENMPI_INSTALL_DIR/opt-gfortran" >> $BASHRC
-            echo "export LD_LIBRARY_PATH=\$LD_LIBRARY_PATH:\$MPI_INSTALL_DIR/lib" >> $BASHRC
-            echo "export PATH=\$MPI_INSTALL_DIR/bin:\$PATH" >> $BASHRC
-        else
-            echo "MPI environment variables already added to $BASHRC."
-        fi
     fi
 
     success "$name"
@@ -276,6 +277,17 @@ petsc_real() {
 
     PETSC_INSTALL_DIR="$MDOLAB_PACKAGES_DIR/petsc-$PETSC_VERSION"
     PETSC_ARCH="real-debug"
+
+    # Add PETSc environment variables to .bashrc
+    if ! grep -Fxq "# -- PETSc Installation" $BASHRC; then
+        echo "# -- PETSc Installation" >> $BASHRC
+        echo "export PETSC_ARCH=arch-real-debug" >> $BASHRC
+        echo "export PETSC_DIR=$PETSC_INSTALL_DIR" >> $BASHRC
+    else
+        echo "PETSc environment variables already added to $BASHRC."
+    fi
+
+    source $BASHRC
     
     # Check if PETSc library already exists
     if [ -d "$PETSC_INSTALL_DIR" ] && [ -f "$PETSC_INSTALL_DIR/real-debug/lib/libpetsc.so" ]; then
@@ -295,22 +307,13 @@ petsc_real() {
                     --with-shared-libraries=yes \
                     --with-fortran-bindings=1 \
                     --with-cxx-dialect=C++11 \
-                    # --with-mpi-dir=$MPI_INSTALL_DIR \
-        make all || die "configure/compile/test petsc real failed"
+                    --with-mpi-dir=$MPI_INSTALL_DIR
+
+        make PETSC_DIR=$PETSC_INSTALL_DIR PETSC_ARCH=$PETSC_ARCH all || die "configure/compile/test petsc real failed"
     fi
 
     # Install petsc4py
-    cd $PETSC_INSTALL_DIR/src/binding/petsc4py
-    $PIP install . || die "petsc4py real failed"
-
-    # Add PETSc environment variables to .bashrc
-    if ! grep -Fxq "# -- PETSc Installation" $BASHRC; then
-        echo "# -- PETSc Installation" >> $BASHRC
-        echo "export PETSC_ARCH=arch-real-debug" >> $BASHRC
-        echo "export PETSC_DIR=$PETSC_INSTALL_DIR" >> $BASHRC
-    else
-        echo "PETSc environment variables already added to $BASHRC."
-    fi
+    $PIP install petsc4py==$PETSC_VERSION --no-cache || die "petsc4py real failed"
 
     success "$name"
 }
@@ -479,6 +482,17 @@ mphys(){
     success "$name"
 }
 
+mach_aero(){
+    local name="${FUNCNAME[0]}"
+    install "$name" || return 0
+
+    activate_python_env
+    cd $MDOLAB_PACKAGES_DIR
+    git clone https://github.com/mdolab/MACH-Aero.git
+
+    success "$name"
+}
+
 # ==============================================================================
 #                             RUN COMMANDS
 # ==============================================================================
@@ -507,5 +521,6 @@ pyhyp || die "pyhyp install failed"
 pyoptsparse || die "pyoptsparse install failed"
 openmdao || die "openmdao install failed"
 mphys || die "mphys install failed"
+mach_aero || die "mach_aero install failed"
 
 exit 0
