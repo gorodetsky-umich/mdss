@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Inputs - Simulate Test Cases</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../styles/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Inputs";
+        var mkdocs_page_input_path = "tutorials/inputs.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Simulate Test Cases
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../introduction/">Introduction</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Inputs</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#1-yaml-configuration-file">1. YAML Configuration File</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#input-yaml-file-structure">Input YAML file Structure</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#descriptions">Descriptions</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#solver-parameters">Solver Parameters</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#default-solver-parameters">Default Solver Parameters:</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#experimental-conditions">Experimental Conditions</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#location-of-mesh-files">Location of Mesh Files</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#2-output-directory-path">2. Output Directory Path</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../outputs/">outputs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/">Usage</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../additionalInfo/">Additional Information</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Simulate Test Cases</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorials</li>
+      <li class="breadcrumb-item active">Inputs</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="inputs">Inputs</h1>
+<p>The <code>simulateTestCases</code> package requires the following inputs to configure and execute simulations:</p>
+<hr />
+<h2 id="1-yaml-configuration-file">1. YAML Configuration File</h2>
+<p>A YAML file is required to define the simulation parameters and organize test cases. The YAML file structure and respective descriptions are given below.</p>
+<h3 id="input-yaml-file-structure">Input YAML file Structure</h3>
+<p>The YAML file organizes simulation data into a structured hierarchy, enabling clear configuration of cases and experimental conditions. Below is the hierarchical structure used in the YAML file:</p>
+<pre><code>Hierarchies
+|
+|---- Hierarchie 1
+        |
+        |---- name
+        |---- cases:
+        |       |
+        |       |---- case 1
+        |       |       |
+        |       |       |---- name
+        |       |       |---- meshes folder path
+        |       |       |---- mesh files
+        |       |       |---- Geometry Info
+        |       |       |---- Solver Parameters
+        |       |       |---- Experimental Conditions:
+        |       |               |
+        |       |               |---- Condition 1
+        |       |               |
+        |       |               |---- Other conditions as applicable
+        |       | 
+        |       |---- Other cases as needed
+        |
+        |---- Additional hierarchy levels as required.
+</code></pre>
+<h4 id="descriptions">Descriptions</h4>
+<ul>
+<li><strong>Hierarchies</strong>: A list to organize the simulation data into a multi-level structure for easy navigation.<ul>
+<li><strong>Hierarchie 1</strong>: The first level in the hierarchy, where main categories are defined.<ul>
+<li><strong>name</strong>: Represents the name of the hierarchy.</li>
+<li><strong>cases</strong>: A list containing individual simulation cases under the hierarchy.<ul>
+<li><strong>case 1</strong>: An individual simulation case with detailed specifications.<ul>
+<li><strong>name</strong>: The name of the airfoil or the model used in the simulation.</li>
+<li><strong>meshes folder path</strong>: Path to the folder containg mesh files.</li>
+<li><strong>mesh files</strong>: A list of mesh files</li>
+<li><strong>Geometry Info</strong>: Geometrical details that are required: Reference area and chord length for the geometry.</li>
+<li><strong>Solver Parameters</strong>: Specific ADflow solver parameters for running the case.</li>
+<li><strong>Experimental Conditions</strong>: A list defining experimental conditions.<ul>
+<li><strong>Condition 1</strong>: Details required to define an AeroProblem: Reynold's number, Mach number, temperature, list of Angle of Attacks and the location of experimental data.</li>
+</ul>
+</li>
+<li><strong>Other conditions</strong>: Additional experimental conditions that may be present.</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><strong>Other Cases</strong>: Additional cases that may be present in current hierarchie.</li>
+</ul>
+</li>
+<li><strong>Additional hierarchy levels</strong>: Allows for adding more structured levels if needed.</li>
+</ul>
+</li>
+</ul>
+<p>Please note that adherence to this structure is essential; any deviation may lead to errors when running simulations. Examples of correctly formatted YAML files are provided in the <code>examples</code> folder.</p>
+<p>A Python script named <code>dict_to_yaml</code> is available to help convert a Python dictionary (structured according to the hierarchy above) into a <code>.yaml</code> file. This script can also be used as a starting point for generating custom YAML files.</p>
+<p>The example YAML files and <code>dict_to_yaml</code> script serve as templates to facilitate proper configuration.</p>
+<h3 id="solver-parameters">Solver Parameters</h3>
+<p>The Solver parameters is a dictionary containing options specific to the ADflow CFD solver, allowing users to customize the solver's behavior to suit their simulation needs. Detailed descriptions of these parameters and their usage can be found in the <a href="https://mdolab-adflow.readthedocs-hosted.com/en/latest/options.html" title="ADflow Options">ADflow Documentation</a>. </p>
+<p>If the dictionary is empty or if the default parameters are not modified, the code will use a predefined set of default solver options. These defaults are designed to provide a reliable baseline configuration for running simulations effectively without requiring manual adjustments.</p>
+<h4 id="default-solver-parameters">Default Solver Parameters:</h4>
+<pre><code># Print Options
+&quot;printIterations&quot;: False,
+&quot;printAllOptions&quot;: False,
+&quot;printIntro&quot;: False,
+&quot;printTiming&quot;: False,
+# I/O Parameters
+&quot;gridFile&quot;: f&quot;grids/naca0012_L1.cgns&quot;, # Default grid file
+&quot;outputDirectory&quot;: &quot;.&quot;,
+&quot;monitorvariables&quot;: [&quot;resrho&quot;, &quot;resturb&quot;, &quot;cl&quot;, &quot;cd&quot;, &quot;yplus&quot;],
+&quot;writeTecplotSurfaceSolution&quot;: True,
+# Physics Parameters
+&quot;equationType&quot;: &quot;RANS&quot;,
+&quot;liftindex&quot;: 3,  # z is the lift direction
+# Solver Parameters
+&quot;smoother&quot;: &quot;DADI&quot;,
+&quot;CFL&quot;: 0.5,
+&quot;CFLCoarse&quot;: 0.25,
+&quot;MGCycle&quot;: &quot;sg&quot;,
+&quot;MGStartLevel&quot;: -1,
+&quot;nCyclesCoarse&quot;: 250,
+# ANK Solver Parameters
+&quot;useANKSolver&quot;: True,
+&quot;nsubiterturb&quot;: 5,
+&quot;anksecondordswitchtol&quot;: 1e-4,
+&quot;ankcoupledswitchtol&quot;: 1e-6,
+&quot;ankinnerpreconits&quot;: 2,
+&quot;ankouterpreconits&quot;: 2,
+&quot;anklinresmax&quot;: 0.1,
+# Termination Criteria
+&quot;L2Convergence&quot;: 1e-12,
+&quot;L2ConvergenceCoarse&quot;: 1e-2,
+&quot;nCycles&quot;: 75000,
+</code></pre>
+<h3 id="experimental-conditions">Experimental Conditions</h3>
+<p>To define the problem, referred to as the <em><strong>AeroProblem</strong></em> (focused on aerodynamics), the following conditions along with the Angle of Attack(AoA) and path to the experimental data:</p>
+<ul>
+<li>Reynolds number</li>
+<li>Mach number</li>
+<li>Temperature</li>
+<li>Reynolds length (Computed from geometrical data)</li>
+</ul>
+<p>Other properties, such as pressure or density, will be calculated automatically based on the specified values and the governing gas laws.</p>
+<p>The <code>Angle of Attack (AoA)</code> is required to define the aerodynamic orientation of the flow. The <code>path to experimental data</code> can be left blank, as it will not affect the simulation. However, leaving it blank will generate a warning during the post-processing stage.</p>
+<h3 id="location-of-mesh-files">Location of Mesh Files</h3>
+<p>Specifying the location of the mesh files requires two inputs in every case: </p>
+<ul>
+<li><code>meshes_folder_path</code> gets the path to the folder that contains the mesh files</li>
+<li><code>mesh_files</code> gets the list of file names, that to be run, in the folder specified above.</li>
+</ul>
+<h2 id="2-output-directory-path">2. Output Directory Path</h2>
+<p>A string specifying the directory where simulation results will be stored. The directory structure mirrors the hierarchy defined in the YAML file.</p>
+<p><strong>Ensure that:</strong></p>
+<ul>
+<li>The specified directory exists or permissions allow for its creation.</li>
+<li>The directory has sufficient space to store simulation results.</li>
+</ul>
+<hr />
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../introduction/" class="btn btn-neutral float-left" title="Introduction"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../outputs/" class="btn btn-neutral float-right" title="outputs">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../introduction/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../outputs/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

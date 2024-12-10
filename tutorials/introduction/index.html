@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Introduction - Simulate Test Cases</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../styles/extra.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Introduction";
+        var mkdocs_page_input_path = "tutorials/introduction.md";
+        var mkdocs_page_url = null;
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> Simulate Test Cases
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../installation/">Installation</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Tutorials</span></p>
+              <ul class="current">
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Introduction</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#key-features">Key Features</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#inputs">Inputs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#outputs">Outputs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#example-hierarchy">Example Hierarchy</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../inputs/">Inputs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../outputs/">outputs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../usage/">Usage</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../additionalInfo/">Additional Information</a>
+                </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">Simulate Test Cases</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Tutorials</li>
+      <li class="breadcrumb-item active">Introduction</li>
+    <li class="wy-breadcrumbs-aside">
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+                <h1 id="introduction">Introduction</h1>
+<p>The <code>simulateTestCases</code> package is a Python-based tool designed to streamline the execution and data management of ADflow simulations. It integrates with MPhys to provide a structured framework for running aerodynamic flow simulations and organizing the resulting data in a hierarchical manner.</p>
+<p>This package is particularly suited for projects involving multiple configurations or test cases, ensuring that simulation results are stored and categorized systematically.</p>
+<h3 id="key-features">Key Features</h3>
+<ul>
+<li>Automates the execution of multiple ADflow simulation cases.</li>
+<li>Utilizes YAML configuration files for defining simulation parameters and organizing cases.</li>
+<li>Stores simulation data in a structured directory hierarchy for ease of access and analysis.</li>
+<li>Supports post-processing with methods for comparing results to experimental data and generating plots.</li>
+</ul>
+<h3 id="inputs">Inputs</h3>
+<p>The <code>simulateTestCases</code> package requires the following inputs:</p>
+<ol>
+<li>
+<p><strong>YAML Configuration File:</strong></p>
+<p><strong>A YAML file specifying:</strong></p>
+<ul>
+<li>Simulation hierarchy.</li>
+<li>Mesh files and solver parameters.</li>
+<li>Experimental conditions (e.g., Reynolds number, Mach number, and angle of attack).</li>
+</ul>
+</li>
+<li>
+<p><strong>Output Directory:</strong></p>
+<p>A directory path where the simulation results will be saved. The structure of this directory mirrors the hierarchy defined in the YAML file.</p>
+</li>
+</ol>
+<h3 id="outputs">Outputs</h3>
+<p>The outputs of <code>simulateTestCases</code> are stored in directories organized according to the simulation hierarchy. These include:</p>
+<ol>
+<li>
+<p><strong>Simulation Data:</strong></p>
+<p>Results such as C_L, C_D, and Wall Time are saved in CSV and YAML formats.</p>
+</li>
+<li>
+<p><strong>Hierarchical Directory Structure:</strong></p>
+<p>Output directories follow the YAML-defined hierarchy, allowing for easy navigation of results.</p>
+</li>
+<li>
+<p><strong>Visualization:</strong></p>
+<p>Comparison plots (e.g., experimental vs. simulated data) are generated in PNG format.</p>
+</li>
+</ol>
+<h3 id="example-hierarchy">Example Hierarchy</h3>
+<p>The package organizes simulation data into a clear and logical hierarchy. An example of this structure, that has been used in the tutorials is shown below:</p>
+<pre><code>Aero Problem
+    |
+    |---- 2D Clean
+    |       |
+    |       |---- NACA 0012
+    |
+    |---- 2D High-Lift
+    |       |
+    |       |---- Mc Donnell Dolugas 30P-30N
+    |
+    |---- 3D Clean
+    |       |
+    |       |---- NASA CRM clean Configuration
+    |
+    |---- 3D High-Lift
+            |
+            |---- DLR High-Lift Configuration
+</code></pre>
+<p>Explanation of the Hierarchy:</p>
+<ol>
+<li>
+<p><strong>Aero Problem:</strong> Categorizes the type of aerodynamic analysis, such as clean flow or high-lift studies, in 2D or 3D configurations.</p>
+</li>
+<li>
+<p><strong>2D Clean:</strong> Simulations for 2D configurations without high-lift devices (e.g., NACA 0012 airfoil).</p>
+</li>
+<li>
+<p><strong>2D High-Lift:</strong> Simulations for 2D configurations with high-lift devices (e.g., McDonnell Douglas 30P-30N airfoil).</p>
+</li>
+<li>
+<p><strong>3D Clean:</strong> Simulations for 3D configurations without high-lift devices (e.g., NASA Common Research Model Clean Configuration).</p>
+</li>
+<li>
+<p><strong>3D High-Lift:</strong> Simulations for 3D configurations with high-lift devices (e.g., DLR High-Lift Configuration).</p>
+</li>
+</ol>
+              
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../../installation/" class="btn btn-neutral float-left" title="Installation"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../inputs/" class="btn btn-neutral float-right" title="Inputs">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../../installation/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../inputs/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>
