@@ -2,6 +2,16 @@ from pydantic import BaseModel
 
 class ref_sim_info(BaseModel):
     hierarchies: list[dict]
+    out_dir: str
+    hpc: str
+
+class ref_hpc_info(BaseModel):
+    cluster: str
+    job_name: str
+    nodes: str
+    account_name: str
+    email_id: str
+
 
 class ref_hierarchy_info(BaseModel):
     name: str

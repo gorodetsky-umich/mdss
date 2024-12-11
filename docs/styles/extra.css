@@ -16,9 +16,16 @@ h1, h2, h3 {
     color: #000000;
 }
 
-/* Add padding to content */
+/* Adjust the width of the main content area */
 .md-content {
-    padding: 20px;
+    max-width: 1800px; /* Change this value as needed */
+    margin: 0 auto; /* Center the content */
+    padding: 20px; /* Add padding to content */
+}
+
+/* Optional: Adjust the width of the navigation sidebar */
+.md-sidebar {
+    width: 300px; /* Adjust the width of the sidebar */
 }
 
 /* Reduce the margin below headings */

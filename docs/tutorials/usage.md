@@ -6,7 +6,7 @@ Here’s a quick example of how to use `simulateTestCases`:
 from simulateTestCases.run_sim import run_sim
 
 # Initialize the runner with configuration file
-sim = run_sim('naca0012_simInfo.yaml', 'output_dir')
+sim = run_sim('inputs/naca0012_simInfo.yaml')
 
 # Run the simulation series
 sim.run_problem()
@@ -29,11 +29,11 @@ The above script runs a simulation of the NACA 0012 Airfoil, and is included in 
 
 - Run the python script with a single processor:
 
-``` python run_naca0012.py```
+``` python run_example.py```
 
 or run with multiple processors
 
- ``` mpirun -np <number of processors> python run_naca0012.py``` to run using multiple processors
+ ``` mpirun -np <number of processors> python run_example.py``` to run using multiple processors
 
 After execution, the results are saved in the specified output directory. Key outputs include:
 

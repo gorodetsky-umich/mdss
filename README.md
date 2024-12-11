@@ -69,7 +69,7 @@ Here’s a quick example of how to use `simulateTestCases`:
 from simulateTestCases.run_sim import run_sim
 
 # Initialize the runner with configuration file
-sim = run_sim('naca0012_simInfo.yaml', 'output_dir')
+sim = run_sim('inputs/naca0012_simInfo.yaml')
 
 # Run the simulation series
 sim.run_problem()

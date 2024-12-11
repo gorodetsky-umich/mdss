@@ -1,0 +1,11 @@
+import argparse
+from simulateTestCases.run_sim import run_sim
+
+parser = argparse.ArgumentParser()
+parser.add_argument("--inputFile", type=str, default='inputs/naca0012_simInfo.yaml')
+args = parser.parse_args()
+
+sim = run_sim(args.inputFile) # Input the simulation info and output dir
+
+sim.run_problem() # Run the simulation
+sim.post_process() # Genrates plots comparing experimental data and simulated data and stores them

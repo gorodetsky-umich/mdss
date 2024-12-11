@@ -4,6 +4,7 @@ import pandas as pd
 import yaml
 import time
 import copy
+import subprocess
 import matplotlib.pyplot as plt
 from datetime import date, datetime
 
@@ -14,7 +15,7 @@ from baseclasses import AeroProblem
 import openmdao.api as om
 from mpi4py import MPI
 
-from simulateTestCases.utils import load_yaml_file, load_csv_data, check_input_yaml
+from simulateTestCases.utils import load_yaml_file, load_csv_data, check_input_yaml, write_python_file, write_job_script
 
 comm = MPI.COMM_WORLD
 
@@ -78,6 +79,7 @@ class Top(Multipoint):
                         
         adflow_builder = ADflowBuilder(self.aero_options, scenario="aerodynamic")
         adflow_builder.initialize(self.comm)
+        adflow_builder.err_on_convergence_fail = True
 
         ################################################################################
         # MPHY setup
@@ -135,10 +137,10 @@ class run_sim():
             print("YAML file validation is successful")
             print(f"{'-' * 50}")
 
-        self.out_dir = out_dir
         self.info_file = info_file
         self.final_out_file = f"{self.out_dir}/overall_sim_info.yaml" # Setting the overall simulation info file.
         self.sim_info = load_yaml_file(self.info_file)
+        self.out_dir = self.sim_info['out_dir']
 
         
 
@@ -378,13 +380,40 @@ class run_sim():
             with open(self.final_out_file, 'w') as final_out_yaml_handle:
                 yaml.dump(sim_out_info, final_out_yaml_handle, sort_keys=False)
         comm.Barrier()
+    
+    ################################################################################
+    # Code for user to run simulations
+    ################################################################################
+    def run(self):
+        """
+        This is the function user uses to run simulations. It checks if the code has to run on a HPC or not. If HPC, it generates a job script and executes it. Otherwise runs the simulations.
+        """
+        sim_info_copy = copy.deepcopy(self.sim_info)
+        if sim_info_copy['hpc'] == "no":
+            self.run_problem()
+        elif sim_info_copy['hpc'] == "yes":
+            python_file_path = f"{self.out_dir}/run_sim.py"
+            slrum_out_file = f"/overall_sim_out.txt"
+            # Create a python file to run
+            write_python_file(python_file_path)
+            # Create a job script to run
+            job_script_path = write_job_script(sim_info_copy['hpc_info'], self.out_dir, slrum_out_file, python_file_path, self.info_file)
+
+            result = subprocess.run(["sbatch", job_script_path])
+            if result.returncode == 0:
+                print(f"Job submitted successfully. Job ID: {result.stdout.strip()}")
+            else:
+                print(f"Failed to submit job. Error: {result.stderr.strip()}")
+
+
 
     ################################################################################
     # Code for Post Processing
     ################################################################################
     
     def post_process(self):
-        ''' Function to generate plots comaring the experimenatal data vs the data from ADflow
+        """ 
+        Function to generate plots comaring the experimenatal data vs the data from ADflow
         
         Inputs
         ------
@@ -394,7 +423,7 @@ class run_sim():
         -------
         A plot file stored in every experimental directory that compares the experimental data, if available with ADflow data at all the refinement levels for the corresponing
         set of experimental conditions.
-        '''
+        """
         sim_out_info = load_yaml_file(self.final_out_file)
 
         for hierarchy, hierarchy_info in enumerate(sim_out_info['hierarchies']): # loop for Hierarchy level
