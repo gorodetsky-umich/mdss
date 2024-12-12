@@ -92,15 +92,15 @@ def write_python_file(fname):
     Helper function to write a python file to run the simulations on a HPC
     """
     python_code = """
-        import argparse
-        from simulateTestCases.run_sim import run_sim
+import argparse
+from simulateTestCases.run_sim import run_sim
 
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--inputFile", type=str)
-        args = parser.parse_args()
-        sim = run_sim(args.inputFile) # Input the simulation info and output dir
-        sim.run_problem() # Run the simulation
-        sim.post_process() # Genrates plots comparing experimental data and simulated data and stores them
+parser = argparse.ArgumentParser()
+parser.add_argument("--inputFile", type=str)
+args = parser.parse_args()
+sim = run_sim(args.inputFile) # Input the simulation info and output dir
+sim.run_problem() # Run the simulation
+sim.post_process() # Genrates plots comparing experimental data and simulated data and stores them
         """
     # Open the file in write mode
     with open(fname, "w") as file:
@@ -137,7 +137,7 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
         # Update the slurm fields
         for key, value in replacements.items():
             pattern = rf"(#SBATCH {key}).*"  # Match the directive
-            temp_data = re.sub(pattern, rf"\1{value}", temp_data)
+            temp_data = re.sub(pattern, rf"\1 {value}", temp_data)
         
         # Update additional Python file and YAML file
         for pattern, replacement in file_replacements.items():

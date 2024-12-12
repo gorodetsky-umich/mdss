@@ -123,7 +123,7 @@ class Top(Multipoint):
 
 class run_sim():
 
-    def __init__(self, info_file, out_dir):
+    def __init__(self, info_file):
         """
         This function gets the info required for runnign ADflow from the input 'yaml file', and exits, if the file is not readable
         Inputs
@@ -138,10 +138,9 @@ class run_sim():
             print(f"{'-' * 50}")
 
         self.info_file = info_file
-        self.final_out_file = f"{self.out_dir}/overall_sim_info.yaml" # Setting the overall simulation info file.
         self.sim_info = load_yaml_file(self.info_file)
         self.out_dir = self.sim_info['out_dir']
-
+        self.final_out_file = f"{self.out_dir}/overall_sim_info.yaml" # Setting the overall simulation info file.
         
 
         # Create the output directory if it doesn't exist
@@ -393,7 +392,7 @@ class run_sim():
             self.run_problem()
         elif sim_info_copy['hpc'] == "yes":
             python_file_path = f"{self.out_dir}/run_sim.py"
-            slrum_out_file = f"/overall_sim_out.txt"
+            slrum_out_file = f"overall_sim_out.txt"
             # Create a python file to run
             write_python_file(python_file_path)
             # Create a job script to run

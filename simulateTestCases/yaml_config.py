@@ -8,8 +8,8 @@ class ref_sim_info(BaseModel):
 class ref_hpc_info(BaseModel):
     cluster: str
     job_name: str
-    nodes: str
-    nproc: str
+    nodes: int
+    nproc: int
     account_name: str
     email_id: str
 
