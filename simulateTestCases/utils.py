@@ -123,10 +123,12 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
             "--mail-user=": hpc_info['email_id'],
             "--output=": f"{out_dir}/{out_file}",
         }
+        # Update time if use has given
         try:
             replacements['--time='] = hpc_info['time']
         except:
             print("Warning: Time is not given. Using the defalult: 1:00:00")
+        
         file_replacements = {
         r"(srun python )(\S+)": rf"\1{python_file_path}",  # Update Python file
         r"(--inputFile )(\S+)": rf"\1{yaml_file_path}",  # Update YAML file
