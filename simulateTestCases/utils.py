@@ -116,16 +116,16 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
             temp_data = file.read()     
         # Define replacement values
         replacements = {
-            "--job-name ": hpc_info['job_name'],
-            "--nodes=": hpc_info['nodes'],
-            "--ntasks=": hpc_info['nproc'],
-            "--account=": hpc_info['account_name'],
-            "--mail-user=": hpc_info['email_id'],
-            "--output=": f"{out_dir}/{out_file}",
+            "--job-name": hpc_info['job_name'],
+            "--nodes": hpc_info['nodes'],
+            "--ntasks": hpc_info['nproc'],
+            "--account": hpc_info['account_name'],
+            "--mail-user": hpc_info['email_id'],
+            "--output": f"{out_dir}/{out_file}",
         }
         # Update time if use has given
         try:
-            replacements['--time='] = hpc_info['time']
+            replacements['--time'] = hpc_info['time']
         except:
             print("Warning: Time is not given. Using the defalult: 1:00:00")
         
@@ -137,7 +137,10 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
         # Update the slurm fields
         for key, value in replacements.items():
             pattern = rf"(#SBATCH {key}).*"  # Match the directive
-            temp_data = re.sub(pattern, rf"\1 {value}", temp_data)
+            if key == "--job-name": 
+                temp_data = re.sub(pattern, rf"\1 {value}", temp_data)
+            else:
+                temp_data = re.sub(pattern, rf"\1={value}", temp_data)
         
         # Update additional Python file and YAML file
         for pattern, replacement in file_replacements.items():
@@ -150,6 +153,3 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
             file.write(temp_data)
         
         return job_script_path
-
-
-    

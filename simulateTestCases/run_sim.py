@@ -472,8 +472,3 @@ class run_sim():
 
                     plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to fit title
                     plt.savefig(f"{exp_out_dir}/ADflow_Results.png")
-
-                        
-
-
-
