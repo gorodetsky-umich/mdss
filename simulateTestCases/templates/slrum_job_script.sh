@@ -6,7 +6,7 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --exclusive
 #SBATCH --mem-per-cpu=700m
-#SBATCH --time=10:00:00
+#SBATCH --time=1:00:00
 #SBATCH --account=account_name
 #SBATCH --partition=standard
 #SBATCH --mail-type=BEGIN,END,FAIL

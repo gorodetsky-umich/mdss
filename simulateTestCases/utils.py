@@ -99,7 +99,7 @@ def write_python_file(fname):
         parser.add_argument("--inputFile", type=str)
         args = parser.parse_args()
         sim = run_sim(args.inputFile) # Input the simulation info and output dir
-        sim.run() # Run the simulation
+        sim.run_problem() # Run the simulation
         sim.post_process() # Genrates plots comparing experimental data and simulated data and stores them
         """
     # Open the file in write mode
@@ -118,10 +118,15 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
         replacements = {
             "--job-name ": hpc_info['job_name'],
             "--nodes=": hpc_info['nodes'],
+            "--ntasks=": hpc_info['nproc'],
             "--account=": hpc_info['account_name'],
             "--mail-user=": hpc_info['email_id'],
             "--output=": f"{out_dir}/{out_file}",
         }
+        try:
+            replacements['--time='] = hpc_info['time']
+        except:
+            print("Warning: Time is not given. Using the defalult: 1:00:00")
         file_replacements = {
         r"(srun python )(\S+)": rf"\1{python_file_path}",  # Update Python file
         r"(--inputFile )(\S+)": rf"\1{yaml_file_path}",  # Update YAML file

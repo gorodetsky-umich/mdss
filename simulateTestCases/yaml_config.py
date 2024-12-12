@@ -9,6 +9,7 @@ class ref_hpc_info(BaseModel):
     cluster: str
     job_name: str
     nodes: str
+    nproc: str
     account_name: str
     email_id: str
 
