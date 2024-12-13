@@ -64,9 +64,31 @@ default_aero_options = {
 class Top(Multipoint):
 
     """
-    exp_info is a dictionary with experimental conditions info. This read from the yaml file later.
-    aero_option is a dictionary with ADflow parameters, A default is defined above. However, this is updated for
-    every case. The update is also read from the yaml file.
+    Sets up an OpenMDAO problem using MPhys and ADflow for aerodynamic simulations.
+
+    This class is designed to integrate OpenMDAO with MPhys and ADflow to perform aerodynamic simulations. It sets up the problem environment, manages inputs and outputs, and configures scenarios for simulation.
+
+    Methods
+    --------
+    **setup()**
+        Initializes and sets up the required subsystems and scenarios.
+
+    **configure()**
+        Configures the aerodynamic problem (e.g., reference area, chord, angle of attack) and connects design variables to the system.
+
+    Inputs
+    -------
+    - **case_info** : dict
+        Dictionary containing geometry and configuration details for the case being analyzed.
+    - **exp_info** : dict
+        Dictionary with experimental conditions such as Mach number, Reynolds number, and temperature.
+    - **aero_options** : dict
+        ADflow solver parameters that control aerodynamic analysis.
+
+    Outputs
+    --------
+    None. This class directly modifies the OpenMDAO problem structure to include aerodynamic analysis subsystems.
+
     """
 
     def __init__(self, case_info, exp_info, aero_options):
@@ -122,14 +144,29 @@ class Top(Multipoint):
         self.connect("aoa", ["cruise.coupling.aoa", "cruise.aero_post.aoa"])
 
 class run_sim():
+    """
+    Executes ADflow simulations using the `Top` class.
+
+    This class sets up, runs, and post-processes aerodynamic simulations based on input parameters provided via a YAML configuration file. It validates the input, manages directories, and handles outputs, including plots and summary files.
+
+    Methods
+    -------
+    **run_problem()**
+        Sets up and runs the OpenMDAO problem for all cases, hierarchies, and refinement levels.
+
+    **run()**
+        Executes the simulation on either a local machine or an HPC system.
+
+    **post_process()**
+        Generates plots comparing experimental data (if available) with ADflow simulation results.
+
+    Inputs
+    ----------
+    - **info_file** : str
+        Path to the YAML file containing simulation configuration and information.
+    """
 
     def __init__(self, info_file):
-        """
-        This function gets the info required for runnign ADflow from the input 'yaml file', and exits, if the file is not readable
-        Inputs
-            info_file: 'yaml' file conatining simulation info
-            out_dir: Directory to store output
-        """
         # Validate the input yaml file
         check_input_yaml(info_file)
         if comm.rank == 0:
@@ -153,18 +190,26 @@ class run_sim():
     ################################################################################   
     def run_problem(self):
         """
-        This function sets up a openMDAO problem and runs it.
-        
-        Inputs
-        ------
-        No additional inputs needed
+        Sets up and runs the OpenMDAO problem for aerodynamic simulations.
+
+        This method iterates through all hierarchies, cases, refinement levels, and angles of attack defined in the input YAML file. For each combination, it sets up the OpenMDAO problem, runs the simulation, and stores the results.
 
         Outputs
         -------
-        - A csv file to store AOA, Cl, Cd. Stored in the refinemenr level directory
-        - A YAML with the ovarall simulation information. stored in the user given output directory.
-        - A YAML file, specific to an angle of attack for each experimental scenario. Stored in the aoa directory
+        - **A CSV file**:
+            Contains results for each angle of attack at the current refinement level.
+        - **A YAML file**:
+            Stores simulation data for each angle of attack in the corresponding directory.
+        - **A final YAML file**:
+            Summarizes all simulation results across hierarchies, cases, and refinement levels.
 
+        Notes
+        -----
+        This method ensures that:
+
+        - Existing successful simulations are skipped.
+        - Directories are created dynamically if they do not exist.
+        - Simulation results are saved in structured output files.
         """
 
         # Store a copy of input YAML file in output directory
@@ -385,7 +430,14 @@ class run_sim():
     ################################################################################
     def run(self):
         """
-        This is the function user uses to run simulations. It checks if the code has to run on a HPC or not. If HPC, it generates a job script and executes it. Otherwise runs the simulations.
+        Executes the simulation on either a local machine or an HPC system.
+
+        This method checks the simulation settings from the input YAML file. Based on the `hpc` flag, it either runs the simulation locally or generates an HPC job script for execution.
+
+        Notes
+        -----
+        - For local execution (`hpc: no`), it directly calls `run_problem()`.
+        - For HPC execution (`hpc: yes`), it creates a Python file and a job script, then submits the job using `sbatch`.
         """
         sim_info_copy = copy.deepcopy(self.sim_info)
         if sim_info_copy['hpc'] == "no":
@@ -398,30 +450,27 @@ class run_sim():
             # Create a job script to run
             job_script_path = write_job_script(sim_info_copy['hpc_info'], self.out_dir, slrum_out_file, python_file_path, self.info_file)
 
-            result = subprocess.run(["sbatch", job_script_path])
-            if result.returncode == 0:
-                print(f"Job submitted successfully. Job ID: {result.stdout.strip()}")
-            else:
-                print(f"Failed to submit job. Error: {result.stderr.strip()}")
-
-
-
+            subprocess.run(["sbatch", job_script_path])
+            
     ################################################################################
     # Code for Post Processing
     ################################################################################
     
     def post_process(self):
-        """ 
-        Function to generate plots comaring the experimenatal data vs the data from ADflow
-        
-        Inputs
-        ------
-        No Additional Inputs needed
+        """
+        Generates plots comparing experimental data with ADflow simulation results.
+
+        This method creates comparison plots for each experimental condition and refinement level. The plots include `CL` (Lift Coefficient) and `CD` (Drag Coefficient) against the angle of attack (Alpha). Experimental data, if provided, is included in the plots for validation.
 
         Outputs
         -------
-        A plot file stored in every experimental directory that compares the experimental data, if available with ADflow data at all the refinement levels for the corresponing
-        set of experimental conditions.
+        - *PNG plots*:
+            Stored in the experimental condition directory for each hierarchy and case.
+
+        Notes
+        -----
+        - Experimental data is optional. If not provided, only simulation results are plotted.
+        - Plots are saved with clear labels and legends for easy interpretation.
         """
         sim_out_info = load_yaml_file(self.final_out_file)
 
@@ -435,15 +484,17 @@ class run_sim():
 
                     # Load Experimental Data
                     try:
-                        exp_data = load_csv_data(exp_info['exp_data'])
+                        exp_cl_data = load_csv_data(exp_info['exp_data'][0])
+                        exp_cd_data = load_csv_data(exp_info['exp_data'][1])
                     except:
-                        exp_data = None
+                        exp_cl_data = None
+                        exp_cd_data = None
                         if comm.rank == 0:
-                            print(f"Error: Experimental data location is not specified. Continuing to plot without experimental data")
+                            print(f"Warning: Experimental data location is not specified or the data is not readable. Continuing to plot without experimental data")
 
-                    if exp_data is not None: # Only plot if data loaded successfully
-                        axs[0].plot(exp_data['Alpha'], exp_data['CL'], label='Experimental', color='black', linestyle='--', marker='o')
-                        axs[1].plot(exp_data['Alpha'], exp_data['CD'], label='Experimental', color='black', linestyle='--', marker='o')
+                    if exp_cl_data is not None and exp_cd_data is not None: # Only plot if data loaded successfully
+                        axs[0].plot(exp_cl_data['Alpha'], exp_cl_data['CL'], label='Experimental', color='black', linestyle='--', marker='o')
+                        axs[1].plot(exp_cd_data['Alpha'], exp_cd_data['CD'], label='Experimental', color='black', linestyle='--', marker='o')
                 
                     # Load Simulated Data
                     exp_out_dir = exp_info['sim_info']['exp_set_out_dir']

@@ -8,15 +8,21 @@ from simulateTestCases.yaml_config import ref_sim_info, ref_hpc_info, ref_hierar
 # Helper Functions
 ################################################################################
 def load_yaml_file(yaml_file):
-    '''Helper Function to load yaml files and display the type of error in loading, if the file cannot be loaded.
+    """
+    Loads a YAML file and returns its content as a dictionary.
+
+    This function attempts to read the specified YAML file and parse its content into a Python dictionary. If the file cannot be loaded due to errors, it provides a detailed error message.
 
     Inputs
-    ------
-    yaml_file: Name of the YAML File
+    ----------
+    **yaml_file** : str
+        Path to the YAML file to be loaded.
 
     Outputs
     -------
-    dict_info: Dictionary contatining the YAML file Info'''
+    **dict or None**
+        A dictionary containing the content of the YAML file if successful, or None if an error occurs.
+    """
     try:
         # Attempt to open and read the YAML file
         with open(yaml_file, 'r') as file:
@@ -37,15 +43,21 @@ def load_yaml_file(yaml_file):
     return None
 
 def load_csv_data(csv_file):
-    '''Helper Function to load csv files and display the type of error in loading, if the file cannot be loaded.
+    """
+    Loads a CSV file and returns its content as a Pandas DataFrame.
+
+    This function reads the specified CSV file and converts its content into a Pandas DataFrame. It handles common errors such as missing files, empty files, or parsing issues.
 
     Inputs
-    ------
-    csv_file: Name of the csv File
+    ----------
+    - **csv_file** : str
+        Path to the CSV file to be loaded.
 
     Outputs
     -------
-    df: Panda data frame containing the csv file Info'''
+    **pandas.DataFrame or None**
+        A DataFrame containing the content of the CSV file if successful, or None if an error occurs.
+"""
     try:
         df = pd.read_csv(csv_file)
         return df
@@ -64,15 +76,26 @@ def load_csv_data(csv_file):
     return None # In case of error, return none.
 
 def check_input_yaml(yaml_file):
-    '''Helper Function to check if the input yaml file follows the template
-    
+    """
+    Validates the structure of the input YAML file against predefined templates.
+
+    This function checks whether the input YAML file conforms to the expected template structure. It validates each section, including simulation, HPC, hierarchies, cases, and experimental sets.
+
     Inputs
+    ----------
+    - **yaml_file** : str
+        Path to the YAML file to be validated.
+
+    Outputs
     ------
-    yaml_file: Name of the input yaml file
-     
-    outputs
-    -------
-    Checks the yaml file and throws error if the template is not followed'''
+    **ValidationError**
+        If the YAML file does not conform to the expected structure.
+
+    Notes
+    -----
+    - Uses `ref_sim_info`, `ref_hpc_info`, and other reference pydantic models listed in `yaml_config.py` for validation.
+    - Ensures hierarchical consistency by iterating through all levels of the YAML structure.
+    """
     with open(yaml_file, 'r') as file:
         sim_info = yaml.safe_load(file)
 
@@ -89,7 +112,19 @@ def check_input_yaml(yaml_file):
 
 def write_python_file(fname):
     """
-    Helper function to write a python file to run the simulations on a HPC
+    Generates a Python script to run simulations on an HPC cluster.
+
+    This function creates a Python script with predefined code to run simulations, including problem setup, execution, and post-processing.
+
+    Inputs
+    ----------
+    - **fname** : str
+        Path where the Python script should be saved.
+
+    Notes
+    -----
+    - The generated script uses argparse to accept input YAML files.
+    - It imports the `run_sim` class and runs the simulation using `run_problem` method.
     """
     python_code = """
 import argparse
@@ -108,7 +143,33 @@ sim.post_process() # Genrates plots comparing experimental data and simulated da
 
 def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_path):
     """
-    Helper function to generate job scripts to run on clusters
+    Generates a job script for running simulations on an HPC cluster.
+
+    This function reads a Slurm job script template, updates it with specific HPC parameters and file paths, and saves the customized script to the output directory.
+
+    Inputs
+    ------
+    - **hpc_info** : dict
+        Dictionary containing HPC configuration details (e.g., cluster name, job name, nodes, tasks, and account).
+    - **out_dir** : str
+        Directory where the job script and output files will be saved.
+    - **out_file** : str
+        Name of the file to store job output.
+    - **python_file_path** : str
+        Path to the Python script to be executed by the job script.
+    - **yaml_file_path** : str
+        Path to the YAML file containing simulation information.
+
+    Outputs
+    -------
+    - **str**
+        Path to the generated job script.
+
+    Notes
+    -----
+    - Supports customization for the GL cluster with Slurm job scheduling.
+    - Uses regex to update the job script with provided parameters.
+    - Ensures that the correct Python and YAML file paths are embedded in the job script.
     """
     if hpc_info['cluster'] == 'GL':
         # Read the template file

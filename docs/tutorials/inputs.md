@@ -4,63 +4,60 @@ The `simulateTestCases` package requires the following inputs to configure and e
 
 ---
 
-## 1. YAML Configuration File
+## YAML Configuration File
 
 A YAML file is required to define the simulation parameters and organize test cases. The YAML file structure and respective descriptions are given below.
 
 ### Input YAML file Structure
 
-The YAML file organizes simulation data into a structured hierarchy, enabling clear configuration of cases and experimental conditions. Below is the hierarchical structure used in the YAML file:
+The YAML file organizes simulation data into a structured hierarchy, enabling clear configuration of cases and experimental conditions. Below is the structure used in the YAML file:
 
+```yaml
+out_dir: # str, path to the output directory
+hpc: # str, 'yes' or 'no'
+hpc_info: # dict, only needed if hpc is yes
+  cluster: # str, name of the cluste. GL for Great Lakes
+  job_name: # str, name of the job
+  nodes: # int, number of nodes
+  nproc: # int, total number of processors
+  time: #str, time in D-H:M:S format
+  account_name: # str, account name
+  email_id: # str
+hierarchies: # list, List of hierarchies
+# First hierarchy
+- name: # str, name of the hierarchy
+  cases: # list, list of cases in this hierarchy
+  # First case in the hierarchy
+  - name: # str, name of the case
+    meshes_folder_path: # str, path to the floder containing the mesh files for this case
+    mesh_files: # list, list of mesh file names
+    - # str, name of the finest mesh
+    - # str, .
+    - # str, .
+    - # str, name of the corasest mesh
+    geometry_info: # dict, dictionary of geometry info
+      chordRef: # float, reference chord length
+      areaRef: # flaot, reference area
+    solver_parameters: # dict, dictionary of solver parameters. For more information see solver parameters section
+      # ......
+    exp_sets: # list, list of dictionaries contating experimental info
+    # First experimental set in current case
+    - aoa_list: # list, list of angle of attacks(AoA) to run in with the experimental info
+      Re: # float, Reynold's number 
+      mach: # float, Mach number
+      Temp: # float, Temperature in Kelvin scale
+      exp_data: # str, path to experimental data
+    
+    # Second experimental set in current case
+
+  # Second case in current hierachy
+
+# Second hierarchy
 ```
-Hierarchies
-|
-|---- Hierarchie 1
-        |
-        |---- name
-        |---- cases:
-        |       |
-        |       |---- case 1
-        |       |       |
-        |       |       |---- name
-        |       |       |---- meshes folder path
-        |       |       |---- mesh files
-        |       |       |---- Geometry Info
-        |       |       |---- Solver Parameters
-        |       |       |---- Experimental Conditions:
-        |       |               |
-        |       |               |---- Condition 1
-        |       |               |
-        |       |               |---- Other conditions as applicable
-        |       | 
-        |       |---- Other cases as needed
-        |
-        |---- Additional hierarchy levels as required.
-```
 
-#### Descriptions
+Please note that adherence to this structure is essential; any deviation may lead to errors when running simulations. Examples of correctly formatted YAML files are provided in the `examples/inputs` folder.
 
-- **Hierarchies**: A list to organize the simulation data into a multi-level structure for easy navigation.
-    - **Hierarchie 1**: The first level in the hierarchy, where main categories are defined.
-        - **name**: Represents the name of the hierarchy.
-        - **cases**: A list containing individual simulation cases under the hierarchy.
-            - **case 1**: An individual simulation case with detailed specifications.
-                - **name**: The name of the airfoil or the model used in the simulation.
-                - **meshes folder path**: Path to the folder containg mesh files.
-                - **mesh files**: A list of mesh files
-                - **Geometry Info**: Geometrical details that are required: Reference area and chord length for the geometry.
-                - **Solver Parameters**: Specific ADflow solver parameters for running the case.
-                - **Experimental Conditions**: A list defining experimental conditions.
-                    - **Condition 1**: Details required to define an AeroProblem: Reynold's number, Mach number, temperature, list of Angle of Attacks and the location of experimental data.
-                - **Other conditions**: Additional experimental conditions that may be present.
-        - **Other Cases**: Additional cases that may be present in current hierarchie.
-    - **Additional hierarchy levels**: Allows for adding more structured levels if needed.
-
-Please note that adherence to this structure is essential; any deviation may lead to errors when running simulations. Examples of correctly formatted YAML files are provided in the `examples` folder.
-
-A Python script named `dict_to_yaml` is available to help convert a Python dictionary (structured according to the hierarchy above) into a `.yaml` file. This script can also be used as a starting point for generating custom YAML files.
-
-The example YAML files and `dict_to_yaml` script serve as templates to facilitate proper configuration.
+The yaml script can also be used as a starting point for generating custom YAML files.
 
 ### Solver Parameters
 The Solver parameters is a dictionary containing options specific to the ADflow CFD solver, allowing users to customize the solver's behavior to suit their simulation needs. Detailed descriptions of these parameters and their usage can be found in the [ADflow Documentation](https://mdolab-adflow.readthedocs-hosted.com/en/latest/options.html "ADflow Options"). 
@@ -122,16 +119,6 @@ Specifying the location of the mesh files requires two inputs in every case:
 
 - `meshes_folder_path` gets the path to the folder that contains the mesh files
 - `mesh_files` gets the list of file names, that to be run, in the folder specified above.
-
-## 2. Output Directory Path
-
-A string specifying the directory where simulation results will be stored. The directory structure mirrors the hierarchy defined in the YAML file.
-
-**Ensure that:**
-
-- The specified directory exists or permissions allow for its creation.
-- The directory has sufficient space to store simulation results.
-
 ---
 
 

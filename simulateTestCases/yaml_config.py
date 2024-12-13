@@ -35,4 +35,4 @@ class ref_exp_set_info(BaseModel):
     Re: float
     mach: float
     Temp: float
-    exp_data: str=None
+    exp_data: list[str]=None

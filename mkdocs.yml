@@ -1,6 +1,50 @@
 site_name: Simulate Test Cases
 theme:
-  name: readthedocs
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  
+  language: en
+
+  palette:
+    - scheme: default
+      toggle:
+        icon: material/toggle-switch-off-outline 
+        name: Switch to dark mode
+      primary: blue grey
+      accent: blue
+    - scheme: slate 
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode    
+      primary: blue grey
+      accent: blue
+
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      enabled: !ENV [ENABLE_MKDOCSTRINGS, true]
+      default_handler: python
+      handlers:
+        python:
+          paths: [simulateTestCases]
+          options:
+            show_source: true
+
 nav:
   - Home: index.md
   - Installation: installation.md
@@ -9,8 +53,22 @@ nav:
     - Inputs: tutorials/inputs.md
     - outputs: tutorials/outputs.md
     - Usage: tutorials/usage.md
+  - Source Overview: reference/
   - Additional Information: additionalInfo.md
+
 markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - admonition
+  - pymdownx.arithmatex:
+      generic: true
+  - footnotes
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.mark
+  - attr_list
   - md_in_html
 
 extra_css:
