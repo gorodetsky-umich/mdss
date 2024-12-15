@@ -15,7 +15,7 @@ from baseclasses import AeroProblem
 import openmdao.api as om
 from mpi4py import MPI
 
-from simulateTestCases.utils import load_yaml_file, load_csv_data, check_input_yaml, write_python_file, write_job_script
+from simulateTestCases.helpers import load_yaml_file, load_csv_data, check_input_yaml, write_python_file, write_job_script
 
 comm = MPI.COMM_WORLD
 
@@ -175,7 +175,7 @@ class run_sim():
             print(f"{'-' * 50}")
 
         self.info_file = info_file
-        self.sim_info = load_yaml_file(self.info_file)
+        self.sim_info = load_yaml_file(self.info_file, comm)
         self.out_dir = self.sim_info['out_dir']
         self.final_out_file = f"{self.out_dir}/overall_sim_info.yaml" # Setting the overall simulation info file.
         
@@ -472,7 +472,7 @@ class run_sim():
         - Experimental data is optional. If not provided, only simulation results are plotted.
         - Plots are saved with clear labels and legends for easy interpretation.
         """
-        sim_out_info = load_yaml_file(self.final_out_file)
+        sim_out_info = load_yaml_file(self.final_out_file, comm)
 
         for hierarchy, hierarchy_info in enumerate(sim_out_info['hierarchies']): # loop for Hierarchy level
             for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
@@ -484,8 +484,8 @@ class run_sim():
 
                     # Load Experimental Data
                     try:
-                        exp_cl_data = load_csv_data(exp_info['exp_data'][0])
-                        exp_cd_data = load_csv_data(exp_info['exp_data'][1])
+                        exp_cl_data = load_csv_data(exp_info['exp_data'][0], comm)
+                        exp_cd_data = load_csv_data(exp_info['exp_data'][1], comm)
                     except:
                         exp_cl_data = None
                         exp_cd_data = None
@@ -502,7 +502,7 @@ class run_sim():
                     for ii, mesh_file in enumerate(case_info['mesh_files']): # Loop for refinement levels
                         refinement_level_dir = f"{exp_out_dir}/L{ii}"
                         ADflow_out_file = f"{refinement_level_dir}/ADflow_output.csv"
-                        sim_data = load_csv_data(ADflow_out_file)
+                        sim_data = load_csv_data(ADflow_out_file, comm)
                         if sim_data is not None:  # Only plot if data loaded successfully
                             label = f"L{ii}"
                             axs[0].plot(sim_data['Alpha'], sim_data['CL'], label=label) # Plot CL vs Alpha for this refinement level

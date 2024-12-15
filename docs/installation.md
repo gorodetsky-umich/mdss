@@ -1,6 +1,6 @@
 # Installation and dependencies
 
-## Installation innstructions
+## Installation instructions
 To install `simulateTestCases`, use the following commands:
 
 1. Clone the repository:
