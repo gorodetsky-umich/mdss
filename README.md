@@ -2,7 +2,7 @@
 
 `simulateTestCases` is a Python package designed for running a series of ADflow simulations using Mphys and OpenMDAO. This package provides streamlined functions to automate simulation test cases.
 
-For detailed install instructions and usage visit the [documentation page](https://gorodetsky-umich.github.io/simulateTestCases/)
+For detailed install instructions and usage visit the [documentation page](https://gorodetsky-umich.github.io/simulateTestCases/).
 
 ## Dependencies
 
