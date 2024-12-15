@@ -76,7 +76,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#dependencies-and-installation" class="md-skip">
+        <a href="#installation-and-dependencies" class="md-skip">
           Skip to content
         </a>
       
@@ -263,7 +263,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../reference/run_sim/" class="md-tabs__link">
+        <a href="../reference/helpers/" class="md-tabs__link">
           
   
   Source Overview
@@ -399,18 +399,51 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#required-libraries" class="md-nav__link">
+  <a href="#installation-instructions" class="md-nav__link">
     <span class="md-ellipsis">
-      Required Libraries
+      Installation instructions
     </span>
   </a>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#installation-instructions" class="md-nav__link">
+  <a href="#dependencies" class="md-nav__link">
     <span class="md-ellipsis">
-      Installation Instructions
+      Dependencies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dependencies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#softwares" class="md-nav__link">
+    <span class="md-ellipsis">
+      Softwares
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#python-libraries" class="md-nav__link">
+    <span class="md-ellipsis">
+      Python libraries
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hpc-section-yet-to-be-completed" class="md-nav__link">
+    <span class="md-ellipsis">
+      HPC section - yet to be completed
     </span>
   </a>
   
@@ -602,6 +635,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../reference/helpers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    helpers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../reference/run_sim/" class="md-nav__link">
         
   
@@ -679,26 +733,8 @@
                   
 
 
-<h1 id="dependencies-and-installation">Dependencies and Installation</h1>
-<h2 id="required-libraries">Required Libraries</h2>
-<p>The package requires the following libraries, which can automatically be installed with <code>pip</code>:</p>
-<ul>
-<li><code>numpy&gt;=1.21</code></li>
-<li><code>scipy&gt;=1.7</code></li>
-<li><code>mpi4py&gt;=3.1.4</code></li>
-<li><code>pyyaml</code></li>
-<li><code>matplotlib</code></li>
-<li><code>pandas</code></li>
-<li><code>petsc4py</code></li>
-</ul>
-<p>Additionally, the following packages are also needed but may require manual installation:</p>
-<ul>
-<li><code>openmdao</code></li>
-<li><code>mdolab-baseclasses</code></li>
-<li><code>adflow</code></li>
-<li><code>mphys</code></li>
-</ul>
-<h2 id="installation-instructions">Installation Instructions</h2>
+<h1 id="installation-and-dependencies">Installation and dependencies</h1>
+<h2 id="installation-instructions">Installation instructions</h2>
 <p>To install <code>simulateTestCases</code>, use the following commands:</p>
 <ol>
 <li>
@@ -721,8 +757,37 @@
 <p>For an editable installation:</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>pip install -e .
 </code></pre></div>
+<h2 id="dependencies">Dependencies</h2>
+<p>The framework requires tools built by NASA (OpenMDAO and MPhys) and the MDO lab (MACH-Aero framework). The <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/index.html">MACH-Aero</a> framework houses all the core packages needed to run CFD simulations. A detailed list of all packages follow:</p>
 </li>
 </ol>
+<h3 id="softwares">Softwares</h3>
+<ul>
+<li><a href="https://github.com/OpenMDAO/OpenMDAO"><code>OpenMDAO</code></a></li>
+<li><a href="https://github.com/OpenMDAO/mphys"><code>MPhys</code></a></li>
+<li><a href="https://github.com/mdolab/baseclasses"><code>baseClasses</code></a></li>
+<li><a href="https://github.com/mdolab/pyspline"><code>pySpline</code></a></li>
+<li><a href="https://github.com/mdolab/pygeo"><code>pyGeo</code></a></li>
+<li><a href="https://github.com/mdolab/idwarp"><code>IDWarp</code></a></li>
+<li><a href="https://github.com/mdolab/adflow"><code>ADflow</code></a></li>
+<li><a href="https://github.com/mdolab/pyoptsparse"><code>pyOptSparse</code></a></li>
+<li><code>TACS</code> - maybe later</li>
+</ul>
+<p>Most of the above software packages have additional third party dependencies such as PETSc, OpenMPI etc.., a detailed guide for installing them from scratch can be found <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html">here</a>. A custom bash script file is provided as well that will aid in installation.</p>
+<p>However, we suggest using Docker. Images are available for both GCC and INTEL compilers <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#">here</a>. If you are not familiar with docker, we recommend going through the official documentation <a href="https://docs.docker.com/">here</a>.</p>
+<p>Once you pull an image compatible with your machine's architecture, you can follow the instructions mentioned <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#">here</a> to initialize and start a container. Once in the container, clone this repository in the mount directory and install it. Note that if you are referencing any paths inside the container, they must be with respect to the container's folder architecture, not your host machine.</p>
+<h3 id="python-libraries">Python libraries</h3>
+<p>The following python libraries are required for the framework and can be installed with <code>pip</code>:</p>
+<ul>
+<li><code>numpy&gt;=1.21</code></li>
+<li><code>scipy&gt;=1.7</code></li>
+<li><code>mpi4py&gt;=3.1.4</code></li>
+<li><code>pyyaml</code></li>
+<li><code>matplotlib</code></li>
+<li><code>pandas</code></li>
+<li><code>petsc4py</code></li>
+</ul>
+<h2 id="hpc-section-yet-to-be-completed">HPC section - yet to be completed</h2>
 
 
 

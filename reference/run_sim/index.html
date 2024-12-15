@@ -9,7 +9,7 @@
       
       
       
-        <link rel="prev" href="../../tutorials/usage/">
+        <link rel="prev" href="../helpers/">
       
       
         <link rel="next" href="../utils/">
@@ -263,7 +263,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="./" class="md-tabs__link">
+        <a href="../helpers/" class="md-tabs__link">
           
   
   Source Overview
@@ -541,6 +541,27 @@
             Source Overview
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../helpers/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    helpers
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -1539,7 +1560,7 @@
 <a id="__codelineno-0-175" name="__codelineno-0-175"></a>            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;-&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">50</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-176" name="__codelineno-0-176"></a>
 <a id="__codelineno-0-177" name="__codelineno-0-177"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">info_file</span> <span class="o">=</span> <span class="n">info_file</span>
-<a id="__codelineno-0-178" name="__codelineno-0-178"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sim_info</span> <span class="o">=</span> <span class="n">load_yaml_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info_file</span><span class="p">)</span>
+<a id="__codelineno-0-178" name="__codelineno-0-178"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">sim_info</span> <span class="o">=</span> <span class="n">load_yaml_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">info_file</span><span class="p">,</span> <span class="n">comm</span><span class="p">)</span>
 <a id="__codelineno-0-179" name="__codelineno-0-179"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sim_info</span><span class="p">[</span><span class="s1">&#39;out_dir&#39;</span><span class="p">]</span>
 <a id="__codelineno-0-180" name="__codelineno-0-180"></a>        <span class="bp">self</span><span class="o">.</span><span class="n">final_out_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">/overall_sim_info.yaml&quot;</span> <span class="c1"># Setting the overall simulation info file.</span>
 <a id="__codelineno-0-181" name="__codelineno-0-181"></a>
@@ -1836,7 +1857,7 @@
 <a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">        - Experimental data is optional. If not provided, only simulation results are plotted.</span>
 <a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">        - Plots are saved with clear labels and legends for easy interpretation.</span>
 <a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="sd">        &quot;&quot;&quot;</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="n">sim_out_info</span> <span class="o">=</span> <span class="n">load_yaml_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_out_file</span><span class="p">)</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>        <span class="n">sim_out_info</span> <span class="o">=</span> <span class="n">load_yaml_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_out_file</span><span class="p">,</span> <span class="n">comm</span><span class="p">)</span>
 <a id="__codelineno-0-476" name="__codelineno-0-476"></a>
 <a id="__codelineno-0-477" name="__codelineno-0-477"></a>        <span class="k">for</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">hierarchy_info</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sim_out_info</span><span class="p">[</span><span class="s1">&#39;hierarchies&#39;</span><span class="p">]):</span> <span class="c1"># loop for Hierarchy level</span>
 <a id="__codelineno-0-478" name="__codelineno-0-478"></a>            <span class="k">for</span> <span class="n">case</span><span class="p">,</span> <span class="n">case_info</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hierarchy_info</span><span class="p">[</span><span class="s1">&#39;cases&#39;</span><span class="p">]):</span> <span class="c1"># loop for cases in hierarchy</span>
@@ -1848,8 +1869,8 @@
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a>
 <a id="__codelineno-0-485" name="__codelineno-0-485"></a>                    <span class="c1"># Load Experimental Data</span>
 <a id="__codelineno-0-486" name="__codelineno-0-486"></a>                    <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>                        <span class="n">exp_cl_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>                        <span class="n">exp_cd_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>                        <span class="n">exp_cl_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">comm</span><span class="p">)</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>                        <span class="n">exp_cd_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">comm</span><span class="p">)</span>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a>                    <span class="k">except</span><span class="p">:</span>
 <a id="__codelineno-0-490" name="__codelineno-0-490"></a>                        <span class="n">exp_cl_data</span> <span class="o">=</span> <span class="kc">None</span>
 <a id="__codelineno-0-491" name="__codelineno-0-491"></a>                        <span class="n">exp_cd_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1866,7 +1887,7 @@
 <a id="__codelineno-0-502" name="__codelineno-0-502"></a>                    <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">mesh_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">case_info</span><span class="p">[</span><span class="s1">&#39;mesh_files&#39;</span><span class="p">]):</span> <span class="c1"># Loop for refinement levels</span>
 <a id="__codelineno-0-503" name="__codelineno-0-503"></a>                        <span class="n">refinement_level_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exp_out_dir</span><span class="si">}</span><span class="s2">/L</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-504" name="__codelineno-0-504"></a>                        <span class="n">ADflow_out_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">refinement_level_dir</span><span class="si">}</span><span class="s2">/ADflow_output.csv&quot;</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>                        <span class="n">sim_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">ADflow_out_file</span><span class="p">)</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a>                        <span class="n">sim_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">ADflow_out_file</span><span class="p">,</span> <span class="n">comm</span><span class="p">)</span>
 <a id="__codelineno-0-506" name="__codelineno-0-506"></a>                        <span class="k">if</span> <span class="n">sim_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Only plot if data loaded successfully</span>
 <a id="__codelineno-0-507" name="__codelineno-0-507"></a>                            <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;L</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-508" name="__codelineno-0-508"></a>                            <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim_data</span><span class="p">[</span><span class="s1">&#39;Alpha&#39;</span><span class="p">],</span> <span class="n">sim_data</span><span class="p">[</span><span class="s1">&#39;CL&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span> <span class="c1"># Plot CL vs Alpha for this refinement level</span>
@@ -2010,7 +2031,7 @@
 <a id="__codelineno-0-472" name="__codelineno-0-472"></a><span class="sd">    - Experimental data is optional. If not provided, only simulation results are plotted.</span>
 <a id="__codelineno-0-473" name="__codelineno-0-473"></a><span class="sd">    - Plots are saved with clear labels and legends for easy interpretation.</span>
 <a id="__codelineno-0-474" name="__codelineno-0-474"></a><span class="sd">    &quot;&quot;&quot;</span>
-<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="n">sim_out_info</span> <span class="o">=</span> <span class="n">load_yaml_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_out_file</span><span class="p">)</span>
+<a id="__codelineno-0-475" name="__codelineno-0-475"></a>    <span class="n">sim_out_info</span> <span class="o">=</span> <span class="n">load_yaml_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">final_out_file</span><span class="p">,</span> <span class="n">comm</span><span class="p">)</span>
 <a id="__codelineno-0-476" name="__codelineno-0-476"></a>
 <a id="__codelineno-0-477" name="__codelineno-0-477"></a>    <span class="k">for</span> <span class="n">hierarchy</span><span class="p">,</span> <span class="n">hierarchy_info</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sim_out_info</span><span class="p">[</span><span class="s1">&#39;hierarchies&#39;</span><span class="p">]):</span> <span class="c1"># loop for Hierarchy level</span>
 <a id="__codelineno-0-478" name="__codelineno-0-478"></a>        <span class="k">for</span> <span class="n">case</span><span class="p">,</span> <span class="n">case_info</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">hierarchy_info</span><span class="p">[</span><span class="s1">&#39;cases&#39;</span><span class="p">]):</span> <span class="c1"># loop for cases in hierarchy</span>
@@ -2022,8 +2043,8 @@
 <a id="__codelineno-0-484" name="__codelineno-0-484"></a>
 <a id="__codelineno-0-485" name="__codelineno-0-485"></a>                <span class="c1"># Load Experimental Data</span>
 <a id="__codelineno-0-486" name="__codelineno-0-486"></a>                <span class="k">try</span><span class="p">:</span>
-<a id="__codelineno-0-487" name="__codelineno-0-487"></a>                    <span class="n">exp_cl_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-<a id="__codelineno-0-488" name="__codelineno-0-488"></a>                    <span class="n">exp_cd_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+<a id="__codelineno-0-487" name="__codelineno-0-487"></a>                    <span class="n">exp_cl_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">comm</span><span class="p">)</span>
+<a id="__codelineno-0-488" name="__codelineno-0-488"></a>                    <span class="n">exp_cd_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">exp_info</span><span class="p">[</span><span class="s1">&#39;exp_data&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">comm</span><span class="p">)</span>
 <a id="__codelineno-0-489" name="__codelineno-0-489"></a>                <span class="k">except</span><span class="p">:</span>
 <a id="__codelineno-0-490" name="__codelineno-0-490"></a>                    <span class="n">exp_cl_data</span> <span class="o">=</span> <span class="kc">None</span>
 <a id="__codelineno-0-491" name="__codelineno-0-491"></a>                    <span class="n">exp_cd_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2040,7 +2061,7 @@
 <a id="__codelineno-0-502" name="__codelineno-0-502"></a>                <span class="k">for</span> <span class="n">ii</span><span class="p">,</span> <span class="n">mesh_file</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">case_info</span><span class="p">[</span><span class="s1">&#39;mesh_files&#39;</span><span class="p">]):</span> <span class="c1"># Loop for refinement levels</span>
 <a id="__codelineno-0-503" name="__codelineno-0-503"></a>                    <span class="n">refinement_level_dir</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">exp_out_dir</span><span class="si">}</span><span class="s2">/L</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-504" name="__codelineno-0-504"></a>                    <span class="n">ADflow_out_file</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">refinement_level_dir</span><span class="si">}</span><span class="s2">/ADflow_output.csv&quot;</span>
-<a id="__codelineno-0-505" name="__codelineno-0-505"></a>                    <span class="n">sim_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">ADflow_out_file</span><span class="p">)</span>
+<a id="__codelineno-0-505" name="__codelineno-0-505"></a>                    <span class="n">sim_data</span> <span class="o">=</span> <span class="n">load_csv_data</span><span class="p">(</span><span class="n">ADflow_out_file</span><span class="p">,</span> <span class="n">comm</span><span class="p">)</span>
 <a id="__codelineno-0-506" name="__codelineno-0-506"></a>                    <span class="k">if</span> <span class="n">sim_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># Only plot if data loaded successfully</span>
 <a id="__codelineno-0-507" name="__codelineno-0-507"></a>                        <span class="n">label</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;L</span><span class="si">{</span><span class="n">ii</span><span class="si">}</span><span class="s2">&quot;</span>
 <a id="__codelineno-0-508" name="__codelineno-0-508"></a>                        <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">sim_data</span><span class="p">[</span><span class="s1">&#39;Alpha&#39;</span><span class="p">],</span> <span class="n">sim_data</span><span class="p">[</span><span class="s1">&#39;CL&#39;</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span> <span class="c1"># Plot CL vs Alpha for this refinement level</span>
