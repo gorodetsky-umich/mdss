@@ -533,9 +533,43 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="Example usage">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#running-simulations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Running Simulations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#to-read-existing-simualtion-data-or-generate-data" class="md-nav__link">
+    <span class="md-ellipsis">
+      To read existing simualtion data or generate data
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
+  <a href="#additional-information" class="md-nav__link">
+    <span class="md-ellipsis">
+      Additional Information
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Additional Information">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
   <a href="#grid-files" class="md-nav__link">
     <span class="md-ellipsis">
       Grid Files
@@ -543,13 +577,18 @@
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#experimentatl-data" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#experimental-data" class="md-nav__link">
     <span class="md-ellipsis">
-      Experimentatl data
+      Experimental data
     </span>
   </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -715,8 +754,9 @@
 
 
 <h1 id="usage">Usage</h1>
-<h3 id="example-usage">Example usage</h3>
+<h2 id="example-usage">Example usage</h2>
 <p>Here’s a quick example of how to use <code>simulateTestCases</code>:</p>
+<h3 id="running-simulations">Running Simulations</h3>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="kn">from</span> <span class="nn">simulateTestCases.run_sim</span> <span class="kn">import</span> <span class="n">run_sim</span>
 <a id="__codelineno-0-2" name="__codelineno-0-2" href="#__codelineno-0-2"></a>
 <a id="__codelineno-0-3" name="__codelineno-0-3" href="#__codelineno-0-3"></a><span class="c1"># Initialize the runner with configuration file</span>
@@ -750,9 +790,24 @@
 <li>Plots and analysis results, including comparisons with experimental data.</li>
 <li>Generated YAML files, summarizing simulation and output information.</li>
 </ul>
+<h3 id="to-read-existing-simualtion-data-or-generate-data">To read existing simualtion data or generate data</h3>
+<p>The function <code>get_sim_data</code> can be used to get existing simulation data that was generated after a simulation, or to generate new simulation data by passing a <code>run_flag</code>. If <code>run_flag</code> is <code>1</code>, then the function runs the simulation and outputs the data as a dictionary.</p>
+<p>The function provides the flexibility of using the input YAML file or  the <code>overall_sim_info.yaml</code> file that is generated and stored in the outptut directory after the completion of simulations, as inputs.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="kn">from</span> <span class="nn">simulateTestCases.utils</span> <span class="kn">import</span> <span class="n">get_sim_data</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="c1"># Specify the path to the input file.</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="n">info_file</span> <span class="o">=</span> <span class="s1">&#39;inputs/naca0012_simInfo.yaml&#39;</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># Call the function to get simulation data as a dictionary</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="n">sim_data</span> <span class="o">=</span> <span class="n">get_sim_data</span><span class="p">(</span><span class="n">info_file</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="c1"># Print the dictionary</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">sim_data</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="additional-information">Additional Information</h2>
 <h3 id="grid-files">Grid Files</h3>
 <p>Grids for NACA 0012 and Mc Donnell Dolugas 30P-30N are provided under <code>examples/grids</code> in the examples directory. The other grids (CRM clean, and DLR High-Lift) including Naca 0012 and 30P-30N can be found at <a href="https://www.dropbox.com/scl/fo/fezdu5be849c78vze7l19/ACCsSHpLGEwCcyFEPWj2FB0?rlkey=ixbr0606y3vx5eadrs61b9cz3&amp;st=i4evwxed&amp;dl=0">Dropbox folder</a>.</p>
-<h3 id="experimentatl-data">Experimentatl data</h3>
+<h3 id="experimental-data">Experimental data</h3>
 <p>Experimental data for NACA 0012 and Mc Donnell Dolugas 30P-30N are provided under <code>examples/exp_data</code> in the examples directory. The other dat (CRM clean, and DLR High-Lift) including Naca 0012 and 30P-30N, and their references can be found at <a href="https://www.dropbox.com/scl/fo/18rcs9bh0qmf19ymptrt2/AHx-xyYSXk_wGXqhvVV2yMM?rlkey=kp0vovsegpddfn78wfjiv8gbi&amp;st=2czi5hbu&amp;dl=0">Dropbox folder</a>.</p>
 
 
