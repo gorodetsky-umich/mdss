@@ -1,6 +1,6 @@
 # Installation and dependencies
 
-## Installation innstructions
+## Installation instructions
 To install `simulateTestCases`, use the following commands:
 
 1. Clone the repository:
@@ -95,7 +95,7 @@ The following instructions assume that you are dealing with Great Lakes.
 2. Copy the installation script provided in the repository into your `<directory-path>` and run it`:
 
     ```
-    $ cp SimulateTestCases/install_packages_gl.sh <directory-path>/
+    $ cp simulateTestCases/install_packages_gl.sh <directory-path>/
     
     $ chmod +x install_packages_gl.sh
 
