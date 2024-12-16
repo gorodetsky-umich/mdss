@@ -2,6 +2,7 @@ import copy
 from simulateTestCases.run_sim import run_sim
 from simulateTestCases.helpers import load_yaml_file, load_csv_data
 from mpi4py import MPI
+
 comm = MPI.COMM_WORLD
 
 def get_sim_data(info_file, run_flag=0):
@@ -13,8 +14,8 @@ def get_sim_data(info_file, run_flag=0):
     experiment sets, refinement levels, and angles of attack. It also provides an
     option to run a simulation if the required data does not exist.
 
-    Inputs:
-    ----------
+    Inputs
+    ------
     - **info_file** : str
         Path to the input YAML file containing simulation information or configuration.
     - **run_flag** : int (0 or 1), optional
@@ -22,7 +23,7 @@ def get_sim_data(info_file, run_flag=0):
         - `0` (default): Exit without running the simulation.
         - `1`: Run the simulation and populate the data.
 
-    Outputs:
+    Outputs
     -------
     **sim_data**: dict
         A dictionary contating simulation data.
@@ -36,7 +37,7 @@ def get_sim_data(info_file, run_flag=0):
 
     except KeyError:  # if the file is input info file, loads the overall_sim_info.yaml if the simulation is run already
         try:
-            sim_info = load_yaml_file(f"{info['out_dir']}/overall_sim_info.yaml")
+            sim_info = load_yaml_file(f"{info['out_dir']}/overall_sim_info.yaml", comm)
         except FileNotFoundError:
             if comm.rank == 0:
                 print(f"No existing simulation found in the specified output directory: {info['out_dir']}")

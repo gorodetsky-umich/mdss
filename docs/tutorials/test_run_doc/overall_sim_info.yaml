@@ -1,0 +1,50 @@
+out_dir: output
+hpc: 'no'
+hierarchies:
+- name: 2d_clean
+  cases:
+  - name: NACA0012
+    meshes_folder_path: grids
+    mesh_files:
+    - naca0012_L0.cgns
+    geometry_info:
+      chordRef: 1.0
+      areaRef: 1.0
+    solver_parameters:
+      useANKSolver: true
+      nSubiterTurb: 20
+      useNKSolver: false
+      NKSwitchTol: 1.0e-06
+      ANKCoupledSwitchTol: 0.001
+      ANKSecondOrdSwitchTol: 1.0e-12
+      L2Convergence: 1.0e-08
+      nCycles: 150000
+    exp_sets:
+    - aoa_list:
+      - 0
+      - 5
+      Re: 3900000.0
+      mach: 0.3
+      Temp: 298.0
+      exp_data: exp_data/naca0012.csv
+      sim_info:
+        L0:
+          aoa_0:
+            cl: -4.577753983635691e-06
+            cd: 0.011900122961186341
+            wall_time: 75.64 sec
+            fail_flag: 0
+            out_dir: output/2d_clean/NACA0012/exp_set_0/L0/aoa_0
+          aoa_5:
+            cl: 0.5708156541811146
+            cd: 0.013758575162168208
+            wall_time: 21.17 sec
+            fail_flag: 0
+            out_dir: output/2d_clean/NACA0012/exp_set_0/L0/aoa_5
+          csv_file: output/2d_clean/NACA0012/exp_set_0/L0/ADflow_output.csv
+          refinement_out_dir: output/2d_clean/NACA0012/exp_set_0/L0
+        exp_set_out_dir: output/2d_clean/NACA0012/exp_set_0
+overall_sim_info:
+  start_time: '2024-12-16 16:51:12'
+  end_time: '2024-12-16 16:51:12'
+  total_wall_time: 0.06 sec

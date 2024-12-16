@@ -484,17 +484,28 @@ class run_sim():
 
                     # Load Experimental Data
                     try:
-                        exp_cl_data = load_csv_data(exp_info['exp_data'][0], comm)
-                        exp_cd_data = load_csv_data(exp_info['exp_data'][1], comm)
+                        exp_data = load_csv_data(exp_info['exp_data'], comm)
                     except:
-                        exp_cl_data = None
-                        exp_cd_data = None
                         if comm.rank == 0:
-                            print(f"Warning: Experimental data location is not specified or the data is not readable. Continuing to plot without experimental data")
+                            print(f"Warning: Experimental data location is not specified or the data is not readable.")
+                        exp_data = None
 
-                    if exp_cl_data is not None and exp_cd_data is not None: # Only plot if data loaded successfully
-                        axs[0].plot(exp_cl_data['Alpha'], exp_cl_data['CL'], label='Experimental', color='black', linestyle='--', marker='o')
-                        axs[1].plot(exp_cd_data['Alpha'], exp_cd_data['CD'], label='Experimental', color='black', linestyle='--', marker='o')
+                    if exp_data is not None: # Only plot if data loaded successfully
+                        exp_data.columns = exp_data.columns.str.strip()  # Clean column names
+    
+                        # Convert to numeric to avoid plotting issues
+                        exp_data['Alpha'] = pd.to_numeric(exp_data['Alpha'], errors='coerce')
+                        exp_data['CL'] = pd.to_numeric(exp_data['CL'], errors='coerce')
+                        exp_data['CD'] = pd.to_numeric(exp_data['CD'], errors='coerce')
+                        exp_data = exp_data.dropna()  # Drop rows with missing data
+                        
+                        axs[0].plot(exp_data['Alpha'], exp_data['CL'], label='Experimental', color='black', linestyle='--', marker='o')
+                        axs[1].plot(exp_data['Alpha'], exp_data['CD'], label='Experimental', color='black', linestyle='--', marker='o')
+                        
+                    else:
+                        if comm.rank == 0:
+                            print("Continuing to plot without experimental data.")
+
                 
                     # Load Simulated Data
                     exp_out_dir = exp_info['sim_info']['exp_set_out_dir']
@@ -505,8 +516,8 @@ class run_sim():
                         sim_data = load_csv_data(ADflow_out_file, comm)
                         if sim_data is not None:  # Only plot if data loaded successfully
                             label = f"L{ii}"
-                            axs[0].plot(sim_data['Alpha'], sim_data['CL'], label=label) # Plot CL vs Alpha for this refinement level
-                            axs[1].plot(sim_data['Alpha'], sim_data['CD'], label=label) # Plot CD vs Alpha for this refinement level
+                            axs[0].plot(sim_data['Alpha'], sim_data['CL'], label=label, color='blue', linestyle='-', marker='^') # Plot CL vs Alpha for this refinement level
+                            axs[1].plot(sim_data['Alpha'], sim_data['CD'], label=label, color='blue', linestyle='-', marker='^') # Plot CD vs Alpha for this refinement level
                     
                     # Setting titles, labels, and legends
                     axs[0].set_title('CL vs Alpha')

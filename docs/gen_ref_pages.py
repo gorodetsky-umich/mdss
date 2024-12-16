@@ -61,9 +61,11 @@ for path in sorted(src.rglob("*.py")):
         ident = ".".join(parts)
         fd.write(f"# {ident}\n\n")
         fd.write(f"::: {ident}\n")
+        fd.write(f"     options:\n")
+        fd.write(f"         show_root_heading: false\n")
+        fd.write(f"         show_root_toc_entry: false\n")
+        fd.write(f"         heading_level: 2\n")
         fd.write("\n---\n")
-
-    mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
 
     mkdocs_gen_files.set_edit_path(full_doc_path, path.relative_to(root))
 

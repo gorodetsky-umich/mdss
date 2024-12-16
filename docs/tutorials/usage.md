@@ -1,4 +1,53 @@
 # Usage
+
+The above script runs a simulation of the NACA 0012 Airfoil, and is included in the `examples` folder. 
+
+**To run the above python script:**
+
+- Copy the examples directory to a different location:
+
+``` 
+cp -r <path-to-repository>/examples <path-to-examples-directory> 
+```
+
+- Navigate into the directory:
+
+``` 
+cd <path-to-examples-directory> 
+```
+
+- Run the python script with a single processor:
+
+``` 
+python run_example.py --inputFile 
+```
+
+or run with multiple processors
+
+ ``` 
+ mpirun -np <number of processors> python run_example.py --inputFile <path-to-input-yaml-file>
+ ```
+
+**_Note:_**
+
+- *_Example input yaml files to run on personal computers are stored in `examples/inputs` directory, and for Great Lakes HPC cluster, an example file is stored in `examples/inputs/GL`_*
+- *_Make sure to modify the file and file paths ti absolute paths in the yaml file when running in a docker container._*
+
+Use `examples/inputs/naca0012_sinInfo.yaml` or `examples/inputs/GL/naca0012_sinInfo.yaml`(for Great Lakes) to test the package with NACA0012 airfoil.
+
+After execution, the following results are expected which are saved in the specified output directory.
+
+- A copy of the input yaml file in the output directory.
+- `overall_sim_info.yaml` in the output directory.
+- `ADflow_Results.png` in each experimental level directory, that is a plot comparing C<sub>L</sub>, and C<sub>D</sub> values at all refinement levels to the expeimental data(if provided).
+
+<p align="center">
+  <img src="../test_run_doc/ADflow_Results.png" alt="Comparision plot" width="800">
+</p>
+
+- `ADflow_output.csv` in each refinement level directory, that is a file containg Angle of Attack(AoA), C<sub>L</sub>, and C<sub>D</sub> data.
+- `aoa_<aoa>.yaml` in aoa level directory, that contains the simulation information particular to that angle of attack.
+- Default ADflow outputs: A tecplot file, a CGNS surface file, and a CGNS volume file.
 ## Example usage
 Here’s a quick example of how to use `simulateTestCases`:
 
@@ -7,7 +56,7 @@ Here’s a quick example of how to use `simulateTestCases`:
 from simulateTestCases.run_sim import run_sim
 
 # Initialize the runner with configuration file
-sim = run_sim('inputs/naca0012_simInfo.yaml')
+sim = run_sim('<path-to-input-yaml-file>')
 
 # Run the simulation series
 sim.run()
@@ -15,32 +64,6 @@ sim.run()
 # Analyze results
 sim.post_process()
 ```
-
-The above script runs a simulation of the NACA 0012 Airfoil, and is included in the `examples` folder. 
-
-**To run the above python script:**
-
-- Copy the examples directory to a different location:
-
-``` cp -r examples <Path to directory to save copy of examples> ```
-
-- Navigate into the directory:
-
-``` cd <Path to directory to save copy of examples>/examples ```
-
-- Run the python script with a single processor:
-
-``` python run_example.py --inputFile <Path to the input yaml file>```
-
-or run with multiple processors
-
- ``` mpirun -np <number of processors> python run_example.py --inputFile <Path to the input yaml file>``` to run using multiple processors
-
-After execution, the results are saved in the specified output directory. Key outputs include:
-
-- Simulation outputs in structured directories for each refinement and angle of attack (AOA) level.
-- Plots and analysis results, including comparisons with experimental data.
-- Generated YAML files, summarizing simulation and output information.
 
 ### To read existing simualtion data or generate data
 
