@@ -441,11 +441,35 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#hpc-section-yet-to-be-completed" class="md-nav__link">
+  <a href="#hpc" class="md-nav__link">
     <span class="md-ellipsis">
-      HPC section - yet to be completed
+      HPC
     </span>
   </a>
+  
+    <nav class="md-nav" aria-label="HPC">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#scratch-installation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Scratch Installation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#singularity-tbd" class="md-nav__link">
+    <span class="md-ellipsis">
+      Singularity - TBD
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -774,6 +798,7 @@
 <li><code>TACS</code> - maybe later</li>
 </ul>
 <p>Most of the above software packages have additional third party dependencies such as PETSc, OpenMPI etc.., a detailed guide for installing them from scratch can be found <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html">here</a>. A custom bash script file is provided as well that will aid in installation.</p>
+<p>If you choose to install the packages with the help of the script, follow <code>STEP 2</code> mentioned in the <a href="#scratch-installation">Scratch Installation</a> section for the install_packages.sh file.</p>
 <p>However, we suggest using Docker. Images are available for both GCC and INTEL compilers <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#">here</a>. If you are not familiar with docker, we recommend going through the official documentation <a href="https://docs.docker.com/">here</a>.</p>
 <p>Once you pull an image compatible with your machine's architecture, you can follow the instructions mentioned <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#">here</a> to initialize and start a container. Once in the container, clone this repository in the mount directory and install it. Note that if you are referencing any paths inside the container, they must be with respect to the container's folder architecture, not your host machine.</p>
 <h3 id="python-libraries">Python libraries</h3>
@@ -787,7 +812,41 @@
 <li><code>pandas</code></li>
 <li><code>petsc4py</code></li>
 </ul>
-<h2 id="hpc-section-yet-to-be-completed">HPC section - yet to be completed</h2>
+<h2 id="hpc">HPC</h2>
+<p>If you would like to use this framework in an HPC cluster such as GreatLakes or NASA HECC, the tools and packages mentioned in the <a href="#softwares">Softwares</a> and <a href="#python-libraries">Python libraries</a> sections will need to be installed and configured accordingly. Note that the process is slightly simplified if these packages are available as modules in the HPC environment.</p>
+<h3 id="scratch-installation">Scratch Installation</h3>
+<p>The following instructions assume that you are dealing with Great Lakes.</p>
+<ol>
+<li>
+<p>Place these lines somewhere in your <code>~/.bashrc</code> file :</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a># ------------- Module loads
+<a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>module load gcc
+<a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a>module load openmpi
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a>module load python/3.9.12
+<a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>module load cmake
+<a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a># ------------- PETSc Installation
+<a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>export PETSC_ARCH=real-opt
+<a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a>export PETSC_DIR=&lt;directory-path&gt;/packages/petsc-3.15.3
+<a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a>
+<a id="__codelineno-5-11" name="__codelineno-5-11" href="#__codelineno-5-11"></a># ------------- CGNS Installation
+<a id="__codelineno-5-12" name="__codelineno-5-12" href="#__codelineno-5-12"></a>export CGNS_HOME=&lt;directory-path&gt;/packages/CGNS-4.4.0/opt-gfortran
+<a id="__codelineno-5-13" name="__codelineno-5-13" href="#__codelineno-5-13"></a>export PATH=$PATH:$CGNS_HOME/bin
+<a id="__codelineno-5-14" name="__codelineno-5-14" href="#__codelineno-5-14"></a>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CGNS_HOME/lib
+</code></pre></div>
+Here <code>&lt;directory-path&gt;</code> is the path of your directory where you would want to install the framework. Do not forget to <code>source ~/.bashrc</code> the file after completing this step.</p>
+</li>
+<li>
+<p>Copy the installation script provided in the repository into your <code>&lt;directory-path&gt;</code> and run it`:</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a>$ cp simulateTestCases/install_packages_gl.sh &lt;directory-path&gt;/
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>$ chmod +x install_packages_gl.sh
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>$ ./install_packages_gl.sh
+</code></pre></div>
+</li>
+</ol>
+<h3 id="singularity-tbd">Singularity - TBD</h3>
 
 
 
