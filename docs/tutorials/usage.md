@@ -72,13 +72,13 @@ The function `get_sim_data` can be used to get existing simulation data that was
 The function provides the flexibility of using the input YAML file or  the `overall_sim_info.yaml` file that is generated and stored in the outptut directory after the completion of simulations, as inputs.
 
 ```python
-from simulateTestCases.utils import get_sim_data
+from simulateTestCases.utils import get_sim_data, RunFlag
 
 # Specify the path to the input file.
 info_file = 'inputs/naca0012_simInfo.yaml'
 
 # Call the function to get simulation data as a dictionary
-sim_data = get_sim_data(info_file, 0)
+sim_data = get_sim_data(info_file, RunFlag.skip)
 
 # Print the dictionary
 print(sim_data)

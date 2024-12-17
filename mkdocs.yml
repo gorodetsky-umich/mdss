@@ -53,6 +53,7 @@ nav:
     - Inputs: tutorials/inputs.md
     - outputs: tutorials/outputs.md
     - Usage: tutorials/usage.md
+    - Test Cases: tutorials/test_cases.md
   - Source Overview: reference/
   - Additional Information: additionalInfo.md
 

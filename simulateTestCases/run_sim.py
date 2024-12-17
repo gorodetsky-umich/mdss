@@ -1,11 +1,13 @@
 import os
 import sys
 import pandas as pd
+import numpy as np
 import yaml
 import time
 import copy
 import subprocess
 import matplotlib.pyplot as plt
+import matplotlib.cm as cm
 from datetime import date, datetime
 
 from mphys.multipoint import Multipoint
@@ -506,7 +508,8 @@ class run_sim():
                         if comm.rank == 0:
                             print("Continuing to plot without experimental data.")
 
-                
+                    num_levels = len(case_info['mesh_files'])  # Total refinement levels
+                    colors = cm.viridis(np.linspace(0, 1, num_levels))  # Generate unique colors for each level
                     # Load Simulated Data
                     exp_out_dir = exp_info['sim_info']['exp_set_out_dir']
                     sim_data = {}
@@ -516,19 +519,19 @@ class run_sim():
                         sim_data = load_csv_data(ADflow_out_file, comm)
                         if sim_data is not None:  # Only plot if data loaded successfully
                             label = f"L{ii}"
-                            axs[0].plot(sim_data['Alpha'], sim_data['CL'], label=label, color='blue', linestyle='-', marker='^') # Plot CL vs Alpha for this refinement level
-                            axs[1].plot(sim_data['Alpha'], sim_data['CD'], label=label, color='blue', linestyle='-', marker='^') # Plot CD vs Alpha for this refinement level
+                            axs[0].plot(sim_data['Alpha'], sim_data['CL'], label=label, color=colors[ii], linestyle='-', marker='s') # Plot CL vs Alpha for this refinement level
+                            axs[1].plot(sim_data['Alpha'], sim_data['CD'], label=label, color=colors[ii], linestyle='-', marker='s') # Plot CD vs Alpha for this refinement level
                     
                     # Setting titles, labels, and legends
-                    axs[0].set_title('CL vs Alpha')
+                    axs[0].set_title('$C_L$ vs Alpha')
                     axs[0].set_xlabel('Alpha (deg)')
-                    axs[0].set_ylabel('CL')
+                    axs[0].set_ylabel('$C_L$')
                     axs[0].legend()
                     axs[0].grid(True)
 
-                    axs[1].set_title('CD vs Alpha')
+                    axs[1].set_title('$C_D$ vs Alpha')
                     axs[1].set_xlabel('Alpha (deg)')
-                    axs[1].set_ylabel('CD')
+                    axs[1].set_ylabel('$C_D$')
                     axs[1].legend()
                     axs[1].grid(True)
 
