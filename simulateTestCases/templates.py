@@ -7,7 +7,7 @@ gl_job_script = """#!/bin/bash
 #SBATCH --ntasks-per-node=36
 #SBATCH --cpus-per-task=1
 #SBATCH --exclusive
-#SBATCH --mem-per-cpu=700m
+#SBATCH --mem-per-cpu={mem_per_cpu}
 #SBATCH --time={time}
 #SBATCH --account={account_name}
 #SBATCH --partition=standard
