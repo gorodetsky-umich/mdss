@@ -3,6 +3,7 @@ import pandas as pd
 import importlib.resources as resources
 import re
 from simulateTestCases.yaml_config import ref_sim_info, ref_hpc_info, ref_hierarchy_info, ref_case_info, ref_geometry_info, ref_exp_set_info
+from simulateTestCases.templates import gl_job_script
 
 ################################################################################
 # Helper Functions
@@ -172,45 +173,28 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
     - Ensures that the correct Python and YAML file paths are embedded in the job script.
     """
     if hpc_info['cluster'] == 'GL':
-        # Read the template file
-        with resources.open_text("simulateTestCases.templates", "slrum_job_script.sh") as file:
-            temp_data = file.read()     
-        # Define replacement values
-        replacements = {
-            "--job-name": hpc_info['job_name'],
-            "--nodes": hpc_info['nodes'],
-            "--ntasks": hpc_info['nproc'],
-            "--account": hpc_info['account_name'],
-            "--mail-user": hpc_info['email_id'],
-            "--output": f"{out_dir}/{out_file}",
-        }
-        # Update time if use has given
-        try:
-            replacements['--time'] = hpc_info['time']
-        except:
-            print("Warning: Time is not given. Using the defalult: 1:00:00")
-        
-        file_replacements = {
-        r"(srun python )(\S+)": rf"\1{python_file_path}",  # Update Python file
-        r"(--inputFile )(\S+)": rf"\1{yaml_file_path}",  # Update YAML file
-        }
+        # Set default time if not provided
+        job_time = hpc_info.get('time', '1:00:00')
 
-        # Update the slurm fields
-        for key, value in replacements.items():
-            pattern = rf"(#SBATCH {key}).*"  # Match the directive
-            if key == "--job-name": 
-                temp_data = re.sub(pattern, rf"\1 {value}", temp_data)
-            else:
-                temp_data = re.sub(pattern, rf"\1={value}", temp_data)
-        
-        # Update additional Python file and YAML file
-        for pattern, replacement in file_replacements.items():
-            temp_data = re.sub(pattern, replacement, temp_data)
+        # Fill in the template with values from hpc_info and other parameters
+        job_script = gl_job_script.format(
+            job_name=hpc_info['job_name'],
+            nodes=hpc_info['nodes'],
+            nproc=hpc_info['nproc'],
+            time=job_time,
+            account_name=hpc_info['account_name'],
+            email_id=hpc_info['email_id'],
+            out_dir=out_dir,
+            out_file=out_file,
+            python_file_path=python_file_path,
+            yaml_file_path=yaml_file_path
+        )
 
+        # Define the path for the job script
         job_script_path = f"{out_dir}/{hpc_info['job_name']}.sh"
-        
-        # Save the updated content to a new file
+
+        # Save the script to the specified file
         with open(job_script_path, "w") as file:
-            file.write(temp_data)
-        
+            file.write(job_script)
+
         return job_script_path

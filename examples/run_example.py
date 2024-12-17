@@ -7,5 +7,5 @@ args = parser.parse_args()
 
 sim = run_sim(args.inputFile) # Input the simulation info and output dir
 
-sim.run_problem() # Run the simulation
+sim.run() # Run the simulation
 sim.post_process() # Genrates plots comparing experimental data and simulated data and stores them
