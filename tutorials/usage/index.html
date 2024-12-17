@@ -12,7 +12,7 @@
         <link rel="prev" href="../outputs/">
       
       
-        <link rel="next" href="../../reference/helpers/">
+        <link rel="next" href="../test_cases/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -601,6 +601,27 @@
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../test_cases/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Cases
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -812,13 +833,13 @@
 <h3 id="to-read-existing-simualtion-data-or-generate-data">To read existing simualtion data or generate data</h3>
 <p>The function <code>get_sim_data</code> can be used to get existing simulation data that was generated after a simulation, or to generate new simulation data by passing a <code>run_flag</code>. If <code>run_flag</code> is <code>1</code>, then the function runs the simulation and outputs the data as a dictionary.</p>
 <p>The function provides the flexibility of using the input YAML file or  the <code>overall_sim_info.yaml</code> file that is generated and stored in the outptut directory after the completion of simulations, as inputs.</p>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span> <span class="nn">simulateTestCases.utils</span> <span class="kn">import</span> <span class="n">get_sim_data</span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span> <span class="nn">simulateTestCases.utils</span> <span class="kn">import</span> <span class="n">get_sim_data</span><span class="p">,</span> <span class="n">RunFlag</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># Specify the path to the input file.</span>
 <a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">info_file</span> <span class="o">=</span> <span class="s1">&#39;inputs/naca0012_simInfo.yaml&#39;</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Call the function to get simulation data as a dictionary</span>
-<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">sim_data</span> <span class="o">=</span> <span class="n">get_sim_data</span><span class="p">(</span><span class="n">info_file</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+<a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">sim_data</span> <span class="o">=</span> <span class="n">get_sim_data</span><span class="p">(</span><span class="n">info_file</span><span class="p">,</span> <span class="n">RunFlag</span><span class="o">.</span><span class="n">skip</span><span class="p">)</span>
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="c1"># Print the dictionary</span>
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">sim_data</span><span class="p">)</span>
