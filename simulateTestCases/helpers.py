@@ -175,14 +175,14 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
     if hpc_info['cluster'] == 'GL':
         # Set default time if not provided
         job_time = hpc_info.get('time', '1:00:00')
-        job_time = hpc_info.get('mem_per_cpu', '1000m')
+        mem_per_cpu = hpc_info.get('mem_per_cpu', '1000m')
 
         # Fill in the template with values from hpc_info and other parameters
         job_script = gl_job_script.format(
             job_name=hpc_info['job_name'],
             nodes=hpc_info['nodes'],
             nproc=hpc_info['nproc'],
-            mem_per_cpu=hpc_info['mem_per_cpu'],
+            mem_per_cpu=mem_per_cpu,
             time=job_time,
             account_name=hpc_info['account_name'],
             email_id=hpc_info['email_id'],
