@@ -45,7 +45,7 @@ There are two types of installation methods available - from scratch and through
 
 - [Local machine (Docker)](#using-docker-recommended)
 - [Local machine (Scratch)](#from-scratch)
-- [HPC - Great Lakes (Singularity))](#singularity)
+- [HPC - Great Lakes (Singularity)](#singularity)
 - [HPC - Great Lakes (Scratch)](#scratch)
 
 ### Local machine

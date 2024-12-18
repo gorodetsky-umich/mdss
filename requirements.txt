@@ -1,12 +1,5 @@
-# Core dependencies
-numpy>=1.21
-scipy>=1.7
+# Additional Dependencies
 pyyaml
 matplotlib
 pandas
 pydantic
-mpi4py>=3.1.4
-openmdao
-mdolab-baseclasses
-adflow  # Requires custom installation
-mphys  # Requires custom installation

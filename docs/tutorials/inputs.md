@@ -65,7 +65,7 @@ The Solver parameters is a dictionary containing options specific to the ADflow 
 If the dictionary is empty or if the default parameters are not modified, the code will use a predefined set of default solver options. These defaults are designed to provide a reliable baseline configuration for running simulations effectively without requiring manual adjustments.
 
 #### Default Solver Parameters:
-```
+```yaml
 # Print Options
 "printIterations": False,
 "printAllOptions": False,

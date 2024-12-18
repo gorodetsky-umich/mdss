@@ -6,26 +6,26 @@ The above script runs a simulation of the NACA 0012 Airfoil, and is included in 
 
 - Copy the examples directory to a different location:
 
-``` 
-cp -r <path-to-repository>/examples <path-to-examples-directory> 
+```bash 
+$ cp -r <path-to-repository>/examples <path-to-examples-directory> 
 ```
 
 - Navigate into the directory:
 
-``` 
-cd <path-to-examples-directory> 
+```bash
+$ cd <path-to-examples-directory> 
 ```
 
 - Run the python script with a single processor:
 
-``` 
-python run_example.py --inputFile 
+```bash 
+$ python run_example.py --inputFile 
 ```
 
 or run with multiple processors
 
- ``` 
- mpirun -np <number of processors> python run_example.py --inputFile <path-to-input-yaml-file>
+ ```bash 
+ $ mpirun -np <number of processors> python run_example.py --inputFile <path-to-input-yaml-file>
  ```
 
 **_Note:_**
