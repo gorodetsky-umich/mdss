@@ -1,6 +1,6 @@
 # Usage
 
-The above script runs a simulation of the NACA 0012 Airfoil, and is included in the `examples` folder. 
+The [script](#running-simulations) below runs a simulation of the NACA 0012 Airfoil, and is included in the `examples` folder. 
 
 **To run the above python script:**
 

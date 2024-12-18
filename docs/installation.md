@@ -32,14 +32,26 @@ The following Python libraries are also required:
 
 ---
 ## Getting Started
-To get started, create a directory on your machine where you would want to store this framework along with the software packages.
+To begin using this framework, follow these steps:
 
-```bash
-$ mkdir <directory-path> 
-$ cd <directory-path>
-```
+1. **Create a Directory**  
+   Set up a directory on your machine where you want to store this framework along with the necessary software packages.
 
-### Installation of Dependencies
+    ```bash
+    $ mkdir <directory-path> 
+    $ cd <directory-path>
+    ```
+
+2. **Install Dependencies**  
+   Follow the [Installation of Dependencies](#installation-of-dependencies) section to ensure all required dependencies are installed on your system.
+
+3. **Install the Package**  
+   Complete the setup by following the steps outlined in the [Package Installation](#package-installation) section.
+
+By completing these steps, you'll have the framework ready for use.
+
+
+## Installation of Dependencies
 
 There are two types of installation methods available - from scratch and through Docker. If you are on a local machine, we recommend using Docker as it is the easiest option. If you are on an HPC machine, only the scratch installation method is available. Singularity support will be added later. Please follow the appropriate link.
 
@@ -119,7 +131,7 @@ These instructions assume that you are on the Great Lakes HPC at UMich.
 
 ---
 
-### Package Installation
+## Package Installation
 
 The following steps are common for personal computers and HPC systems:
 
