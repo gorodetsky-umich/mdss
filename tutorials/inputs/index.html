@@ -828,38 +828,38 @@
 <p>The Solver parameters is a dictionary containing options specific to the ADflow CFD solver, allowing users to customize the solver's behavior to suit their simulation needs. Detailed descriptions of these parameters and their usage can be found in the <a href="https://mdolab-adflow.readthedocs-hosted.com/en/latest/options.html" title="ADflow Options">ADflow Documentation</a>. </p>
 <p>If the dictionary is empty or if the default parameters are not modified, the code will use a predefined set of default solver options. These defaults are designed to provide a reliable baseline configuration for running simulations effectively without requiring manual adjustments.</p>
 <h4 id="default-solver-parameters">Default Solver Parameters:</h4>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a># Print Options
-<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a>&quot;printIterations&quot;: False,
-<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a>&quot;printAllOptions&quot;: False,
-<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a>&quot;printIntro&quot;: False,
-<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a>&quot;printTiming&quot;: False,
-<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a># I/O Parameters
-<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a>&quot;gridFile&quot;: f&quot;grids/naca0012_L1.cgns&quot;, # Default grid file
-<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a>&quot;outputDirectory&quot;: &quot;.&quot;,
-<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a>&quot;monitorvariables&quot;: [&quot;resrho&quot;, &quot;resturb&quot;, &quot;cl&quot;, &quot;cd&quot;, &quot;yplus&quot;],
-<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a>&quot;writeTecplotSurfaceSolution&quot;: True,
-<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a># Physics Parameters
-<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a>&quot;equationType&quot;: &quot;RANS&quot;,
-<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a>&quot;liftindex&quot;: 3,  # z is the lift direction
-<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a># Solver Parameters
-<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a>&quot;smoother&quot;: &quot;DADI&quot;,
-<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a>&quot;CFL&quot;: 0.5,
-<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a>&quot;CFLCoarse&quot;: 0.25,
-<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a>&quot;MGCycle&quot;: &quot;sg&quot;,
-<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a>&quot;MGStartLevel&quot;: -1,
-<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a>&quot;nCyclesCoarse&quot;: 250,
-<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a># ANK Solver Parameters
-<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a>&quot;useANKSolver&quot;: True,
-<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a>&quot;nsubiterturb&quot;: 5,
-<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a>&quot;anksecondordswitchtol&quot;: 1e-4,
-<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a>&quot;ankcoupledswitchtol&quot;: 1e-6,
-<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a>&quot;ankinnerpreconits&quot;: 2,
-<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a>&quot;ankouterpreconits&quot;: 2,
-<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a>&quot;anklinresmax&quot;: 0.1,
-<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a># Termination Criteria
-<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a>&quot;L2Convergence&quot;: 1e-12,
-<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a>&quot;L2ConvergenceCoarse&quot;: 1e-2,
-<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a>&quot;nCycles&quot;: 75000,
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="c1"># Print Options</span>
+<a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="s">&quot;printIterations&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False,</span>
+<a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="s">&quot;printAllOptions&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False,</span>
+<a id="__codelineno-1-4" name="__codelineno-1-4" href="#__codelineno-1-4"></a><span class="s">&quot;printIntro&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False,</span>
+<a id="__codelineno-1-5" name="__codelineno-1-5" href="#__codelineno-1-5"></a><span class="s">&quot;printTiming&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">False,</span>
+<a id="__codelineno-1-6" name="__codelineno-1-6" href="#__codelineno-1-6"></a><span class="c1"># I/O Parameters</span>
+<a id="__codelineno-1-7" name="__codelineno-1-7" href="#__codelineno-1-7"></a><span class="s">&quot;gridFile&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">f&quot;grids/naca0012_L1.cgns&quot;,</span><span class="w"> </span><span class="c1"># Default grid file</span>
+<a id="__codelineno-1-8" name="__codelineno-1-8" href="#__codelineno-1-8"></a><span class="s">&quot;outputDirectory&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;.&quot;</span><span class="err">,</span>
+<a id="__codelineno-1-9" name="__codelineno-1-9" href="#__codelineno-1-9"></a><span class="s">&quot;monitorvariables&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;resrho&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;resturb&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;cl&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;cd&quot;</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">&quot;yplus&quot;</span><span class="p p-Indicator">]</span><span class="err">,</span>
+<a id="__codelineno-1-10" name="__codelineno-1-10" href="#__codelineno-1-10"></a><span class="s">&quot;writeTecplotSurfaceSolution&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True,</span>
+<a id="__codelineno-1-11" name="__codelineno-1-11" href="#__codelineno-1-11"></a><span class="c1"># Physics Parameters</span>
+<a id="__codelineno-1-12" name="__codelineno-1-12" href="#__codelineno-1-12"></a><span class="s">&quot;equationType&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;RANS&quot;</span><span class="err">,</span>
+<a id="__codelineno-1-13" name="__codelineno-1-13" href="#__codelineno-1-13"></a><span class="s">&quot;liftindex&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">3,</span><span class="w">  </span><span class="c1"># z is the lift direction</span>
+<a id="__codelineno-1-14" name="__codelineno-1-14" href="#__codelineno-1-14"></a><span class="c1"># Solver Parameters</span>
+<a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="s">&quot;smoother&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;DADI&quot;</span><span class="err">,</span>
+<a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="s">&quot;CFL&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.5,</span>
+<a id="__codelineno-1-17" name="__codelineno-1-17" href="#__codelineno-1-17"></a><span class="s">&quot;CFLCoarse&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.25,</span>
+<a id="__codelineno-1-18" name="__codelineno-1-18" href="#__codelineno-1-18"></a><span class="s">&quot;MGCycle&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="s">&quot;sg&quot;</span><span class="err">,</span>
+<a id="__codelineno-1-19" name="__codelineno-1-19" href="#__codelineno-1-19"></a><span class="s">&quot;MGStartLevel&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">-1,</span>
+<a id="__codelineno-1-20" name="__codelineno-1-20" href="#__codelineno-1-20"></a><span class="s">&quot;nCyclesCoarse&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">250,</span>
+<a id="__codelineno-1-21" name="__codelineno-1-21" href="#__codelineno-1-21"></a><span class="c1"># ANK Solver Parameters</span>
+<a id="__codelineno-1-22" name="__codelineno-1-22" href="#__codelineno-1-22"></a><span class="s">&quot;useANKSolver&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">True,</span>
+<a id="__codelineno-1-23" name="__codelineno-1-23" href="#__codelineno-1-23"></a><span class="s">&quot;nsubiterturb&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">5,</span>
+<a id="__codelineno-1-24" name="__codelineno-1-24" href="#__codelineno-1-24"></a><span class="s">&quot;anksecondordswitchtol&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-4,</span>
+<a id="__codelineno-1-25" name="__codelineno-1-25" href="#__codelineno-1-25"></a><span class="s">&quot;ankcoupledswitchtol&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-6,</span>
+<a id="__codelineno-1-26" name="__codelineno-1-26" href="#__codelineno-1-26"></a><span class="s">&quot;ankinnerpreconits&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2,</span>
+<a id="__codelineno-1-27" name="__codelineno-1-27" href="#__codelineno-1-27"></a><span class="s">&quot;ankouterpreconits&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2,</span>
+<a id="__codelineno-1-28" name="__codelineno-1-28" href="#__codelineno-1-28"></a><span class="s">&quot;anklinresmax&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.1,</span>
+<a id="__codelineno-1-29" name="__codelineno-1-29" href="#__codelineno-1-29"></a><span class="c1"># Termination Criteria</span>
+<a id="__codelineno-1-30" name="__codelineno-1-30" href="#__codelineno-1-30"></a><span class="s">&quot;L2Convergence&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-12,</span>
+<a id="__codelineno-1-31" name="__codelineno-1-31" href="#__codelineno-1-31"></a><span class="s">&quot;L2ConvergenceCoarse&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1e-2,</span>
+<a id="__codelineno-1-32" name="__codelineno-1-32" href="#__codelineno-1-32"></a><span class="s">&quot;nCycles&quot;</span><span class="p p-Indicator">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">75000,</span>
 </code></pre></div>
 <h3 id="experimental-conditions">Experimental Conditions</h3>
 <p>To define the problem, referred to as the <em><strong>AeroProblem</strong></em> (focused on aerodynamics), the following conditions along with the Angle of Attack(AoA) and path to the experimental data:</p>
