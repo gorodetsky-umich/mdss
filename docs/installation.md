@@ -15,10 +15,10 @@ The framework requires tools developed by NASA (OpenMDAO and MPhys) and the MDO 
 - [`pyOptSparse`](https://github.com/mdolab/pyoptsparse)
 - `TACS` (optional)
 
-These software packages may have additional third-party dependencies like PETSc and OpenMPI. A detailed guide for installing them from scratch is available [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html).
+These software packages may have additional third-party dependencies like PETSc and OpenMPI. A detailed guide on the additional dependencies required is available [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html).
 
 ### Python Libraries
-The following Python libraries are required and can be installed via `pip`:
+The following Python libraries are also required:
 
 - `numpy>=1.21`
 - `scipy>=1.7`
@@ -32,11 +32,33 @@ The following Python libraries are required and can be installed via `pip`:
 
 ---
 ## Getting Started
-To get started, install the required dependencies first. Follow the detailed steps provided in the sections below.
+To get started, create a directory on your machine where you would want to store this framework along with the software packages.
+
+```bash
+$ mkdir database_framework_dir  # Change the name to something else later
+$ cd database_frameowrk_dir
+```
 
 ### Installation of Dependencies
 
+There are two types of installation methods available - from scratch and through Docker. If you are on a private machine, we recommend using Docker as it is the easiest option. If you are on an HPC machine, only the scratch installation method is available. Singularity support will be added later.
+
+### Local machine
+
+#### Using Docker (Recommended)
+Docker is highly recommended for ease of installation:
+
+1. Setup Docker: If you do not have Docker installed in your system, follow the [Docker Guide](https://docs.docker.com/) to set it up.
+
+2. Pull a Docker image: Official images for GCC and INTEL compilers are available [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html). Follow the instructions in the link to pull and image compatible to your systems' architecture.
+
+3. Initialize and start a container, mount the directory, and install this package. Follow the instructions mentioned [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#initialize-docker-container) to initialize and start a container.
+4. Once in the container, follow the instructions in the [Package Installation](#package-installation) section to clone this repository in the mount directory and install it.
+
+**_Note: If you are referencing any paths inside the container, they must be with respect to the container's folder architecture, not your host machine._**
+
 #### From Scratch
+
 To manually install all dependencies:
 
 1. Refer to the [Scratch Installation Guide](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html).
@@ -45,15 +67,7 @@ To manually install all dependencies:
 **_Note: When installing dependencies from scratch, ensure that the `petsc4py` version matches the `petsc` version being installed. This library must be installed separately, as it cannot be bundled with the package._**
 
 
-#### Using Docker (Recommended)
-Docker is highly recommended for ease of installation:
 
-1. Pull a Docker image compatible with your machine's architecture. Official images for GCC and INTEL compilers are available [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html).
-2. Follow the [Docker Guide](https://docs.docker.com/) to set up Docker.
-3. Initialize and start a container, mount the directory, and install this package. Follow the instructions mentioned [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#initialize-docker-container) to initialize and start a container.
-4. Once in the container, follow the instructions in the [Package Installation](#package-installation) section to clone this repository in the mount directory and install it.
-
-**_Note: If you are referencing any paths inside the container, they must be with respect to the container's folder architecture, not your host machine._**
 
 #### HPC Systems
 For installation on HPC clusters like Great Lakes or NASA HECC:
