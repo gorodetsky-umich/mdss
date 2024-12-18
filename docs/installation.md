@@ -35,13 +35,18 @@ The following Python libraries are also required:
 To get started, create a directory on your machine where you would want to store this framework along with the software packages.
 
 ```bash
-$ mkdir database_framework_dir  # Change the name to something else later
-$ cd database_frameowrk_dir
+$ mkdir <directory-path> 
+$ cd <directory-path>
 ```
 
 ### Installation of Dependencies
 
-There are two types of installation methods available - from scratch and through Docker. If you are on a private machine, we recommend using Docker as it is the easiest option. If you are on an HPC machine, only the scratch installation method is available. Singularity support will be added later.
+There are two types of installation methods available - from scratch and through Docker. If you are on a local machine, we recommend using Docker as it is the easiest option. If you are on an HPC machine, only the scratch installation method is available. Singularity support will be added later. Please follow the appropriate link.
+
+- [Local machine (Docker)](#using-docker-recommended)
+- [Local machine (Scratch)](#from-scratch)
+- [HPC - Great Lakes (Singularity))](#singularity)
+- [HPC - Great Lakes (Scratch)](#scratch)
 
 ### Local machine
 
@@ -50,64 +55,30 @@ Docker is highly recommended for ease of installation:
 
 1. Setup Docker: If you do not have Docker installed in your system, follow the [Docker Guide](https://docs.docker.com/) to set it up.
 
-2. Pull a Docker image: Official images for GCC and INTEL compilers are available [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html). Follow the instructions in the link to pull and image compatible to your systems' architecture.
+2. Pull a Docker image: Official images for GCC and INTEL compilers are available [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html). Follow the instructions in the link to pull an image compatible to your systems' architecture.
 
-3. Initialize and start a container, mount the directory, and install this package. Follow the instructions mentioned [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#initialize-docker-container) to initialize and start a container.
-4. Once in the container, follow the instructions in the [Package Installation](#package-installation) section to clone this repository in the mount directory and install it.
+3. Initialize and start a container, follow the instructions mentioned [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#initialize-docker-container) to initialize and start a container. Mount the directory `<directory-path>` into the folder mentioned in [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#initialize-docker-container).
+
+4. Inside the container, navigate to the `mount` directory and clone this repository following the instructions in the [Package Installation](#package-installation) section.
+
+5. Run the testcase (TBD)
 
 **_Note: If you are referencing any paths inside the container, they must be with respect to the container's folder architecture, not your host machine._**
 
 #### From Scratch
 
-To manually install all dependencies:
+To manually install all dependencies, we will refer to the instructions found in the [Scratch Installation Guide](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html).
 
-1. Refer to the [Scratch Installation Guide](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html).
-2. A custom bash script `install_packages.sh` is available in this repository to automate the process. Follow `STEP 2` in the [Scratch Installation](#scratch-installation) section.
+(Sanjan needs tio fix the local install bash file, unable to identify issue with petsc. Will do soon.)
 
-**_Note: When installing dependencies from scratch, ensure that the `petsc4py` version matches the `petsc` version being installed. This library must be installed separately, as it cannot be bundled with the package._**
+### HPC Systems (Great Lakes)
 
+#### Singularity 
+TBD
 
+#### Scratch
 
-
-#### HPC Systems
-For installation on HPC clusters like Great Lakes or NASA HECC:
-
-1. Install dependencies as modules or compile them manually. Most packages are available in HPC environments as modules.
-2. Follow the [Scratch Installation](#scratch-installation) instructions.
-
----
-
-### Package Installation
-
-The following steps are common for personal computers and HPC systems:
-
-1. Clone the repository:
-    ```
-    git clone https://github.com/gorodetsky-umich/simulateTestCases.git
-    ```
-2. Navigate into the directory:
-    ```
-    cd simulateTestCases
-    ```
-3. Install the package:
-    - Without dependencies:
-        ```
-        pip install .
-        ```
-    - With dependencies:
-        ```
-        pip install . -r requirements.txt
-        ```
-    - Editable installation:
-        ```
-        pip install -e .
-        ```
-
----
-
-### Scratch Installation
-
-#### HPC Cluster Setup (e.g., Great Lakes)
+These instructions assume that you are on the Great Lakes HPC at UMich.
 
 1. Add the following lines to your `~/.bashrc` file:
     ```bash
@@ -129,12 +100,12 @@ The following steps are common for personal computers and HPC systems:
     Replace `<directory-path>` with your installation directory path. Do not forget to `source ~/.bashrc` after editing.
 
 2. Clone the repository:
-    ```
-    git clone https://github.com/gorodetsky-umich/simulateTestCases.git
+    ```bash
+    $ git clone https://github.com/gorodetsky-umich/simulateTestCases.git
     ```
 
     Copy and execute the installation script:
-    ```
+    ```bash
     $ cd simulateTestCases
 
     $ cp simulateTestCases/install_packages_gl.sh <directory-path>/
@@ -144,7 +115,33 @@ The following steps are common for personal computers and HPC systems:
     $ ./install_packages_gl.sh
     ```
 
+3. Run the testcase (TBD)
+
 ---
 
-### Singularity
-(*To Be Documented*)
+### Package Installation
+
+The following steps are common for personal computers and HPC systems:
+
+1. Clone the repository:
+    ```bash
+    $ git clone https://github.com/gorodetsky-umich/simulateTestCases.git
+    ```
+2. Navigate into the directory:
+    ```bash
+    $ cd simulateTestCases
+    ```
+3. Install the package:
+    - Without dependencies:
+        ```bash 
+        $ pip install .
+        ```
+    - With dependencies:
+        ```bash
+        $ pip install . -r requirements.txt
+        ```
+    - Editable installation:
+        ```bash
+        $ pip install -e .
+        ```
+
