@@ -37,6 +37,40 @@ h1, h2, h3 {
     width: 300px; /* Adjust the width of the sidebar */
 }
 
+/* Responsive Styles */
+@media (max-width: 1200px) {
+    .md-content {
+        max-width: 95%; /* Adjust width to fit smaller screens */
+        padding: 15px; /* Reduce padding */
+    }
+
+    .md-sidebar {
+        width: 250px; /* Slightly reduce sidebar width */
+    }
+}
+
+@media (max-width: 768px) {
+    .md-content {
+        max-width: 100%; /* Use full width on smaller screens */
+        padding: 10px; /* Further reduce padding */
+    }
+
+    .md-sidebar {
+        display: none; /* Hide the sidebar for small screens */
+    }
+}
+
+@media (max-width: 480px) {
+    .md-content {
+        padding: 5px; /* Minimal padding for very small screens */
+    }
+
+    /* Additional small-screen tweaks */
+    body {
+        font-size: 14px; /* Adjust font size for better readability */
+    }
+}
+
 /* Reduce the margin below headings */
 h1, h2, h3, h4, h5, h6 {
     margin-bottom: 0.1em; /* Adjust this value as needed */

@@ -23,13 +23,16 @@ The following Python libraries are required and can be installed via `pip`:
 - `numpy>=1.21`
 - `scipy>=1.7`
 - `mpi4py>=3.1.4`
+- `petsc4py`
 - `pyyaml`
 - `matplotlib`
 - `pandas`
-- `petsc4py`
+- `pydantic`
+
 
 ---
 ## Getting Started
+To get started, install the required dependencies first. Follow the detailed steps provided in the sections below.
 
 ### Installation of Dependencies
 
@@ -39,13 +42,16 @@ To manually install all dependencies:
 1. Refer to the [Scratch Installation Guide](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/installFromScratch.html).
 2. A custom bash script `install_packages.sh` is available in this repository to automate the process. Follow `STEP 2` in the [Scratch Installation](#scratch-installation) section.
 
-#### Using Docker
+**_Note: When installing dependencies from scratch, ensure that the `petsc4py` version matches the `petsc` version being installed. This library must be installed separately, as it cannot be bundled with the package._**
+
+
+#### Using Docker (Recommended)
 Docker is highly recommended for ease of installation:
 
 1. Pull a Docker image compatible with your machine's architecture. Official images for GCC and INTEL compilers are available [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html).
 2. Follow the [Docker Guide](https://docs.docker.com/) to set up Docker.
-3. Initialize and start a container, mount the directory, and install this package. instructions mentioned [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#initialize-docker-container) to initialize and start a container.
-4. Once in the container, follow the instructions in the [Package Installation](#package-installation) section to clone this repository in the mount directory and install it. 
+3. Initialize and start a container, mount the directory, and install this package. Follow the instructions mentioned [here](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/installInstructions/dockerInstructions.html#initialize-docker-container) to initialize and start a container.
+4. Once in the container, follow the instructions in the [Package Installation](#package-installation) section to clone this repository in the mount directory and install it.
 
 **_Note: If you are referencing any paths inside the container, they must be with respect to the container's folder architecture, not your host machine._**
 
@@ -91,11 +97,11 @@ The following steps are common for personal computers and HPC systems:
 
 1. Add the following lines to your `~/.bashrc` file:
     ```bash
-    # Module loads
-    module load gcc
-    module load openmpi
-    module load python/3.9.12
-    module load cmake
+    # Load required modules
+    module load gcc              # GNU Compiler
+    module load openmpi          # MPI Libraries
+    module load python/3.9.12    # Python 3.9.12
+    module load cmake            # CMake for build systems
 
     # PETSc Installation
     export PETSC_ARCH=real-opt
