@@ -1,5 +1,5 @@
 # Usage
-
+## Run a script from examples
 The [script](#running-simulations) below runs a simulation of the NACA 0012 Airfoil, and is included in the `examples` folder. 
 
 **To run the above python script:**
@@ -48,8 +48,9 @@ After execution, the following results are expected which are saved in the speci
 - `ADflow_output.csv` in each refinement level directory, that is a file containg Angle of Attack(AoA), C<sub>L</sub>, and C<sub>D</sub> data.
 - `aoa_<aoa>.yaml` in aoa level directory, that contains the simulation information particular to that angle of attack.
 - Default ADflow outputs: A tecplot file, a CGNS surface file, and a CGNS volume file.
+
 ## Example usage
-Here’s a quick example of how to use `simulateTestCases`:
+Here are quick examples of how to different classes and functions in `simulateTestCases`:
 
 ### Running Simulations
 ```python
