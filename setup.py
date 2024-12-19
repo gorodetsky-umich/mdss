@@ -7,6 +7,8 @@ setup(
     author='Sinaendhran Pujali Elilarasan',
     packages=find_packages(include=['simulateTestCases', 'simulateTestCases.*']),
     python_requires='>=3.9',
+    include_package_data=True,
+    package_data={'resources': ['simulateTestCases/resources/*.yaml']},
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: MIT License',

@@ -19,7 +19,7 @@ $ cd <path-to-examples-directory>
 - Run the python script with a single processor:
 
 ```bash 
-$ python run_example.py --inputFile 
+$ python run_example.py --inputFile <path-to-input-yaml-file>
 ```
 
 or run with multiple processors
@@ -56,7 +56,7 @@ Here’s a quick example of how to use `simulateTestCases`:
 from simulateTestCases.run_sim import run_sim
 
 # Initialize the runner with configuration file
-sim = run_sim('<path-to-input-yaml-file>')
+sim = run_sim('/path/to/input-yaml-file')
 
 # Run the simulation series
 sim.run()
@@ -65,7 +65,7 @@ sim.run()
 sim.post_process()
 ```
 
-### To read existing simualtion data or generate data
+### Read existing simualtion data or generate data
 
 The function `get_sim_data` can be used to get existing simulation data that was generated after a simulation, or to generate new simulation data by passing a `run_flag`. If `run_flag` is `1`, then the function runs the simulation and outputs the data as a dictionary.
 
@@ -75,12 +75,49 @@ The function provides the flexibility of using the input YAML file or  the `over
 from simulateTestCases.utils import get_sim_data, RunFlag
 
 # Specify the path to the input file.
-info_file = 'inputs/naca0012_simInfo.yaml'
+info_file = '/path/to/input-yaml-file'
 
 # Call the function to get simulation data as a dictionary
 sim_data = get_sim_data(info_file, RunFlag.skip)
 
 # Print the dictionary
+print(sim_data)
+```
+### Custom Simulations
+
+The `run_naca0012` and `run_30p30n` functions allow users to run simulations without the need to generate an input YAML file. Instead, users can supply a [dictionary](#template-for-input-dictionary) of basic parameters. These functions load the respective YAML files and update it with the information provided by the user. 
+
+Users can specify an output directory to save the simulation data; otherwise, the data will be stored in a temporary file and deleted after the simulation completes.
+
+**_Note: These functions are intended to use in a python script. If you want to run on a HPC, create a job script and submit it manually._**
+
+#### Template for Input Dictionary
+
+```python
+case_info = {
+    'out_dir': '',  # (Optional) str, path to output directory
+    'meshes_folder_path': '', # str, path to the folder containing mesh files.
+    'mesh_files': [],         # list[str], list of mesh file names.
+    'aoa_list': [],           # list[float], list of angles of attack to simulate.
+    'solver_parameters': {},  # (Optional) dict, dictionary of solver-specific parameters to update.
+}
+```
+
+---
+
+#### Example Usage
+
+```python
+from simulateTestCases.utils import run_naca0012
+
+case_info = {
+    'meshes_folder_path': '/path/to/meshes',
+    'mesh_files': ['naca0012_L0.cgns'],
+    'aoa_list': [0],
+}
+
+sim_data = run_naca0012(case_info)
+
 print(sim_data)
 ```
 
