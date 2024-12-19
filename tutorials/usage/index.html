@@ -546,11 +546,44 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#to-read-existing-simualtion-data-or-generate-data" class="md-nav__link">
+  <a href="#read-existing-simualtion-data-or-generate-data" class="md-nav__link">
     <span class="md-ellipsis">
-      To read existing simualtion data or generate data
+      Read existing simualtion data or generate data
     </span>
   </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-simulations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Custom Simulations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Custom Simulations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-for-input-dictionary" class="md-nav__link">
+    <span class="md-ellipsis">
+      Template for Input Dictionary
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-usage_1" class="md-nav__link">
+    <span class="md-ellipsis">
+      Example Usage
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
         
@@ -790,7 +823,7 @@
 <ul>
 <li>Run the python script with a single processor:</li>
 </ul>
-<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$<span class="w"> </span>python<span class="w"> </span>run_example.py<span class="w"> </span>--inputFile<span class="w"> </span>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$<span class="w"> </span>python<span class="w"> </span>run_example.py<span class="w"> </span>--inputFile<span class="w"> </span>&lt;path-to-input-yaml-file&gt;
 </code></pre></div>
 <p>or run with multiple processors</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>$<span class="w"> </span>mpirun<span class="w"> </span>-np<span class="w"> </span>&lt;number<span class="w"> </span>of<span class="w"> </span>processors&gt;<span class="w"> </span>python<span class="w"> </span>run_example.py<span class="w"> </span>--inputFile<span class="w"> </span>&lt;path-to-input-yaml-file&gt;
@@ -822,7 +855,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a><span class="kn">from</span> <span class="nn">simulateTestCases.run_sim</span> <span class="kn">import</span> <span class="n">run_sim</span>
 <a id="__codelineno-4-2" name="__codelineno-4-2" href="#__codelineno-4-2"></a>
 <a id="__codelineno-4-3" name="__codelineno-4-3" href="#__codelineno-4-3"></a><span class="c1"># Initialize the runner with configuration file</span>
-<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">sim</span> <span class="o">=</span> <span class="n">run_sim</span><span class="p">(</span><span class="s1">&#39;&lt;path-to-input-yaml-file&gt;&#39;</span><span class="p">)</span>
+<a id="__codelineno-4-4" name="__codelineno-4-4" href="#__codelineno-4-4"></a><span class="n">sim</span> <span class="o">=</span> <span class="n">run_sim</span><span class="p">(</span><span class="s1">&#39;/path/to/input-yaml-file&#39;</span><span class="p">)</span>
 <a id="__codelineno-4-5" name="__codelineno-4-5" href="#__codelineno-4-5"></a>
 <a id="__codelineno-4-6" name="__codelineno-4-6" href="#__codelineno-4-6"></a><span class="c1"># Run the simulation series</span>
 <a id="__codelineno-4-7" name="__codelineno-4-7" href="#__codelineno-4-7"></a><span class="n">sim</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
@@ -830,19 +863,46 @@
 <a id="__codelineno-4-9" name="__codelineno-4-9" href="#__codelineno-4-9"></a><span class="c1"># Analyze results</span>
 <a id="__codelineno-4-10" name="__codelineno-4-10" href="#__codelineno-4-10"></a><span class="n">sim</span><span class="o">.</span><span class="n">post_process</span><span class="p">()</span>
 </code></pre></div>
-<h3 id="to-read-existing-simualtion-data-or-generate-data">To read existing simualtion data or generate data</h3>
+<h3 id="read-existing-simualtion-data-or-generate-data">Read existing simualtion data or generate data</h3>
 <p>The function <code>get_sim_data</code> can be used to get existing simulation data that was generated after a simulation, or to generate new simulation data by passing a <code>run_flag</code>. If <code>run_flag</code> is <code>1</code>, then the function runs the simulation and outputs the data as a dictionary.</p>
 <p>The function provides the flexibility of using the input YAML file or  the <code>overall_sim_info.yaml</code> file that is generated and stored in the outptut directory after the completion of simulations, as inputs.</p>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="kn">from</span> <span class="nn">simulateTestCases.utils</span> <span class="kn">import</span> <span class="n">get_sim_data</span><span class="p">,</span> <span class="n">RunFlag</span>
 <a id="__codelineno-5-2" name="__codelineno-5-2" href="#__codelineno-5-2"></a>
 <a id="__codelineno-5-3" name="__codelineno-5-3" href="#__codelineno-5-3"></a><span class="c1"># Specify the path to the input file.</span>
-<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">info_file</span> <span class="o">=</span> <span class="s1">&#39;inputs/naca0012_simInfo.yaml&#39;</span>
+<a id="__codelineno-5-4" name="__codelineno-5-4" href="#__codelineno-5-4"></a><span class="n">info_file</span> <span class="o">=</span> <span class="s1">&#39;/path/to/input-yaml-file&#39;</span>
 <a id="__codelineno-5-5" name="__codelineno-5-5" href="#__codelineno-5-5"></a>
 <a id="__codelineno-5-6" name="__codelineno-5-6" href="#__codelineno-5-6"></a><span class="c1"># Call the function to get simulation data as a dictionary</span>
 <a id="__codelineno-5-7" name="__codelineno-5-7" href="#__codelineno-5-7"></a><span class="n">sim_data</span> <span class="o">=</span> <span class="n">get_sim_data</span><span class="p">(</span><span class="n">info_file</span><span class="p">,</span> <span class="n">RunFlag</span><span class="o">.</span><span class="n">skip</span><span class="p">)</span>
 <a id="__codelineno-5-8" name="__codelineno-5-8" href="#__codelineno-5-8"></a>
 <a id="__codelineno-5-9" name="__codelineno-5-9" href="#__codelineno-5-9"></a><span class="c1"># Print the dictionary</span>
 <a id="__codelineno-5-10" name="__codelineno-5-10" href="#__codelineno-5-10"></a><span class="nb">print</span><span class="p">(</span><span class="n">sim_data</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="custom-simulations">Custom Simulations</h3>
+<p>The <code>run_naca0012</code> and <code>run_30p30n</code> functions allow users to run simulations without the need to generate an input YAML file. Instead, users can supply a <a href="#template-for-input-dictionary">dictionary</a> of basic parameters. These functions load the respective YAML files and update it with the information provided by the user. </p>
+<p>Users can specify an output directory to save the simulation data; otherwise, the data will be stored in a temporary file and deleted after the simulation completes.</p>
+<p><strong><em>Note: These functions are intended to use in a python script. If you want to run on a HPC, create a job script and submit it manually.</em></strong></p>
+<h4 id="template-for-input-dictionary">Template for Input Dictionary</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="n">case_info</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-6-2" name="__codelineno-6-2" href="#__codelineno-6-2"></a>    <span class="s1">&#39;out_dir&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>  <span class="c1"># (Optional) str, path to output directory</span>
+<a id="__codelineno-6-3" name="__codelineno-6-3" href="#__codelineno-6-3"></a>    <span class="s1">&#39;meshes_folder_path&#39;</span><span class="p">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="c1"># str, path to the folder containing mesh files.</span>
+<a id="__codelineno-6-4" name="__codelineno-6-4" href="#__codelineno-6-4"></a>    <span class="s1">&#39;mesh_files&#39;</span><span class="p">:</span> <span class="p">[],</span>         <span class="c1"># list[str], list of mesh file names.</span>
+<a id="__codelineno-6-5" name="__codelineno-6-5" href="#__codelineno-6-5"></a>    <span class="s1">&#39;aoa_list&#39;</span><span class="p">:</span> <span class="p">[],</span>           <span class="c1"># list[float], list of angles of attack to simulate.</span>
+<a id="__codelineno-6-6" name="__codelineno-6-6" href="#__codelineno-6-6"></a>    <span class="s1">&#39;solver_parameters&#39;</span><span class="p">:</span> <span class="p">{},</span>  <span class="c1"># (Optional) dict, dictionary of solver-specific parameters to update.</span>
+<a id="__codelineno-6-7" name="__codelineno-6-7" href="#__codelineno-6-7"></a><span class="p">}</span>
+</code></pre></div>
+<hr />
+<h4 id="example-usage_1">Example Usage</h4>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="kn">from</span> <span class="nn">simulateTestCases.utils</span> <span class="kn">import</span> <span class="n">run_naca0012</span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="n">case_info</span> <span class="o">=</span> <span class="p">{</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a>    <span class="s1">&#39;meshes_folder_path&#39;</span><span class="p">:</span> <span class="s1">&#39;/path/to/meshes&#39;</span><span class="p">,</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a>    <span class="s1">&#39;mesh_files&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;naca0012_L0.cgns&#39;</span><span class="p">],</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a>    <span class="s1">&#39;aoa_list&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="p">}</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="n">sim_data</span> <span class="o">=</span> <span class="n">run_naca0012</span><span class="p">(</span><span class="n">case_info</span><span class="p">)</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="nb">print</span><span class="p">(</span><span class="n">sim_data</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="additional-information">Additional Information</h2>
 <h3 id="grid-files">Grid Files</h3>
