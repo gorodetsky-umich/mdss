@@ -1,4 +1,6 @@
 site_name: Simulate Test Cases
+repo_url: https://github.com/gorodetsky-umich/simulateTestCases.git
+repo_name: simulateTestCases
 theme:
   name: material
   features:
@@ -11,7 +13,7 @@ theme:
     - content.tabs.link
     - content.code.annotation
     - content.code.copy
-  
+
   language: en
 
   palette:
