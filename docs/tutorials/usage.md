@@ -16,7 +16,7 @@ $ cp -r <path-to-repository>/examples <path-to-examples-directory>
 $ cd <path-to-examples-directory> 
 ```
 
-- Run the python script with a single processor:
+- Run the python script with a single processor or when using `run_as_subprocess` option:
 
 ```bash 
 $ python run_example.py --inputFile <path-to-input-yaml-file>
@@ -30,6 +30,7 @@ or run with multiple processors
 
 **_Note:_**
 
+- *_Do not use `mpirun` when using `run_as_subprocess` as it will result in an error_*
 - *_Example input yaml files to run on personal computers are stored in `examples/inputs` directory, and for Great Lakes HPC cluster, an example file is stored in `examples/inputs/GL`_*
 - *_Make sure to modify the file and file paths ti absolute paths in the yaml file when running in a docker container._*
 

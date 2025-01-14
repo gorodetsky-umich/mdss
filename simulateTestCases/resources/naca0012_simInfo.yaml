@@ -1,6 +1,7 @@
 out_dir: output
 hpc: 'no'
-run_as_subprocess: 'no'
+run_as_subprocess: 'yes'
+nproc: 4
 hpc_info:
   cluster: GL
   job_name: naca0012

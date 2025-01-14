@@ -5,6 +5,7 @@ This package is particularly suited for projects involving multiple configuratio
 
 ### Key Features
 - Automates the execution of multiple ADflow simulation cases.
+- Allows the user to choose to run the simulations as subprocesses.
 - Utilizes YAML configuration files for defining simulation parameters and organizing cases.
 - Stores simulation data in a structured directory hierarchy for ease of access and analysis.
 - Supports post-processing with methods for comparing results to experimental data and generating plots.

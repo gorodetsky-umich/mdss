@@ -14,9 +14,11 @@ The YAML file organizes simulation data into a structured hierarchy, enabling cl
 
 ```yaml
 out_dir: # str, path to the output directory
+run_as_subprocess: # str, 'yes' or 'no'
+nproc: # int, number of processors, required only if run_as_subprocess is yes
 hpc: # str, 'yes' or 'no'
-hpc_info: # dict, only needed if hpc is yes
-  cluster: # str, name of the cluste. GL for Great Lakes
+hpc_info: # dict, required only if hpc is yes
+  cluster: # str, name of the cluster. GL for Great Lakes
   job_name: # str, name of the job
   nodes: # int, number of nodes
   nproc: # int, total number of processors
@@ -55,7 +57,7 @@ hierarchies: # list, List of hierarchies
 # Second hierarchy
 ```
 
-Please note that adherence to this structure is essential; any deviation may lead to errors when running simulations. Examples of correctly formatted YAML files are provided in the `examples/inputs` folder.
+Please note that adherence to this structure is essential; any deviation may lead to errors when running simulations. Examples of correctly formatted YAML files are provided in the `examples/inputs` folder. The file `naca0012_simInfo.yaml` is an example file to run NACA0012 airfoil without the `run_as_subprocess` option, and `30p-30n_simInfo.yaml` is with `run_as_subprocess` option.
 
 The yaml script can also be used as a starting point for generating custom YAML files.
 
