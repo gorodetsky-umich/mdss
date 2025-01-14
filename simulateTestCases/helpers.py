@@ -198,7 +198,7 @@ def write_job_script(sim_info, out_dir, out_file, python_file_path, yaml_file_pa
 
         # Change 'srun python' command to just python command
         if sim_info['run_as_subprocess'] == 'yes':
-            job_script.replace("srun python", "python")
+            job_script = job_script.replace("srun python", "python")
         
         # Define the path for the job script
         job_script_path = f"{out_dir}/{hpc_info['job_name']}.sh"
@@ -299,16 +299,27 @@ def run_as_subprocess(sim_info, hierarchy_info, case_info, exp_info, aoa, aoa_ou
     if comm.rank==0:
         print(f"{'-' * 30}")
         print(f"Starting subprocess for aoa: {aoa}")
-        p = subprocess.Popen(
-            ['mpirun', '-np', str(nproc), 'python', python_fname, '--inputFile', aoa_specific_input_file],
-            env=env,
-            stdout=subprocess.PIPE,  # Capture standard output
-            stderr=subprocess.PIPE,  # Capture standard error
-            text=True  # Ensure output is in text format, not bytes
-            )
+        if sim_info['hpc'] != 'yes':
+            p = subprocess.Popen(
+                ['mpirun', '-np', str(nproc), 'python', python_fname, '--inputFile', aoa_specific_input_file],
+                env=env,
+                stdout=subprocess.PIPE,  # Capture standard output
+                stderr=subprocess.PIPE,  # Capture standard error
+                text=True  # Ensure output is in text format, not bytes
+                )
+        elif sim_info['hpc'] == 'yes':
+            p = subprocess.Popen(
+                ['srun', '-n', str(nproc), 'python', python_fname, '--inputFile', aoa_specific_input_file],
+                env=env,
+                stdout=subprocess.PIPE,  # Capture standard output
+                stderr=subprocess.PIPE,  # Capture standard error
+                text=True  # Ensure output is in text format, not bytes
+                )
         # Read and print the output and error messages
         stdout, stderr = p.communicate()
 
+        #print("Subprocess Output:", stdout)
+        #print("Subprocess Error:", stderr)
 
         p.wait() # Wait for subprocess to end
         
