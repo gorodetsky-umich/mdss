@@ -2,6 +2,7 @@ import yaml
 import pandas as pd
 import importlib.resources as resources
 import re
+import os, subprocess
 from simulateTestCases.yaml_config import ref_sim_info, ref_hpc_info, ref_hierarchy_info, ref_case_info, ref_geometry_info, ref_exp_set_info
 from simulateTestCases.templates import gl_job_script
 
@@ -64,7 +65,7 @@ def load_csv_data(csv_file, comm):
         return df
     except FileNotFoundError:
         if comm.rank == 0:
-            print(f"Error: The file '{csv_file}' was not found. Please check the file path.")
+            print(f"Warning: The file '{csv_file}' was not found. Please check the file path.")
     except pd.errors.EmptyDataError:
         if comm.rank == 0:
             print("Error: The file is empty. Please check if data has been written correctly.")
@@ -101,6 +102,9 @@ def check_input_yaml(yaml_file):
         sim_info = yaml.safe_load(file)
 
     ref_sim_info.model_validate(sim_info)
+    if sim_info['run_as_subprocess']=='yes':
+        if 'nproc' not in sim_info or not isinstance(sim_info['nproc'], int):
+            raise ValueError("'nproc' must be provided as an integer when 'run_as_subprocess' is 'yes'")
     if sim_info['hpc'] == 'yes':
         ref_hpc_info.model_validate(sim_info['hpc_info'])
     for hierarchy, hierarchy_info in enumerate(sim_info['hierarchies']): # loop for Hierarchy level
@@ -136,13 +140,12 @@ parser.add_argument("--inputFile", type=str)
 args = parser.parse_args()
 sim = run_sim(args.inputFile) # Input the simulation info and output dir
 sim.run_problem() # Run the simulation
-sim.post_process() # Genrates plots comparing experimental data and simulated data and stores them
         """
     # Open the file in write mode
     with open(fname, "w") as file:
         file.write(python_code)
 
-def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_path):
+def write_job_script(sim_info, out_dir, out_file, python_file_path, yaml_file_path):
     """
     Generates a job script for running simulations on an HPC cluster.
 
@@ -150,8 +153,8 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
 
     Inputs
     ------
-    - **hpc_info** : dict
-        Dictionary containing HPC configuration details (e.g., cluster name, job name, nodes, tasks, and account).
+    - **sim_info** : dict
+        Dictionary containing simulation details details.
     - **out_dir** : str
         Directory where the job script and output files will be saved.
     - **out_file** : str
@@ -172,6 +175,7 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
     - Uses regex to update the job script with provided parameters.
     - Ensures that the correct Python and YAML file paths are embedded in the job script.
     """
+    hpc_info = sim_info['hpc_info']
     if hpc_info['cluster'] == 'GL':
         # Set default time if not provided
         job_time = hpc_info.get('time', '1:00:00')
@@ -192,6 +196,10 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
             yaml_file_path=yaml_file_path
         )
 
+        # Change 'srun python' command to just python command
+        if sim_info['run_as_subprocess'] == 'yes':
+            job_script.replace("srun python", "python")
+        
         # Define the path for the job script
         job_script_path = f"{out_dir}/{hpc_info['job_name']}.sh"
 
@@ -200,3 +208,113 @@ def write_job_script(hpc_info, out_dir, out_file, python_file_path, yaml_file_pa
             file.write(job_script)
 
         return job_script_path
+    
+################################################################################
+# Helper Functions for running the simulations as subprocesses
+################################################################################
+def run_as_subprocess(sim_info, hierarchy_info, case_info, exp_info, aoa, aoa_out_dir, nproc, comm):
+    """
+    Executes a simulation case as a subprocess using mpirun.
+
+    This function automates the creation of input files, ensures directories exist, and runs a subprocess to execute simulations in parallel.
+
+    Inputs
+    ------
+    - **sim_info** : dict  
+        Dictionary containing simulation details, such as output directory, job name, and other metadata.
+    - **hierarchy_info** : dict  
+        Information about the simulation hierarchy, including hierarchy name.
+    - **case_info** : dict  
+        Details about the simulation case, such as mesh files, geometry, and solver parameters.
+    - **exp_info** : dict  
+        Experimental setup details, including Reynolds number, Mach number, temperature, and experimental data.
+    - **aoa** : float  
+        The angle of attack (in degrees) for the simulation.
+    - **aoa_out_dir** : str  
+        Directory where output specific to the given angle of attack will be stored.
+    - **nproc** : int  
+        Number of processors to use for the subprocess execution.
+    - **comm** : MPI communicator  
+        An MPI communicator object to handle parallelism.
+
+    Outputs
+    -------
+    - **None**  
+        This function does not return any value but performs the following actions:
+        1. Creates necessary directories and input files.
+        2. Launches a subprocess to execute the simulation using `mpirun`.
+        3. Prints standard output and error logs from the subprocess for debugging.
+
+    Notes
+    -----
+    - The function ensures the proper setup of the simulation environment for the given angle of attack.
+    - The generated Python script and YAML input file are specific to each simulation run.
+    - Uses MPI to parallelize the simulation process.
+    - Captures and displays `stdout` and `stderr` from the subprocess for troubleshooting.
+    """
+    aoa_specific_sim_info = {
+        'out_dir': sim_info['out_dir'],
+        'hpc': 'no',
+        'run_as_subprocess': 'no',
+        'hierarchies':[
+            {
+                'name': hierarchy_info['name'],
+                'cases':[
+                    {
+                        'name': case_info['name'],
+                        'meshes_folder_path': case_info['meshes_folder_path'],
+                        'mesh_files': case_info['mesh_files'],
+                        'geometry_info': case_info['geometry_info'],
+                        'solver_parameters': case_info['solver_parameters'],
+                        'exp_sets':[
+                            {
+                                'aoa_list': [aoa],
+                                'Re': exp_info['Re'],
+                                'mach': exp_info['mach'],
+                                'Temp': exp_info['Temp'],
+                                'exp_data': exp_info['exp_data'],
+                            },
+                        ],
+                    },
+                ],
+            },
+        ],
+    }
+    if not os.path.exists(aoa_out_dir): # Create the directory if it doesn't exist
+        if comm.rank == 0:
+            os.makedirs(aoa_out_dir)
+    
+    aoa_specific_input_file = f"{aoa_out_dir}/temp_input_file.yaml"
+    if comm.rank==0:
+        with open(aoa_specific_input_file, 'w') as input_file:
+            yaml.dump(aoa_specific_sim_info, input_file, sort_keys=False)
+
+    python_fname = f"{sim_info['out_dir']}/script_for_subprocess.py"
+
+    if not os.path.exists(python_fname):
+        if comm.rank==0:
+            write_python_file(python_fname)
+
+    env = os.environ.copy()
+    if comm.rank==0:
+        print(f"{'-' * 30}")
+        print(f"Starting subprocess for aoa: {aoa}")
+        p = subprocess.Popen(
+            ['mpirun', '-np', str(nproc), 'python', python_fname, '--inputFile', aoa_specific_input_file],
+            env=env,
+            stdout=subprocess.PIPE,  # Capture standard output
+            stderr=subprocess.PIPE,  # Capture standard error
+            text=True  # Ensure output is in text format, not bytes
+            )
+        # Read and print the output and error messages
+        stdout, stderr = p.communicate()
+
+
+        p.wait() # Wait for subprocess to end
+        
+        print(f"Completed")
+        print(f"{'-' * 30}")
+
+    # Delete the files
+    if comm.rank == 0:
+        os.remove(aoa_specific_input_file)

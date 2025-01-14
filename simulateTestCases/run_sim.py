@@ -17,7 +17,7 @@ from baseclasses import AeroProblem
 import openmdao.api as om
 from mpi4py import MPI
 
-from simulateTestCases.helpers import load_yaml_file, load_csv_data, check_input_yaml, write_python_file, write_job_script
+from simulateTestCases.helpers import load_yaml_file, load_csv_data, check_input_yaml, write_python_file, write_job_script, run_as_subprocess
 
 comm = MPI.COMM_WORLD
 
@@ -280,6 +280,10 @@ class run_sim():
 
                             aoa_level_dict = {} # Creating aoa level sim info dictionary for overall sim info file
 
+                            # Call 'run_as_subprocess' function if the user has requested
+                            if sim_info_copy['run_as_subprocess'] == 'yes':
+                                run_as_subprocess(sim_info_copy, hierarchy_info, case_info, exp_info, aoa, output_dir, sim_info_copy['nproc'], comm)
+
                             ################################################################################
                             # OpenMDAO setup
                             ################################################################################
@@ -383,6 +387,7 @@ class run_sim():
                             TList.append(aoa_run_time)
                             FList.append(fail_flag)
                         
+                        
                         # Write simulation results to a csv file
                         refinement_level_data = {
                             "Alpha": [f"{alpha:6.2f}" for alpha in aoa_list],
@@ -391,12 +396,12 @@ class run_sim():
                             "FFlag": [f"{int(FF):12f}" for FF in FList],
                             "WTime": [f"{wall_time:10.2f}" for wall_time in TList]
                         }
-                        df = pd.DataFrame(refinement_level_data) # Create a panda DataFrame
 
                         # Define the output file path
                         refinement_level_dir = os.path.dirname(output_dir)
                         ADflow_out_file = f"{refinement_level_dir}/ADflow_output.csv"
-
+                        
+                        df = pd.DataFrame(refinement_level_data) # Create a panda DataFrame
                         # Write the DataFrame to a CSV file
                         df.to_csv(ADflow_out_file, index=False)
 
@@ -450,7 +455,7 @@ class run_sim():
             # Create a python file to run
             write_python_file(python_file_path)
             # Create a job script to run
-            job_script_path = write_job_script(sim_info_copy['hpc_info'], self.out_dir, slrum_out_file, python_file_path, self.info_file)
+            job_script_path = write_job_script(sim_info_copy, self.out_dir, slrum_out_file, python_file_path, self.info_file)
 
             subprocess.run(["sbatch", job_script_path])
             

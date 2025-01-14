@@ -4,6 +4,8 @@ class ref_sim_info(BaseModel):
     hierarchies: list[dict]
     out_dir: str
     hpc: str
+    run_as_subprocess: str
+    nproc: int = None
 
 class ref_hpc_info(BaseModel):
     cluster: str

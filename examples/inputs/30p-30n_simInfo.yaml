@@ -1,5 +1,7 @@
 out_dir: output
 hpc: 'no'
+run_as_subprocess: 'yes'
+nproc: 4
 hierarchies:
 - name: 2d_high_lift
   cases:

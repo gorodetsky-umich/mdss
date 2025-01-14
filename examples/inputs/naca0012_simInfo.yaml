@@ -1,5 +1,6 @@
 out_dir: output
 hpc: 'no'
+run_as_subprocess: 'no'
 hierarchies:
 - name: 2d_clean
   cases:

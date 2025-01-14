@@ -302,14 +302,3 @@ def run_30p30n(case_info):
     case_data = sim_data['2d_high_lift']['30p-30n']['exp_set_0']
 
     return case_data
-
-
-    
-    
-
-
-
-
-        
-
-
