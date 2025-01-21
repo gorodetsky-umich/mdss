@@ -1463,7 +1463,18 @@
 <span class="normal"><a href="#__codelineno-0-317">317</a></span>
 <span class="normal"><a href="#__codelineno-0-318">318</a></span>
 <span class="normal"><a href="#__codelineno-0-319">319</a></span>
-<span class="normal"><a href="#__codelineno-0-320">320</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="k">def</span> <span class="nf">run_as_subprocess</span><span class="p">(</span><span class="n">sim_info</span><span class="p">,</span> <span class="n">hierarchy_info</span><span class="p">,</span> <span class="n">case_info</span><span class="p">,</span> <span class="n">exp_info</span><span class="p">,</span> <span class="n">aoa</span><span class="p">,</span> <span class="n">aoa_out_dir</span><span class="p">,</span> <span class="n">nproc</span><span class="p">,</span> <span class="n">comm</span><span class="p">):</span>
+<span class="normal"><a href="#__codelineno-0-320">320</a></span>
+<span class="normal"><a href="#__codelineno-0-321">321</a></span>
+<span class="normal"><a href="#__codelineno-0-322">322</a></span>
+<span class="normal"><a href="#__codelineno-0-323">323</a></span>
+<span class="normal"><a href="#__codelineno-0-324">324</a></span>
+<span class="normal"><a href="#__codelineno-0-325">325</a></span>
+<span class="normal"><a href="#__codelineno-0-326">326</a></span>
+<span class="normal"><a href="#__codelineno-0-327">327</a></span>
+<span class="normal"><a href="#__codelineno-0-328">328</a></span>
+<span class="normal"><a href="#__codelineno-0-329">329</a></span>
+<span class="normal"><a href="#__codelineno-0-330">330</a></span>
+<span class="normal"><a href="#__codelineno-0-331">331</a></span></pre></div></td><td class="code"><div><pre><span></span><code><a id="__codelineno-0-215" name="__codelineno-0-215"></a><span class="k">def</span> <span class="nf">run_as_subprocess</span><span class="p">(</span><span class="n">sim_info</span><span class="p">,</span> <span class="n">hierarchy_info</span><span class="p">,</span> <span class="n">case_info</span><span class="p">,</span> <span class="n">exp_info</span><span class="p">,</span> <span class="n">aoa</span><span class="p">,</span> <span class="n">aoa_out_dir</span><span class="p">,</span> <span class="n">nproc</span><span class="p">,</span> <span class="n">comm</span><span class="p">):</span>
 <a id="__codelineno-0-216" name="__codelineno-0-216"></a><span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <a id="__codelineno-0-217" name="__codelineno-0-217"></a><span class="sd">    Executes a simulation case as a subprocess using mpirun.</span>
 <a id="__codelineno-0-218" name="__codelineno-0-218"></a>
@@ -1550,25 +1561,36 @@
 <a id="__codelineno-0-299" name="__codelineno-0-299"></a>    <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span><span class="o">==</span><span class="mi">0</span><span class="p">:</span>
 <a id="__codelineno-0-300" name="__codelineno-0-300"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;-&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">30</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-301" name="__codelineno-0-301"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting subprocess for aoa: </span><span class="si">{</span><span class="n">aoa</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
-<a id="__codelineno-0-303" name="__codelineno-0-303"></a>            <span class="p">[</span><span class="s1">&#39;mpirun&#39;</span><span class="p">,</span> <span class="s1">&#39;-np&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">nproc</span><span class="p">),</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">python_fname</span><span class="p">,</span> <span class="s1">&#39;--inputFile&#39;</span><span class="p">,</span> <span class="n">aoa_specific_input_file</span><span class="p">],</span>
-<a id="__codelineno-0-304" name="__codelineno-0-304"></a>            <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
-<a id="__codelineno-0-305" name="__codelineno-0-305"></a>            <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>  <span class="c1"># Capture standard output</span>
-<a id="__codelineno-0-306" name="__codelineno-0-306"></a>            <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>  <span class="c1"># Capture standard error</span>
-<a id="__codelineno-0-307" name="__codelineno-0-307"></a>            <span class="n">text</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Ensure output is in text format, not bytes</span>
-<a id="__codelineno-0-308" name="__codelineno-0-308"></a>            <span class="p">)</span>
-<a id="__codelineno-0-309" name="__codelineno-0-309"></a>        <span class="c1"># Read and print the output and error messages</span>
-<a id="__codelineno-0-310" name="__codelineno-0-310"></a>        <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
-<a id="__codelineno-0-311" name="__codelineno-0-311"></a>
-<a id="__codelineno-0-312" name="__codelineno-0-312"></a>
-<a id="__codelineno-0-313" name="__codelineno-0-313"></a>        <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="c1"># Wait for subprocess to end</span>
-<a id="__codelineno-0-314" name="__codelineno-0-314"></a>
-<a id="__codelineno-0-315" name="__codelineno-0-315"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-316" name="__codelineno-0-316"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;-&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">30</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<a id="__codelineno-0-317" name="__codelineno-0-317"></a>
-<a id="__codelineno-0-318" name="__codelineno-0-318"></a>    <span class="c1"># Delete the files</span>
-<a id="__codelineno-0-319" name="__codelineno-0-319"></a>    <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-<a id="__codelineno-0-320" name="__codelineno-0-320"></a>        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">aoa_specific_input_file</span><span class="p">)</span>
+<a id="__codelineno-0-302" name="__codelineno-0-302"></a>        <span class="k">if</span> <span class="n">sim_info</span><span class="p">[</span><span class="s1">&#39;hpc&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+<a id="__codelineno-0-303" name="__codelineno-0-303"></a>            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+<a id="__codelineno-0-304" name="__codelineno-0-304"></a>                <span class="p">[</span><span class="s1">&#39;mpirun&#39;</span><span class="p">,</span> <span class="s1">&#39;-np&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">nproc</span><span class="p">),</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">python_fname</span><span class="p">,</span> <span class="s1">&#39;--inputFile&#39;</span><span class="p">,</span> <span class="n">aoa_specific_input_file</span><span class="p">],</span>
+<a id="__codelineno-0-305" name="__codelineno-0-305"></a>                <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+<a id="__codelineno-0-306" name="__codelineno-0-306"></a>                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>  <span class="c1"># Capture standard output</span>
+<a id="__codelineno-0-307" name="__codelineno-0-307"></a>                <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>  <span class="c1"># Capture standard error</span>
+<a id="__codelineno-0-308" name="__codelineno-0-308"></a>                <span class="n">text</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Ensure output is in text format, not bytes</span>
+<a id="__codelineno-0-309" name="__codelineno-0-309"></a>                <span class="p">)</span>
+<a id="__codelineno-0-310" name="__codelineno-0-310"></a>        <span class="k">elif</span> <span class="n">sim_info</span><span class="p">[</span><span class="s1">&#39;hpc&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span><span class="p">:</span>
+<a id="__codelineno-0-311" name="__codelineno-0-311"></a>            <span class="n">p</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+<a id="__codelineno-0-312" name="__codelineno-0-312"></a>                <span class="p">[</span><span class="s1">&#39;srun&#39;</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">nproc</span><span class="p">),</span> <span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">python_fname</span><span class="p">,</span> <span class="s1">&#39;--inputFile&#39;</span><span class="p">,</span> <span class="n">aoa_specific_input_file</span><span class="p">],</span>
+<a id="__codelineno-0-313" name="__codelineno-0-313"></a>                <span class="n">env</span><span class="o">=</span><span class="n">env</span><span class="p">,</span>
+<a id="__codelineno-0-314" name="__codelineno-0-314"></a>                <span class="n">stdout</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>  <span class="c1"># Capture standard output</span>
+<a id="__codelineno-0-315" name="__codelineno-0-315"></a>                <span class="n">stderr</span><span class="o">=</span><span class="n">subprocess</span><span class="o">.</span><span class="n">PIPE</span><span class="p">,</span>  <span class="c1"># Capture standard error</span>
+<a id="__codelineno-0-316" name="__codelineno-0-316"></a>                <span class="n">text</span><span class="o">=</span><span class="kc">True</span>  <span class="c1"># Ensure output is in text format, not bytes</span>
+<a id="__codelineno-0-317" name="__codelineno-0-317"></a>                <span class="p">)</span>
+<a id="__codelineno-0-318" name="__codelineno-0-318"></a>        <span class="c1"># Read and print the output and error messages</span>
+<a id="__codelineno-0-319" name="__codelineno-0-319"></a>        <span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">communicate</span><span class="p">()</span>
+<a id="__codelineno-0-320" name="__codelineno-0-320"></a>
+<a id="__codelineno-0-321" name="__codelineno-0-321"></a>        <span class="c1">#print(&quot;Subprocess Output:&quot;, stdout)</span>
+<a id="__codelineno-0-322" name="__codelineno-0-322"></a>        <span class="c1">#print(&quot;Subprocess Error:&quot;, stderr)</span>
+<a id="__codelineno-0-323" name="__codelineno-0-323"></a>
+<a id="__codelineno-0-324" name="__codelineno-0-324"></a>        <span class="n">p</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span> <span class="c1"># Wait for subprocess to end</span>
+<a id="__codelineno-0-325" name="__codelineno-0-325"></a>
+<a id="__codelineno-0-326" name="__codelineno-0-326"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Completed&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-327" name="__codelineno-0-327"></a>        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="s1">&#39;-&#39;</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">30</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-328" name="__codelineno-0-328"></a>
+<a id="__codelineno-0-329" name="__codelineno-0-329"></a>    <span class="c1"># Delete the files</span>
+<a id="__codelineno-0-330" name="__codelineno-0-330"></a>    <span class="k">if</span> <span class="n">comm</span><span class="o">.</span><span class="n">rank</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+<a id="__codelineno-0-331" name="__codelineno-0-331"></a>        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">aoa_specific_input_file</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
             </details>
     </div>
@@ -1730,7 +1752,7 @@
 <a id="__codelineno-0-198" name="__codelineno-0-198"></a>
 <a id="__codelineno-0-199" name="__codelineno-0-199"></a>        <span class="c1"># Change &#39;srun python&#39; command to just python command</span>
 <a id="__codelineno-0-200" name="__codelineno-0-200"></a>        <span class="k">if</span> <span class="n">sim_info</span><span class="p">[</span><span class="s1">&#39;run_as_subprocess&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;yes&#39;</span><span class="p">:</span>
-<a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="n">job_script</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;srun python&quot;</span><span class="p">,</span> <span class="s2">&quot;python&quot;</span><span class="p">)</span>
+<a id="__codelineno-0-201" name="__codelineno-0-201"></a>            <span class="n">job_script</span> <span class="o">=</span> <span class="n">job_script</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;srun python&quot;</span><span class="p">,</span> <span class="s2">&quot;python&quot;</span><span class="p">)</span>
 <a id="__codelineno-0-202" name="__codelineno-0-202"></a>
 <a id="__codelineno-0-203" name="__codelineno-0-203"></a>        <span class="c1"># Define the path for the job script</span>
 <a id="__codelineno-0-204" name="__codelineno-0-204"></a>        <span class="n">job_script_path</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">out_dir</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">hpc_info</span><span class="p">[</span><span class="s1">&#39;job_name&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">.sh&quot;</span>

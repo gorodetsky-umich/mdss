@@ -879,7 +879,7 @@
 <div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>&lt;path-to-examples-directory&gt;<span class="w"> </span>
 </code></pre></div>
 <ul>
-<li>Run the python script with a single processor:</li>
+<li>Run the python script with a single processor or when using <code>run_as_subprocess</code> option:</li>
 </ul>
 <div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>$<span class="w"> </span>python<span class="w"> </span>run_example.py<span class="w"> </span>--inputFile<span class="w"> </span>&lt;path-to-input-yaml-file&gt;
 </code></pre></div>
@@ -888,6 +888,7 @@
 </code></pre></div>
 <p><strong><em>Note:</em></strong></p>
 <ul>
+<li><em><em>Do not use <code>mpirun</code> when using <code>run_as_subprocess</code> as it will result in an error</em></em></li>
 <li><em><em>Example input yaml files to run on personal computers are stored in <code>examples/inputs</code> directory, and for Great Lakes HPC cluster, an example file is stored in <code>examples/inputs/GL</code></em></em></li>
 <li><em><em>Make sure to modify the file and file paths ti absolute paths in the yaml file when running in a docker container.</em></em></li>
 </ul>

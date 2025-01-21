@@ -554,6 +554,15 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verification
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1029,6 +1038,34 @@
 </code></pre></div></li>
 </ul>
 </li>
+</ol>
+<h2 id="verification">Verification</h2>
+<p>To verify the installation of packages, run a MACH-Aero tutorial available available on the <a href="https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/machAeroTutorials/aero_adflow.html">MDO lab website</a>. The files required to run the tutprial can be obtained from the the <a href="https://github.com/mdolab/MACH-Aero.git">MACH-Aero github repo</a>.</p>
+<p><strong>Follow the steps to run a MACH-Aero tutorial:</strong></p>
+<ol>
+<li>
+<p>Clone the MACH-Aero repo
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a>$<span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/mdolab/MACH-Aero.git
+</code></pre></div></p>
+</li>
+<li>
+<p>Create a new directory to run the tutorial
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a>$<span class="w"> </span>mkdir<span class="w"> </span>&lt;path-to-tutorial-directory&gt;
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a>$<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>&lt;path-to-tutorial-directory&gt;
+</code></pre></div></p>
+</li>
+<li>Copy the necessary files
+<div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a>$<span class="w"> </span>cp<span class="w"> </span>&lt;path-to-mach-aero-directory&gt;/tutorial/aero/analysis/wing_vol.cgns<span class="w"> </span>.
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a>$<span class="w"> </span>cp<span class="w"> </span>&lt;path-to-mach-aero-directory&gt;/tutorial/aero/analysis/aero_run.py
+</code></pre></div></li>
+<li>Run the python file
+To run using one processor:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a>python<span class="w"> </span>aero_run.py
+</code></pre></div>
+To run using multiple processors:
+<div class="highlight"><pre><span></span><code><a id="__codelineno-13-1" name="__codelineno-13-1" href="#__codelineno-13-1"></a>mpirun<span class="w"> </span>-np<span class="w"> </span>&lt;nproc&gt;<span class="w"> </span>python<span class="w"> </span>aero_run.py
+</code></pre></div>
+<em><em>Note: Running using multiple processors helps to identify the problems with <code>openmpi</code> and <code>petsc</code> installations</em></em></li>
 </ol>
 
 
