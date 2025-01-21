@@ -157,3 +157,34 @@ The following steps are common for personal computers and HPC systems:
         $ pip install -e .
         ```
 
+## Verification
+
+To verify the installation of packages, run a MACH-Aero tutorial available available on the [MDO lab website](https://mdolab-mach-aero.readthedocs-hosted.com/en/latest/machAeroTutorials/aero_adflow.html). The files required to run the tutprial can be obtained from the the [MACH-Aero github repo](https://github.com/mdolab/MACH-Aero.git).
+
+**Follow the steps to run a MACH-Aero tutorial:**
+
+1. Clone the MACH-Aero repo
+```bash
+$ git clone https://github.com/mdolab/MACH-Aero.git
+```
+
+2. Create a new directory to run the tutorial
+```bash
+$ mkdir <path-to-tutorial-directory>
+$ cd <path-to-tutorial-directory>
+```
+3. Copy the necessary files
+```bash
+$ cp <path-to-mach-aero-directory>/tutorial/aero/analysis/wing_vol.cgns .
+$ cp <path-to-mach-aero-directory>/tutorial/aero/analysis/aero_run.py
+```
+4. Run the python file
+To run using one processor:
+```bash
+python aero_run.py
+```
+To run using multiple processors:
+```bash
+mpirun -np <nproc> python aero_run.py
+```
+*_Note: Running using multiple processors helps to identify the problems with `openmpi` and `petsc` installations_*
