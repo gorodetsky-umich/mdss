@@ -17,7 +17,7 @@ from baseclasses import AeroProblem
 import openmdao.api as om
 from mpi4py import MPI
 
-from simulateTestCases.helpers import load_yaml_file, load_csv_data, check_input_yaml, write_python_file, write_job_script, run_as_subprocess
+from mdss.helpers import load_yaml_file, load_csv_data, check_input_yaml, write_python_file, write_job_script, run_as_subprocess
 
 comm = MPI.COMM_WORLD
 # This is a test line

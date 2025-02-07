@@ -1,6 +1,6 @@
-site_name: Simulate Test Cases
-repo_url: https://github.com/gorodetsky-umich/simulateTestCases.git
-repo_name: simulateTestCases
+site_name: Multi-Disciplinary Simulation Suite (MDSS)
+repo_url: https://github.com/gorodetsky-umich/mdss.git
+repo_name: mdss
 theme:
   name: material
   features:
@@ -43,7 +43,7 @@ plugins:
       default_handler: python
       handlers:
         python:
-          paths: [simulateTestCases]
+          paths: [mdss]
           options:
             show_source: true
 

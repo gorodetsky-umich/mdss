@@ -1,6 +1,5 @@
 import copy
-from simulateTestCases.run_sim import run_sim
-from simulateTestCases.helpers import load_yaml_file, load_csv_data, check_input_yaml
+
 from mpi4py import MPI
 from enum import Enum
 import os
@@ -10,6 +9,9 @@ import importlib.resources as pkg_resources
 import random
 from pydantic import BaseModel
 from typing import Optional, Literal
+
+from mdss.run_sim import run_sim
+from mdss.helpers import load_yaml_file, load_csv_data, check_input_yaml
 
 
 comm = MPI.COMM_WORLD
@@ -208,7 +210,7 @@ def run_case(case, case_info):
 
 
     input_file  = f"{case}_simInfo.yaml"
-    with pkg_resources.open_text('simulateTestCases.resources', input_file) as f:
+    with pkg_resources.open_text('mdss.resources', input_file) as f:
         sim_info = yaml.safe_load(f)
     try:
         sim_info['hpc'] = case_info['hpc']

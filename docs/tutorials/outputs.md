@@ -1,6 +1,6 @@
 # Outputs
 
-The `simulateTestCases` package organizes simulation results into a structured directory hierarchy. This hierarchy mirrors the simulation setup defined in the YAML file.
+The `mdss` package organizes simulation results into a structured directory hierarchy. This hierarchy mirrors the simulation setup defined in the YAML file.
 
 ### Structure of the Output Directory
 

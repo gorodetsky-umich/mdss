@@ -3,9 +3,9 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools >= 64"]
 
 [project]
-name="simulateTestCases"
+name="mdss"
 version="0.1.0"
-description="A package for running a series of ADflow simulations using mphys and openMDAO"
+description="A package for running a series Aerodynamic and Aerostructural simulations using ADflow, and TACS simulations with mphys and openMDAO"
 authors=[{name="Sinaendhran Pujali Elilarasan"},]
 readme = "README.md"
 requires-python = ">=3.9"
@@ -17,4 +17,4 @@ classifiers=[
     ]
 
 [project.urls]
-Homepage = "https://github.com/gorodetsky-umich/simulateTestCases.git"
+Homepage = "https://github.com/gorodetsky-umich/mdss.git"
