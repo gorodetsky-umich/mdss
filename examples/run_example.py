@@ -1,5 +1,5 @@
 import argparse
-from simulateTestCases.run_sim import run_sim
+from mdss.run_sim import run_sim
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile", type=str, default='inputs/naca0012_simInfo.yaml')

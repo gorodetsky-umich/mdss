@@ -1,8 +1,8 @@
-# simulateTestCases
+# Multi-Disciplinary Simulation Suite (MDSS)
 
-`simulateTestCases` is a Python package designed for running a series of ADflow simulations using Mphys and OpenMDAO. This package provides streamlined functions to automate simulation test cases.
+`mdss` is a Python package designed for running a series of Aerodynamic and Aerostructural simulations using ADflow, and TACS simulations with mphys and openMDAO. This package provides streamlined functions to automate simulation test cases.
 
-For detailed install instructions and usage visit the [documentation page](https://gorodetsky-umich.github.io/simulateTestCases/).
+For detailed install instructions and usage visit the [documentation page](https://gorodetsky-umich.github.io/mdss/).
 
 ## Dependencies
 
@@ -29,18 +29,18 @@ However, we recommend using Docker. Images are available for both GCC and INTEL 
 
 ## Instructions for Installation
 
-To install `simulateTestCases`, use the following commands:
+To install `mdss`, use the following commands:
 
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/gorodetsky-umich/simulateTestCases.git
+    git clone https://github.com/gorodetsky-umich/mdss.git
     ```
 
 2. Navigate into the directory:
 
     ```bash
-    cd simulateTestCases
+    cd mdss
     ```
 
 3. To install the package without dependencies:

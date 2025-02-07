@@ -3,8 +3,8 @@ import pandas as pd
 import importlib.resources as resources
 import re
 import os, subprocess
-from simulateTestCases.yaml_config import ref_sim_info, ref_hpc_info, ref_hierarchy_info, ref_case_info, ref_geometry_info, ref_exp_set_info
-from simulateTestCases.templates import gl_job_script
+from mdss.yaml_config import ref_sim_info, ref_hpc_info, ref_hierarchy_info, ref_case_info, ref_geometry_info, ref_exp_set_info
+from mdss.templates import gl_job_script
 
 ################################################################################
 # Helper Functions
@@ -133,7 +133,7 @@ def write_python_file(fname):
     """
     python_code = """
 import argparse
-from simulateTestCases.run_sim import run_sim
+from mdss.run_sim import run_sim
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile", type=str)
