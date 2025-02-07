@@ -113,14 +113,14 @@ These instructions assume that you are on the Great Lakes HPC at UMich.
 
 2. Clone the repository:
     ```bash
-    $ git clone https://github.com/gorodetsky-umich/simulateTestCases.git
+    $ git clone https://github.com/gorodetsky-umich/mdss.git
     ```
 
     Copy and execute the installation script:
     ```bash
-    $ cd simulateTestCases
+    $ cd mdss
 
-    $ cp simulateTestCases/install_packages_gl.sh <directory-path>/
+    $ cp mdss/install_packages_gl.sh <directory-path>/
     
     $ chmod +x install_packages_gl.sh
 
@@ -137,11 +137,11 @@ The following steps are common for personal computers and HPC systems:
 
 1. Clone the repository:
     ```bash
-    $ git clone https://github.com/gorodetsky-umich/simulateTestCases.git
+    $ git clone https://github.com/gorodetsky-umich/mdss.git
     ```
 2. Navigate into the directory:
     ```bash
-    $ cd simulateTestCases
+    $ cd mdss
     ```
 3. Install the package:
     - Without dependencies:

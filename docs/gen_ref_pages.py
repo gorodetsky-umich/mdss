@@ -6,13 +6,17 @@ import mkdocs_gen_files
 
 nav = mkdocs_gen_files.Nav()
 
-package_name = "simulateTestCases"
+package_name = "mdss"
 root = Path(__file__).parent.parent
 src = root/package_name
 
+# List the modules to skip below
 modules_to_skip = [
     "templates", 
-    "yaml_config"
+    "yaml_config",
+    "resources",
+    "aerostruct",
+    "tacs_setup",
 ]
 
 for path in sorted(src.rglob("*.py")):

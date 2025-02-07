@@ -1,10 +1,10 @@
 # Introduction
-The `simulateTestCases` package is a Python-based tool designed to streamline the execution and data management of ADflow simulations. It integrates with MPhys to provide a structured framework for running aerodynamic flow simulations and organizing the resulting data in a hierarchical manner.
+The `mdss` package is a Python-based tool designed to streamline the execution and data management of Aerodynamic and Aerostructural simulations. It integrates with MPhys to provide a structured framework for running simulations and organizing the resulting data in a hierarchical manner.
 
 This package is particularly suited for projects involving multiple configurations or test cases, ensuring that simulation results are stored and categorized systematically.
 
 ### Key Features
-- Automates the execution of multiple ADflow simulation cases.
+- Automates the execution of multiple simulation cases.
 - Allows the user to choose to run the simulations as subprocesses.
 - Utilizes YAML configuration files for defining simulation parameters and organizing cases.
 - Stores simulation data in a structured directory hierarchy for ease of access and analysis.
@@ -12,9 +12,7 @@ This package is particularly suited for projects involving multiple configuratio
 
 ### Inputs
 
-The `simulateTestCases` package requires the following inputs:
-
-1. **YAML Configuration File:**
+The `mdss` package requires an **YAML Configuration File** as an input
 
     **A YAML file specifying:**
 
@@ -22,13 +20,9 @@ The `simulateTestCases` package requires the following inputs:
     - Mesh files and solver parameters.
     - Experimental conditions (e.g., Reynolds number, Mach number, and angle of attack).
 
-2. **Output Directory:**
-
-    A directory path where the simulation results will be saved. The structure of this directory mirrors the hierarchy defined in the YAML file.
-
 ### Outputs
 
-The outputs of `simulateTestCases` are stored in directories organized according to the simulation hierarchy. These include:
+The outputs of `mdss` are stored in directories organized according to the simulation hierarchy. These include:
 
 1. **Simulation Data:**
 

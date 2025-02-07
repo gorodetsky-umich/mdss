@@ -1,6 +1,6 @@
 # Inputs
 
-The `simulateTestCases` package requires the following inputs to configure and execute simulations:
+The `mdss` package requires the following inputs to configure and execute simulations:
 
 ---
 

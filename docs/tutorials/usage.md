@@ -51,11 +51,11 @@ After execution, the following results are expected which are saved in the speci
 - Default ADflow outputs: A tecplot file, a CGNS surface file, and a CGNS volume file.
 
 ## Example usage
-Here are quick examples of how to different classes and functions in `simulateTestCases`:
+Here are quick examples of how to different classes and functions in `mdss`:
 
 ### Running Simulations
 ```python
-from simulateTestCases.run_sim import run_sim
+from mdss.run_sim import run_sim
 
 # Initialize the runner with configuration file
 sim = run_sim('/path/to/input-yaml-file')
@@ -74,7 +74,7 @@ The function `get_sim_data` can be used to get existing simulation data that was
 The function provides the flexibility of using the input YAML file or  the `overall_sim_info.yaml` file that is generated and stored in the outptut directory after the completion of simulations, as inputs.
 
 ```python
-from simulateTestCases.utils import get_sim_data, RunFlag
+from mdss.utils import get_sim_data, RunFlag
 
 # Specify the path to the input file.
 info_file = '/path/to/input-yaml-file'
@@ -110,7 +110,7 @@ case_info = {
 #### Example Usage
 
 ```python
-from simulateTestCases.utils import run_naca0012
+from mdss.utils import run_naca0012
 
 case_info = {
     'meshes_folder_path': '/path/to/meshes',
