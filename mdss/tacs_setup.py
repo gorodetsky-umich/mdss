@@ -2,28 +2,11 @@ import copy
 import numpy as np
 from tacs import elements, constitutive, functions
 
-################################################################################
-# Default Structral Properties
-################################################################################
-default_structural_properties = {
-
-    # Material Properties
-    'rho': 2500.0,      # Density in kg/m^3
-    'E': 70.0e9,        # Young's modulus in N/m^2
-    'nu': 0.30,         # Poisson's ratio
-    'kcorr': 5.0/6.0,   # Shear correction factor
-    'ys': 350.0e6,      # Yeild stress
-
-    # Shell Thickness
-    't': 0.01,          # in m
-}
-
 class tacs_setup():
     
     def __init__(self, structural_properties, load_info, outputdir):
 
-        self.structural_properties = copy.deepcopy(default_structural_properties) # Initialize with default structural properties
-        self.structural_properties.update(structural_properties) # Update it the user given structural properties
+        self.structural_properties = structural_properties
         self.load_info = load_info
         self.outputdir = outputdir
 

@@ -4,8 +4,7 @@ class ref_sim_info(BaseModel):
     hierarchies: list[dict]
     out_dir: str
     hpc: str
-    run_as_subprocess: str
-    nproc: int = None
+    nproc: int
 
 class ref_hpc_info(BaseModel):
     cluster: str
@@ -22,10 +21,12 @@ class ref_hierarchy_info(BaseModel):
 
 class ref_case_info(BaseModel):
     name: str
+    problem: str
     meshes_folder_path: str
     mesh_files: list[str]
     geometry_info: dict
-    solver_parameters: dict
+    aero_options: dict=None
+    struct_options: dict=None
     exp_sets: list
 
 class ref_geometry_info(BaseModel):
@@ -38,3 +39,25 @@ class ref_exp_set_info(BaseModel):
     mach: float
     Temp: float
     exp_data: str=None
+
+################################################################################
+# Aerostructural Specific
+################################################################################
+class ref_struct_options(BaseModel):
+    struct_mesh_fpath: str
+    structural_properties: dict=None
+    load_info: dict
+    
+class ref_structural_properties(BaseModel):
+    # Material properties
+    rho: float=None     # Density in kg/m^3
+    E: float=None       # Young's modulus in N/m^2
+    nu: float=None      # Poisson's ratio
+    kcorr: float=None   # Shear correction factor
+    ys: float=None      # Yeild stress
+
+    # Shell Thickness
+    t: float=None       # in m
+
+class ref_load_info(BaseModel):
+    load_type: str

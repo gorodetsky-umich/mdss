@@ -16,7 +16,8 @@ from funtofem.mphys import MeldBuilder
 import openmdao.api as om
 from mpi4py import MPI
 
-from mdss.helpers import load_yaml_file
+from mdss.helpers import load_yaml_file, ProblemType
+from mdss.templates import default_aero_options_aerodynamic, default_aero_options_aerostructural, default_structural_properties
 from mdss.tacs_setup import tacs_setup
 
 comm = MPI.COMM_WORLD
@@ -134,29 +135,43 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
     exp_info = load_yaml_file(exp_info_fpath, comm)
     aoa_list = [float(x) for x in aoa_csv_str.split(',')]
 
-    problem = case_info['problem']
-    aero_options = case_info['aero_options']
-    geo_info = case_info['geo_info']
-
-
-    # Update Grid file
-    aero_options['gridFile'] = aero_grid_fpath
-
+    # Assign problem type
+    try:
+        problem_type = ProblemType.from_string(case_info['problem'])  # Convert string to enum
+    except ValueError as e:
+        print(e)
+    
     # Initialize the structrual info dictionaries which remains empty for aerodynamic problems
     structural_properties = {}
     laod_info = {}
     solver_options = {}
-    
-    if problem == 'AeroStructural': # Update structural info with user given data for aerostructural problem
-        structural_properties.update(case_info['structural_properties'])
-        laod_info.update(case_info['load_info'])
-        solver_options.update(case_info['solver_options'])
+
+    # Assigning defaults
+    # Read the respective default_aero_options
+    if problem_type == ProblemType.AERODYNAMIC:
+        aero_options = default_aero_options_aerodynamic.copy() # Assign default options for aerodynamic case
+    elif problem_type == ProblemType.AEROSTRUCTURAL:
+        aero_options = default_aero_options_aerostructural.copy() # Assign default aero_options for aerostructural case
+        structural_properties.update(default_structural_properties.copy()) # Assign default structural properties
+        structural_properties.update(case_info['struct_options']['structural_properties']) # Update default with user given values
+        laod_info.update(case_info['struct_options']['load_info']) # Update load info with user given values
+        solver_options.update(case_info['struct_options']['solver_options']) # Update solver optiuons with user given values
+
+    problem = case_info['problem']
+    aero_options.update(case_info['aero_options']) # Update aero_options with user given values
+    geometry_info = case_info['geometry_info']
+
+    print(structural_properties)
+    print(aero_options)
+
+    # Update Grid file
+    aero_options['gridFile'] = aero_grid_fpath # Add aero_grid file path to aero_options
         
     sim_info = {
             'problem': problem,
             'aero_options': aero_options,
-            'chordRef': geo_info['chordRef'],
-            'areaRef': geo_info['areaRef'],
+            'chordRef': geometry_info['chordRef'],
+            'areaRef': geometry_info['areaRef'],
             'mach': exp_info['mach'],
             'Re': exp_info['Re'],
             'Temp': exp_info['Temp'],
@@ -237,9 +252,11 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
         aoa_start_time = time.time() # Store the start time
         try:
             prob.run_model()
-            fail_flag = 1
+            fail_flag = 0
         except:
             fail_flag = 1
+        
+        om.n2(prob, show_browser=False, outfile=f"{aoa_out_dir}/mphys_aero.html")
         
         # Manually move the '.f5' files to the respective aoa_out_dir
         if comm.rank == 0:
@@ -258,17 +275,25 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
         # Store a Yaml file at this level
         aoa_out_dic = {
             # 'refinement_level': refinement_level, # Decide on this later
+            'AOA': float(aoa),
+            'fail_flag': int(fail_flag),
             'case':case_info['name'],
             'problem': problem,
             'aero_mesh_fpath': aero_grid_fpath,
-            'exp_info': exp_info,
-            'AOA': float(aoa),
+            'exp_info': {
+                'Re': exp_info['Re'],
+                'mach': exp_info['mach'],
+                'Temp': exp_info['Temp'],
+                },
             'cl': float(prob["cruise.aero_post.cl"][0]),
             'cd': float(prob["cruise.aero_post.cd"][0]),
             'wall_time': f"{aoa_run_time:.2f} sec",
-            'fail_flag': int(fail_flag),
             'out_dir': aoa_out_dir,
         }
+        try:
+            aoa_out_dic['exp_info']['exp_data'] = exp_info['exp_data']
+        except:
+            aoa_out_dic['exp_info']['exp_data'] = 'Not provided'
         if problem == 'AeroStructural': # Add structural info
             struct_info_dict = {
                 'struct_mesh_fpath': struct_mesh_fpath,
