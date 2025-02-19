@@ -16,17 +16,17 @@ comm = MPI.COMM_WORLD
 
 class run_sim():
     """
-    Executes ADflow simulations using the `Top` class.
+    Executes ADflow simulations using the `Top` class defined in [`aerostruct.py`](aerostruct.py).
 
-    This class sets up, runs, and post-processes aerodynamic simulations based on input parameters provided via a YAML configuration file. It validates the input, manages directories, and handles outputs, including plots and summary files.
+    This class sets up, runs, and post-processes aerodynamic and/or aerostructural simulations based on input parameters provided via a YAML configuration file. It validates the input, manages directories, and handles outputs, including plots and summary files.
 
     Methods
     -------
     **run_problem()**
-        Sets up and runs the OpenMDAO problem for all cases, hierarchies, and refinement levels.
+        Sets up and runs the OpenMDAO problem for all hierarchies, cases, and refinement levels in subprocesses.
 
     **run()**
-        Executes the simulation on either a local machine or an HPC system.
+        Helps to execute the simulation on either a local machine or an HPC system.
 
     **post_process()**
         Generates plots comparing experimental data (if available) with ADflow simulation results.
@@ -213,12 +213,13 @@ class run_sim():
                                 
                                 elif fail_flag == 1: # refers to failed simulation
                                     failed_aoa_list.append(aoa) # Add to the list of failed aoa
+                                
+                                # Save the aoa_out_dict as an yaml file with the updated info
+                                with open(aoa_info_file, 'w') as interim_out_yaml:
+                                    yaml.dump(aoa_sim_info, interim_out_yaml, sort_keys=False)
+
                             except:
                                 failed_aoa_list.append(aoa) # Add to the list of failed aoa
-                            
-                            # Save the aoa_out_dict as an yaml file with the updated info
-                            with open(aoa_info_file, 'w') as interim_out_yaml:
-                                yaml.dump(aoa_sim_info, interim_out_yaml, sort_keys=False)
                         ################################# End of AOA loop ########################################
 
                         # Write simulation results to a csv file
@@ -286,7 +287,7 @@ class run_sim():
         Notes
         -----
         - For local execution (`hpc: no`), it directly calls `run_problem()`.
-        - For HPC execution (`hpc: yes`), it creates a Python file and a job script, then submits the job using `sbatch`.
+        - For HPC execution (`hpc: yes`), it creates a Python file and a job script, then submits the job.
         """
         sim_info_copy = copy.deepcopy(self.sim_info)
         if sim_info_copy['hpc'] == "no": # Running on a local machine

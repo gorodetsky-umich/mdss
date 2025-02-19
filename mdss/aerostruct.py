@@ -23,7 +23,47 @@ from mdss.tacs_setup import tacs_setup
 comm = MPI.COMM_WORLD
 
 class Top(Multipoint):
+    """
+    Sets up an OpenMDAO problem using MPhys, ADflow, and/or TACS for aerodynamic or aerostructural simulations.
 
+    This class is designed to integrate ADflow and TACS using MPhys to perform aerodynamic or aerostructural simulations. It sets up the problem environment, manages inputs and outputs, and configures scenarios for simulation.
+
+    Methods
+    --------
+    **setup()**
+        Initializes and sets up the required subsystems and scenarios.
+
+    **configure()**
+        Configures the aerodynamic problem (e.g., reference area, chord, angle of attack) and connects design variables to the system.
+
+    Inputs
+    -------
+    - **sim_info** : dict
+        Dictionary containing geometry and configuration details for the case being analyzed. The structure of `sim_info` is as follows:
+        ```python
+        sim_info = {
+            'problem': # str, Name of the problem Aerodynamic/Aerostructural
+            'aero_options': # dict, Dictionary containing ADflow solver options
+            'chordRef': # float, Reference chord length
+            'areaRef': # float, Reference area
+            'mach': # float, Mach Number
+            'Re': # float, Reynold's Number
+            'Temp': # float, Temperature in Kelvin
+            
+            # Add Structural Info
+            'tacs_out_dir': # str, Path to the outptut directory for TACS. Can be left empty for aerodynamic problems
+            'struct_mesh_fpath': # str, Path to the structural mesh file. Can be left empty for aerodynamic problems
+            'structural_properties': # dict, inludes material propertires - E, ro, nu, kcorr, ys, and thickness of the shell.
+            'load_info': # dict, load type - Cruise/Maneuver, gravity flag, inertial load factor for maneuver loads.
+            'solver_options': # dict, solver options in openMDAO
+        }
+        ```
+
+    Outputs
+    --------
+    None. This class directly modifies the OpenMDAO problem structure to include aerodynamic or aerostructural analysis subsystems.
+
+    """
     def __init__(self, sim_info):
         super().__init__()
         self.sim_info = sim_info
@@ -35,13 +75,13 @@ class Top(Multipoint):
         ################################################################################
         aero_builder = ADflowBuilder(self.sim_info['aero_options'], scenario="aerostructural")
         aero_builder.initialize(self.comm)
+        aero_builder.err_on_convergence_fail = True
         self.add_subsystem("mesh_aero", aero_builder.get_mesh_coordinate_subsystem())
 
         if self.sim_info['problem'] == 'AeroStructural': # TACS setup only for aerostructural scenario
             ################################################################################
             # TACS Setup
             ################################################################################
-            tacs_out_dir = '.' # Temporary output directory for TACS outptuts
             tacs_config = tacs_setup(self.sim_info['structural_properties'], self.sim_info['load_info'], self.sim_info['tacs_out_dir'])
 
             struct_builder = TacsBuilder(mesh_file=self.sim_info['struct_mesh_fpath'], element_callback=tacs_config.element_callback,
@@ -54,7 +94,6 @@ class Top(Multipoint):
             ################################################################################
             # Transfer Scheme Setup
             ################################################################################
-
             isym = 1  # y-symmetry
             ldxfer_builder = MeldBuilder(aero_builder, struct_builder, isym=isym)
             ldxfer_builder.initialize(self.comm)
@@ -62,17 +101,15 @@ class Top(Multipoint):
             ################################################################################
             # MPHYS Setup for AeroStructural Problem
             ################################################################################
-
             # ivc to keep the top level DVs
             dvs = self.add_subsystem("dvs", om.IndepVarComp(), promotes=["*"])
-
-            dvs.add_output("dv_struct", np.array(ndv_struct * [0.002]))
-
+            init_dvs = struct_builder.get_initial_dvs()
+            dvs.add_output("dv_struct", init_dvs)
             scenario = "cruise"
 
             ################# Get the following inputs from the user #############################################
-            nonlinear_solver = om.NonlinearBlockGS(maxiter=25, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
-            linear_solver = om.LinearBlockGS(maxiter=25, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
+            nonlinear_solver = om.NonlinearBlockGS(maxiter=100, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
+            linear_solver = om.LinearBlockGS(maxiter=100, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
             ######################################################################################################
             self.mphys_add_scenario(
                 scenario,
@@ -161,9 +198,6 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
     aero_options.update(case_info['aero_options']) # Update aero_options with user given values
     geometry_info = case_info['geometry_info']
 
-    print(structural_properties)
-    print(aero_options)
-
     # Update Grid file
     aero_options['gridFile'] = aero_grid_fpath # Add aero_grid file path to aero_options
         
@@ -188,12 +222,10 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
     # OpenMDAO setup
     ################################################################################
 
-    os.environ["OPENMDAO_REPORTS"]="0" # Do this to disable report generation by OpenMDAO
+    #os.environ["OPENMDAO_REPORTS"]="0" # Do this to disable report generation by OpenMDAO
     prob = om.Problem()
     prob.model = Top(sim_info)
-
-    # Setup the problem
-    prob.setup()
+    prob.setup() # Setup the problem
 
     for aoa in aoa_list:
         aoa_out_dir = f"{ref_level_dir}/aoa_{aoa}" # name of the aoa output directory
@@ -231,16 +263,14 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
 
         # Change output directory in openMDAO instance
         if problem == 'AeroStructural':
-            print(f"{'+'*50}")
-            print(f"{'+'*50}")
-            print(prob.model.cruise.coupling.struct.sp.options['defaults'])
-            print(prob.model.cruise.coupling.aero.options['solver'].options['outputDirectory'])
+            #print(f"{'+'*50}")
+            #print(prob.model.cruise.coupling.struct.sp.options['defaults'])
+            #print(prob.model.cruise.coupling.aero.options['solver'].options['outputDirectory'])
             prob.model.cruise.coupling.aero.options['solver'].options['outputDirectory'] = aoa_out_dir
             prob.model.cruise.coupling.struct.sp.setOption('outputdir', aoa_out_dir)
-            print(prob.model.cruise.coupling.aero.options['solver'].options['outputDirectory'])
-            print(prob.model.cruise.coupling.struct.sp.options['outputdir'])
-            print(f"{'+'*50}")
-            print(f"{'+'*50}")
+            #print(prob.model.cruise.coupling.aero.options['solver'].options['outputDirectory'])
+            #print(prob.model.cruise.coupling.struct.sp.options['outputdir'])
+            #print(f"{'+'*50}")
 
         elif problem == 'Aerodynamic':
             prob.model.cruise.coupling.options['solver'].options['outputDirectory'] = aoa_out_dir

@@ -3,7 +3,7 @@ import pandas as pd
 import importlib.resources as resources
 import re
 from enum import Enum
-import os, subprocess
+import os, subprocess, shutil
 import mdss.yaml_config as yc
 from mdss.templates import gl_job_script, python_code_for_subprocess, python_code_for_hpc
 
@@ -11,6 +11,15 @@ from mdss.templates import gl_job_script, python_code_for_subprocess, python_cod
 # Problem types as enum
 ################################################################################
 class ProblemType(Enum):
+    """
+    Enum representing different types of simulation problems, 
+    specifically Aerodynamic and AeroStructural problems.
+    
+    Attributes
+    ----------
+        **AERODYNAMIC** (ProblemType): Represents aerodynamic problems with associated aliases.
+        **AEROSTRUCTURAL** (ProblemType): Represents aerostructural problems with associated aliases.
+    """
     AERODYNAMIC = 1, ["Aerodynamic", "Aero", "Flow"]
     AEROSTRUCTURAL = 2, ["AeroStructural", "Structural", "Combined"]
 
@@ -36,7 +45,7 @@ def load_yaml_file(yaml_file, comm):
     This function attempts to read the specified YAML file and parse its content into a Python dictionary. If the file cannot be loaded due to errors, it provides a detailed error message.
 
     Inputs
-    ----------
+    ------
     - **yaml_file** : str
         Path to the YAML file to be loaded.
     - **comm** : MPI communicator  
@@ -255,7 +264,6 @@ def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, ao
     -----
     - The function ensures the proper setup of the simulation environment for the given angle of attack.
     - The generated Python script and YAML input file are specific to each simulation run.
-    - Uses MPI to parallelize the simulation process.
     - Captures and displays `stdout` and `stderr` from the subprocess for troubleshooting.
     """
 
@@ -270,6 +278,12 @@ def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, ao
                 file.write(python_code_for_subprocess)
 
     env = os.environ.copy()
+    
+    python_version = sim_info.get('python_version', 'python') # Update python with user defined version or defaults to current python version
+    if shutil.which(python_version) is None: # Check if the python executable exists
+        python_version = 'python'
+        if comm.rank == 0:
+            print(f"Warning: {python_version} not found! Falling back to default 'python'.")
     if comm.rank==0:
         print(f"{'-' * 30}")
         print(f"Starting subprocess for the following aoa: {aoa_csv_string}")
@@ -280,8 +294,8 @@ def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, ao
             run_cmd = 'srun'
         
         p = subprocess.Popen(
-            [run_cmd, '-np', str(nproc), 'python', python_fname, '--caseInfoFile', case_info_fpath, '--expInfoFile', exp_info_fpath, '--refLevelDir', ref_out_dir, 
-                '--aoaList', aoa_csv_string, '--aeroGrid', aero_grid_fpath, '--structMesh', struct_mesh_fpath],
+            [run_cmd, '-np', str(nproc), python_version, python_fname, '--caseInfoFile', case_info_fpath, '--expInfoFile', exp_info_fpath, 
+                '--refLevelDir', ref_out_dir, '--aoaList', aoa_csv_string, '--aeroGrid', aero_grid_fpath, '--structMesh', struct_mesh_fpath],
             env=env,
             stdout=subprocess.PIPE,  # Capture standard output
             stderr=subprocess.PIPE,  # Capture standard error

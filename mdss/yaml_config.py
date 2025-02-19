@@ -1,3 +1,4 @@
+# This is a yaml configuration file to aid yaml file validation using pydantic
 from pydantic import BaseModel
 
 class ref_sim_info(BaseModel):

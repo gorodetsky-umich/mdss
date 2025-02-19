@@ -5,14 +5,12 @@ from tacs import elements, constitutive, functions
 class tacs_setup():
     
     def __init__(self, structural_properties, load_info, outputdir):
-
         self.structural_properties = structural_properties
         self.load_info = load_info
         self.outputdir = outputdir
 
-        # Callback function used to setup TACS element objects and DVs
+    # Callback function used to setup TACS element objects and DVs
     def element_callback(self, dvNum, compID, compDescript, elemDescripts, specialDVs, **kwargs):
-
         # Get Structural Properties
         # Material properties
         rho = self.structural_properties['rho']     # density kg/m^3
@@ -20,10 +18,8 @@ class tacs_setup():
         nu = self.structural_properties['nu']       # Poisson's ratio
         kcorr = self.structural_properties['kcorr'] # shear correction factor
         ys = self.structural_properties['ys']       # yield stress
-
         # Shell thickness
-        t = self.structural_properties['t']             # m
-
+        t = self.structural_properties['t']            # m
         # Setup (isotropic) property and constitutive objects
         prop = constitutive.MaterialProperties(rho=rho, E=E, nu=nu, ys=ys)
         # Set one thickness dv for every component
