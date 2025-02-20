@@ -137,6 +137,10 @@ def check_input_yaml(yaml_file):
 
     if sim_info['hpc'] == 'yes':
         yc.ref_hpc_info.model_validate(sim_info['hpc_info'])
+    else:
+        if 'nproc' not in sim_info or not isinstance(sim_info['nproc'], int):
+            raise ValueError("Error: 'nproc' must be provided as an integer in sim_info when not running on HPC.")
+
     for hierarchy, hierarchy_info in enumerate(sim_info['hierarchies']): # loop for Hierarchy level
         yc.ref_hierarchy_info.model_validate(hierarchy_info)
         for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
@@ -288,14 +292,13 @@ def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, ao
         print(f"{'-' * 30}")
         print(f"Starting subprocess for the following aoa: {aoa_csv_string}")
         if sim_info['hpc'] != 'yes':
-            run_cmd = 'mpirun'
+            run_cmd = ['mpirun', '-np', str(nproc), python_version]
             
         elif sim_info['hpc'] == 'yes':
-            run_cmd = 'srun'
-        
-        p = subprocess.Popen(
-            [run_cmd, '-np', str(nproc), python_version, python_fname, '--caseInfoFile', case_info_fpath, '--expInfoFile', exp_info_fpath, 
-                '--refLevelDir', ref_out_dir, '--aoaList', aoa_csv_string, '--aeroGrid', aero_grid_fpath, '--structMesh', struct_mesh_fpath],
+            run_cmd = ['srun', python_version]
+        run_cmd.extend([python_fname, '--caseInfoFile', case_info_fpath, '--expInfoFile', exp_info_fpath, 
+                '--refLevelDir', ref_out_dir, '--aoaList', aoa_csv_string, '--aeroGrid', aero_grid_fpath, '--structMesh', struct_mesh_fpath])
+        p = subprocess.Popen(run_cmd, 
             env=env,
             stdout=subprocess.PIPE,  # Capture standard output
             stderr=subprocess.PIPE,  # Capture standard error

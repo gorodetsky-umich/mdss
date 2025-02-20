@@ -281,12 +281,13 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
         # Run the model
         aoa_start_time = time.time() # Store the start time
         try:
-            prob.run_model()
+            fail = prob.run_model()
+            print(fail)
             fail_flag = 0
         except:
             fail_flag = 1
-        
-        om.n2(prob, show_browser=False, outfile=f"{aoa_out_dir}/mphys_aero.html")
+
+        om.n2(prob, show_browser=False, outfile=f"{aoa_out_dir}/mphys_n2.html")
         
         # Manually move the '.f5' files to the respective aoa_out_dir
         if comm.rank == 0:

@@ -5,7 +5,7 @@ class ref_sim_info(BaseModel):
     hierarchies: list[dict]
     out_dir: str
     hpc: str
-    nproc: int
+    nproc: int=None
 
 class ref_hpc_info(BaseModel):
     cluster: str
