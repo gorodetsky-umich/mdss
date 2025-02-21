@@ -164,7 +164,7 @@ class run_sim():
                         # Run subprocess
                         # Initially running all the aoa in a subprocess. However the optimal number of aoa for single subprocess should be determined and modified accordingly.
 
-                        run_as_subprocess(sim_info_copy, case_info_fpath, exp_info_fpath, refinement_out_dir, aoa_list, aero_grid_fpath, sim_info_copy['nproc'], comm, struct_mesh_file)
+                        run_as_subprocess(sim_info_copy, case_info_fpath, exp_info_fpath, refinement_out_dir, aoa_list, aero_grid_fpath, comm, struct_mesh_file)
 
                         failed_aoa_list = [] # Initiate a list to store a list of aoa failed in this refinement level
                 

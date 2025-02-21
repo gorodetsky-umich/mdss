@@ -190,9 +190,10 @@ def submit_job_on_hpc(sim_info, yaml_file_path, comm):
     - Uses regex to update the job script with provided parameters.
     - Ensures that the correct Python and YAML file paths are embedded in the job script.
     """
+    out_dir = os.path.abspath(sim_info['out_dir'])
     hpc_info = sim_info['hpc_info'] # Extract HPC info
-    python_fname = f"{sim_info['out_dir']}/run_sim.py" # Python script to be run on on HPC
-    out_file = f"{sim_info['out_dir']}/{hpc_info['job_name']}_out.txt"
+    python_fname = f"{out_dir}/run_sim.py" # Python script to be run on on HPC
+    out_file = f"{out_dir}/{hpc_info['job_name']}_job_out.txt"
     
     if hpc_info['cluster'] == 'GL':
         # Set default time if not provided
@@ -231,7 +232,7 @@ def submit_job_on_hpc(sim_info, yaml_file_path, comm):
 ################################################################################
 # Helper Functions for running the simulations as subprocesses
 ################################################################################
-def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, aoa_list, aero_grid_fpath, nproc, comm, struct_mesh_fpath=None):
+def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, aoa_list, aero_grid_fpath, comm, struct_mesh_fpath=None):
     """
     Executes a set of Angles of Attack using mpirun for local machine and srun for HPC(Great Lakes).
 
@@ -292,6 +293,7 @@ def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, ao
         print(f"{'-' * 30}")
         print(f"Starting subprocess for the following aoa: {aoa_csv_string}")
         if sim_info['hpc'] != 'yes':
+            nproc = sim_info['nproc']
             run_cmd = ['mpirun', '-np', str(nproc), python_version]
             
         elif sim_info['hpc'] == 'yes':
