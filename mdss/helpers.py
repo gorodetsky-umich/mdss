@@ -193,7 +193,7 @@ def submit_job_on_hpc(sim_info, yaml_file_path, comm):
     out_dir = os.path.abspath(sim_info['out_dir'])
     hpc_info = sim_info['hpc_info'] # Extract HPC info
     python_fname = f"{out_dir}/run_sim.py" # Python script to be run on on HPC
-    out_file = f"{out_dir}/{hpc_info['job_name']}_job_out.txt"
+    out_file = os.path.join(out_dir,f"{hpc_info['job_name']}_job_out.txt")
     
     if hpc_info['cluster'] == 'GL':
         # Set default time if not provided
