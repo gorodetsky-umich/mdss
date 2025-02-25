@@ -36,6 +36,34 @@ class ProblemType(Enum):
         raise ValueError(f"Unknown problem type: {problem_name}")
 
 ################################################################################
+# Machine types as enum
+################################################################################
+class MachineType(Enum):
+    """
+    Enum representing different types of Machines, 
+    specifically LOCAL and HPC.
+    
+    Attributes
+    ----------
+        **LOCAL** (MachineType): Running the problem on a local machine.
+        **AEROSTRUCTURAL** (ProblemType): Running the problem on a High performance computing (HPC) cluster.
+    """
+    LOCAL = 1, ["LOCAL", "local", "Local", "loc", "Loc", "LOC"]
+    HPC = 2, ["hpc", "Hpc", "HPC", "cluster", "Cluster", "CLUSTER"]
+
+    def __init__(self, id, aliases):
+        self.id = id
+        self.aliases = aliases
+
+    @classmethod
+    def from_string(cls, problem_name):
+        # Match a string to the correct enum member based on aliases
+        for member in cls:
+            if problem_name in member.aliases:
+                return member
+        raise ValueError(f"Unknown problem type: {problem_name}")
+
+################################################################################
 # Helper Functions
 ################################################################################
 def load_yaml_file(yaml_file, comm):

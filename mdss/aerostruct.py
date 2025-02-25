@@ -17,7 +17,7 @@ import openmdao.api as om
 from mpi4py import MPI
 
 from mdss.helpers import load_yaml_file, ProblemType
-from mdss.templates import default_aero_options_aerodynamic, default_aero_options_aerostructural, default_structural_properties
+from mdss.templates import default_aero_options_aerodynamic, default_aero_options_aerostructural, default_structural_properties, default_solver_options
 from mdss.tacs_setup import tacs_setup
 
 comm = MPI.COMM_WORLD
@@ -67,6 +67,11 @@ class Top(Multipoint):
     def __init__(self, sim_info):
         super().__init__()
         self.sim_info = sim_info
+        # Assign problem type
+        try:
+            self.problem_type = ProblemType.from_string(sim_info['problem'])  # Convert string to enum
+        except ValueError as e:
+            print(e)
 
     def setup(self):
 
@@ -78,7 +83,7 @@ class Top(Multipoint):
         aero_builder.err_on_convergence_fail = True
         self.add_subsystem("mesh_aero", aero_builder.get_mesh_coordinate_subsystem())
 
-        if self.sim_info['problem'] == 'AeroStructural': # TACS setup only for aerostructural scenario
+        if self.problem_type == ProblemType.AEROSTRUCTURAL: # TACS setup only for aerostructural scenario
             ################################################################################
             # TACS Setup
             ################################################################################
@@ -108,16 +113,17 @@ class Top(Multipoint):
             scenario = "cruise"
 
             ################# Get the following inputs from the user #############################################
-            nonlinear_solver = om.NonlinearBlockGS(maxiter=100, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
-            linear_solver = om.LinearBlockGS(maxiter=100, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
+            nonlinear_solver = om.NonlinearBlockGS(maxiter=25, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
+            linear_solver = om.LinearBlockGS(maxiter=25, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
             ######################################################################################################
+
             self.mphys_add_scenario(
                 scenario,
                 ScenarioAeroStructural(
                     aero_builder=aero_builder, struct_builder=struct_builder, ldxfer_builder=ldxfer_builder
                 ),
-                nonlinear_solver,
-                linear_solver,
+                coupling_nonlinear_solver = nonlinear_solver,
+                coupling_linear_solver = linear_solver,
             )
 
             for discipline in ["aero", "struct"]:
@@ -125,7 +131,7 @@ class Top(Multipoint):
 
             self.connect("dv_struct", f"{scenario}.dv_struct")
         
-        elif self.sim_info['problem'] == 'Aerodynamic':
+        elif self.problem_type == ProblemType.AERODYNAMIC:
             ################################################################################
             # MPHY setup for Aero Problem
             ################################################################################
@@ -152,10 +158,11 @@ class Top(Multipoint):
         )
         ap.addDV("alpha", value=aoa, name="aoa", units="deg")
 
-        if self.sim_info['problem'] == 'AeroStructural':
+        if self.problem_type == ProblemType.AEROSTRUCTURAL:
             self.cruise.coupling.aero.mphys_set_ap(ap)
             variable_to_connect = "cruise.coupling.aero.aoa"
-        elif self.sim_info['problem'] == 'Aerodynamic':
+
+        elif self.problem_type == ProblemType.AERODYNAMIC:
             self.cruise.coupling.mphys_set_ap(ap)
             variable_to_connect = "cruise.coupling.aoa"
         self.cruise.aero_post.mphys_set_ap(ap)
@@ -188,13 +195,13 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
     if problem_type == ProblemType.AERODYNAMIC:
         aero_options = default_aero_options_aerodynamic.copy() # Assign default options for aerodynamic case
     elif problem_type == ProblemType.AEROSTRUCTURAL:
+        solver_options = default_solver_options
         aero_options = default_aero_options_aerostructural.copy() # Assign default aero_options for aerostructural case
         structural_properties.update(default_structural_properties.copy()) # Assign default structural properties
         structural_properties.update(case_info['struct_options']['structural_properties']) # Update default with user given values
         laod_info.update(case_info['struct_options']['load_info']) # Update load info with user given values
         solver_options.update(case_info['struct_options']['solver_options']) # Update solver optiuons with user given values
 
-    problem = case_info['problem']
     aero_options.update(case_info['aero_options']) # Update aero_options with user given values
     geometry_info = case_info['geometry_info']
 
@@ -202,7 +209,7 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
     aero_options['gridFile'] = aero_grid_fpath # Add aero_grid file path to aero_options
         
     sim_info = {
-            'problem': problem,
+            'problem': case_info['problem'],
             'aero_options': aero_options,
             'chordRef': geometry_info['chordRef'],
             'areaRef': geometry_info['areaRef'],
@@ -221,19 +228,20 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
     ################################################################################
     # OpenMDAO setup
     ################################################################################
-
-    #os.environ["OPENMDAO_REPORTS"]="0" # Do this to disable report generation by OpenMDAO
+    os.environ["OPENMDAO_REPORTS"]="0" # Do this to disable report generation by OpenMDAO
     prob = om.Problem()
     prob.model = Top(sim_info)
     prob.setup() # Setup the problem
+    if problem_type == ProblemType.AEROSTRUCTURAL: # Update solver options
+        for key, value in solver_options['nonlinear_solver_options'].items(): 
+            prob.model.cruise.coupling.nonlinear_solver.options[key] = value
+        for key, value in solver_options['linear_solver_options'].items(): 
+            prob.model.cruise.coupling.linear_solver.options[key] = value
 
     for aoa in aoa_list:
         aoa_out_dir = f"{ref_level_dir}/aoa_{aoa}" # name of the aoa output directory
         aoa_info_file = f"{aoa_out_dir}/aoa_{aoa}.yaml" # name of the simulation info file at the aoa level directory
-        
         aoa_out_dir = os.path.abspath(aoa_out_dir)
-
-        #os.environ['OPENMDAO_WORKDIR'] = os.path.abspath(aoa_out_dir)
         ################################################################################
         # Checking for existing sucessful simualtion info
         ################################################################################ 
@@ -262,7 +270,7 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
         fail_flag = 0
 
         # Change output directory in openMDAO instance
-        if problem == 'AeroStructural':
+        if problem_type == ProblemType.AEROSTRUCTURAL:
             #print(f"{'+'*50}")
             #print(prob.model.cruise.coupling.struct.sp.options['defaults'])
             #print(prob.model.cruise.coupling.aero.options['solver'].options['outputDirectory'])
@@ -272,7 +280,7 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
             #print(prob.model.cruise.coupling.struct.sp.options['outputdir'])
             #print(f"{'+'*50}")
 
-        elif problem == 'Aerodynamic':
+        elif problem_type == ProblemType.AERODYNAMIC:
             prob.model.cruise.coupling.options['solver'].options['outputDirectory'] = aoa_out_dir
         
 
@@ -281,8 +289,7 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
         # Run the model
         aoa_start_time = time.time() # Store the start time
         try:
-            fail = prob.run_model()
-            print(fail)
+            prob.run_model()
             fail_flag = 0
         except:
             fail_flag = 1
@@ -309,7 +316,7 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
             'AOA': float(aoa),
             'fail_flag': int(fail_flag),
             'case':case_info['name'],
-            'problem': problem,
+            'problem': case_info['problem'],
             'aero_mesh_fpath': aero_grid_fpath,
             'exp_info': {
                 'Re': exp_info['Re'],
@@ -325,7 +332,8 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
             aoa_out_dic['exp_info']['exp_data'] = exp_info['exp_data']
         except:
             aoa_out_dic['exp_info']['exp_data'] = 'Not provided'
-        if problem == 'AeroStructural': # Add structural info
+
+        if problem_type == ProblemType.AEROSTRUCTURAL: # Add structural info
             struct_info_dict = {
                 'struct_mesh_fpath': struct_mesh_fpath,
                 'structural_properties': structural_properties,

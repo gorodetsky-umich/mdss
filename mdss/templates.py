@@ -78,6 +78,7 @@ default_aero_options_aerostructural = {
     # force integration
     "forcesAsTractions": False,
 }
+
 ################################################################################
 # Default structural properties for aerostructural problems
 ################################################################################
@@ -91,6 +92,27 @@ default_structural_properties = {
 
     # Shell Thickness
     't': 0.01,          # in m
+}
+
+################################################################################
+# Default solver options for AeroStructural problem
+################################################################################
+default_solver_options = {
+    'linear_solver_options': {
+        'atol': 1e-08, # absolute error tolerance
+        'err_on_non_converge': False, # When True, AnalysisError will be raised if not convereged
+        'maxiter': 25, # maximum number of iterations
+        'rtol': 1e-8, # relative error tolerance
+        'use_aitken': True, # set to True to use Aitken
+    },
+
+    'nonlinear_solver_options': {
+        'atol': 1e-08, # absolute error tolerance
+        'err_on_non_converge': True, # When True, AnalysisError will be raised if not convereged
+        'maxiter': 25, # maximum number of iterations
+        'rtol': 1e-08, # relative error tolerance
+        'use_aitken': True, # set to True to use Aitken
+    }
 }
 
 ################################################################################

@@ -210,6 +210,7 @@ class run_sim():
                                         'out_dir': aoa_out_dir,
                                     }
                                     refinement_level_dict[f"aoa_{aoa}"] = aoa_level_dict
+                                    refinement_level_dict["failed_aoa"] = failed_aoa_list
                                 
                                 elif fail_flag == 1: # refers to failed simulation
                                     failed_aoa_list.append(aoa) # Add to the list of failed aoa
