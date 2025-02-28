@@ -4,9 +4,8 @@ import numpy as np
 import yaml
 import shutil
 
-from mphys.multipoint import Multipoint
-from mphys.scenario_aerostructural import ScenarioAeroStructural
-from mphys.scenario_aerodynamic import ScenarioAerodynamic
+from mphys import MPhysVariables, Multipoint
+from mphys.scenarios import ScenarioAeroStructural, ScenarioAerodynamic
 from mpi4py import MPI
 from adflow.mphys import ADflowBuilder
 from baseclasses import AeroProblem
@@ -74,16 +73,15 @@ class Top(Multipoint):
             print(e)
 
     def setup(self):
-
-        ################################################################################
-        # ADflow Setup
-        ################################################################################
-        aero_builder = ADflowBuilder(self.sim_info['aero_options'], scenario="aerostructural")
-        aero_builder.initialize(self.comm)
-        aero_builder.err_on_convergence_fail = True
-        self.add_subsystem("mesh_aero", aero_builder.get_mesh_coordinate_subsystem())
-
+        scenario = "cruise"
         if self.problem_type == ProblemType.AEROSTRUCTURAL: # TACS setup only for aerostructural scenario
+            ################################################################################
+            # ADflow Setup
+            ################################################################################
+            aero_builder = ADflowBuilder(self.sim_info['aero_options'], scenario="aerostructural")
+            aero_builder.initialize(self.comm)
+            aero_builder.err_on_convergence_fail = False
+            self.add_subsystem("mesh_aero", aero_builder.get_mesh_coordinate_subsystem())
             ################################################################################
             # TACS Setup
             ################################################################################
@@ -92,7 +90,6 @@ class Top(Multipoint):
             struct_builder = TacsBuilder(mesh_file=self.sim_info['struct_mesh_fpath'], element_callback=tacs_config.element_callback,
                                         problem_setup=tacs_config.problem_setup)
             struct_builder.initialize(self.comm)
-            ndv_struct = struct_builder.get_ndv()
 
             self.add_subsystem("mesh_struct", struct_builder.get_mesh_coordinate_subsystem())
 
@@ -110,7 +107,6 @@ class Top(Multipoint):
             dvs = self.add_subsystem("dvs", om.IndepVarComp(), promotes=["*"])
             init_dvs = struct_builder.get_initial_dvs()
             dvs.add_output("dv_struct", init_dvs)
-            scenario = "cruise"
 
             ################# Get the following inputs from the user #############################################
             nonlinear_solver = om.NonlinearBlockGS(maxiter=25, iprint=2, use_aitken=True, rtol=1e-14, atol=1e-14)
@@ -126,24 +122,42 @@ class Top(Multipoint):
                 coupling_linear_solver = linear_solver,
             )
 
-            for discipline in ["aero", "struct"]:
-                self.mphys_connect_scenario_coordinate_source("mesh_%s" % discipline, scenario, discipline)
+            self.connect(
+                f"mesh_aero.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}",
+                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.COORDINATES_INITIAL}",
+            )
+            self.connect(
+                f"mesh_struct.{MPhysVariables.Structures.Mesh.COORDINATES}",
+                f"{scenario}.{MPhysVariables.Structures.COORDINATES}",
+            )
 
             self.connect("dv_struct", f"{scenario}.dv_struct")
         
         elif self.problem_type == ProblemType.AERODYNAMIC:
             ################################################################################
+            # ADflow Setup
+            ################################################################################
+            aero_builder = ADflowBuilder(self.sim_info['aero_options'], scenario="aerodynamic")
+            aero_builder.initialize(self.comm)
+            aero_builder.err_on_convergence_fail = True
+            self.add_subsystem("mesh_aero", aero_builder.get_mesh_coordinate_subsystem())
+
+            ################################################################################
             # MPHY setup for Aero Problem
             ################################################################################
-
             # ivc to keep the top level DVs
             self.add_subsystem("dvs", om.IndepVarComp(), promotes=["*"])
-
-            # create the mesh and cruise scenario because we only have one analysis point
-            self.add_subsystem("mesh", aero_builder.get_mesh_coordinate_subsystem())
-            self.mphys_add_scenario("cruise", ScenarioAerodynamic(aero_builder=aero_builder))
-            self.connect("mesh.x_aero0", "cruise.x_aero")
-    
+            self.mphys_add_scenario(scenario, ScenarioAerodynamic(aero_builder=aero_builder))
+            self.connect(
+                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}",
+                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.COORDINATES}",
+            )
+            self.connect(
+                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}",
+                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.COORDINATES_INITIAL}",
+            )
+            self.connect("mesh_aero.x_aero0", "cruise.x_aero")
+            
     def configure(self): # Set Angle of attack
         aoa = 0.0 # Set Angle of attack. Will be changed when running the problem
         ap = AeroProblem(
@@ -239,9 +253,9 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
             prob.model.cruise.coupling.linear_solver.options[key] = value
 
     for aoa in aoa_list:
-        aoa_out_dir = f"{ref_level_dir}/aoa_{aoa}" # name of the aoa output directory
-        aoa_info_file = f"{aoa_out_dir}/aoa_{aoa}.yaml" # name of the simulation info file at the aoa level directory
+        aoa_out_dir = os.path.join(ref_level_dir, f"aoa_{aoa}") # name of the aoa output directory
         aoa_out_dir = os.path.abspath(aoa_out_dir)
+        aoa_info_file = os.path.join(aoa_out_dir, f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
         ################################################################################
         # Checking for existing sucessful simualtion info
         ################################################################################ 
@@ -294,7 +308,7 @@ def run_problem(case_info_fpath, exp_info_fpath, ref_level_dir, aoa_csv_str, aer
         except:
             fail_flag = 1
 
-        om.n2(prob, show_browser=False, outfile=f"{aoa_out_dir}/mphys_n2.html")
+        om.n2(prob, show_browser=False, outfile=os.path.join(aoa_out_dir, "mphys_n2.html"))
         
         # Manually move the '.f5' files to the respective aoa_out_dir
         if comm.rank == 0:

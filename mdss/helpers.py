@@ -220,7 +220,7 @@ def submit_job_on_hpc(sim_info, yaml_file_path, comm):
     """
     out_dir = os.path.abspath(sim_info['out_dir'])
     hpc_info = sim_info['hpc_info'] # Extract HPC info
-    python_fname = f"{out_dir}/run_sim.py" # Python script to be run on on HPC
+    python_fname = os.path.join(out_dir, "run_sim.py") # Python script to be run on on HPC
     out_file = os.path.join(out_dir,f"{hpc_info['job_name']}_job_out.txt")
     
     if hpc_info['cluster'] == 'GL':
@@ -244,7 +244,7 @@ def submit_job_on_hpc(sim_info, yaml_file_path, comm):
         )
         
         # Define the path for the job script
-        job_script_path = f"{sim_info['out_dir']}/{hpc_info['job_name']}_job_file.sh"
+        job_script_path = os.path.join(out_dir, f"{hpc_info['job_name']}_job_file.sh")
 
         if comm.rank==0:
             with open(job_script_path, "w") as file: # Save the script to the specified file
@@ -302,8 +302,8 @@ def run_as_subprocess(sim_info, case_info_fpath, exp_info_fpath, ref_out_dir, ao
 
     # Convert list of aoa to comma separated aoa string
     aoa_csv_string = ",".join(map(str, [float(aoa) for aoa in aoa_list]))
-
-    python_fname = f"{sim_info['out_dir']}/script_for_subprocess.py"
+    out_dir = os.path.abspath(sim_info['out_dir'])
+    python_fname = os.path.join(out_dir, "script_for_subprocess.py")
 
     if not os.path.exists(python_fname): # Saves the python script, that is used to run subprocess in the output directory, if the file do not exist already.
         if comm.rank==0:

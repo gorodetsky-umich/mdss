@@ -48,7 +48,7 @@ class run_sim():
         self.info_file = info_file
         self.sim_info = load_yaml_file(self.info_file, comm)
         self.out_dir = os.path.abspath(self.sim_info['out_dir'])
-        self.final_out_file = f"{self.out_dir}/overall_sim_info.yaml" # Setting the overall simulation info file.
+        self.final_out_file = os.path.join(self.out_dir, "overall_sim_info.yaml") # Setting the overall simulation info file.
         
 
         # Create the output directory if it doesn't exist
@@ -84,7 +84,7 @@ class run_sim():
         """
 
         # Store a copy of input YAML file in output directory
-        input_yaml_file = f"{self.out_dir}/input_file.yaml"
+        input_yaml_file = os.path.join(self.out_dir, "input_file.yaml")
         if comm.rank == 0:
             with open(input_yaml_file, 'w') as input_yaml_handle:
                 yaml.dump(self.sim_info, input_yaml_handle, sort_keys=False)
@@ -99,26 +99,26 @@ class run_sim():
             for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
                 
                 # Define case level outptut directory
-                case_out_dir = f"{self.out_dir}/{hierarchy_info['name']}/{case_info['name']}"
+                case_out_dir = os.path.join(self.out_dir, hierarchy_info['name'], case_info['name'])
                 if not os.path.exists(case_out_dir): # Create the directory if it doesn't exist
                     if comm.rank == 0:
                         os.makedirs(case_out_dir)
                 
                 # Save case info yaml file in the case_out_dir to pass in subprocess
-                case_info_fpath = f"{case_out_dir}/case_info.yaml"
+                case_info_fpath = os.path.join(case_out_dir, "case_info.yaml")
                 with open(case_info_fpath, 'w') as case_info_fhandle:
                     yaml.dump(case_info, case_info_fhandle, sort_keys=False)
 
                 for exp_set, exp_info in enumerate(case_info['exp_sets']): # loop for experimental datasets that may present
                     
                     # Define experimental level output directory
-                    exp_out_dir = f"{case_out_dir}/exp_set_{exp_set}"
+                    exp_out_dir = os.path.join(case_out_dir, f"exp_set_{exp_set}")
                     if not os.path.exists(exp_out_dir): # Create the directory if it doesn't exist
                         if comm.rank == 0:
                             os.makedirs(exp_out_dir)
                     
                     # Save case info yaml file in the case_out_dir to pass in subprocess
-                    exp_info_fpath = f"{exp_out_dir}/exp_info.yaml"
+                    exp_info_fpath = os.path.join(exp_out_dir, "exp_info.yaml")
                     with open(exp_info_fpath, 'w') as exp_info_fhandle:
                         yaml.dump(exp_info, exp_info_fhandle, sort_keys=False)
 
@@ -148,12 +148,12 @@ class run_sim():
                         FList = [] # Fail flag list
 
                         refinement_level_dict = {} # Creating refinement level sim info dictionary for overall sim info file
-                        refinement_out_dir = f"{exp_out_dir}/{refinement_level}"
+                        refinement_out_dir = os.path.join(exp_out_dir, refinement_level)
                         if not os.path.exists(refinement_out_dir): # Create the directory if it doesn't exist
                             if comm.rank == 0:
                                 os.makedirs(refinement_out_dir)
 
-                        aero_grid_fpath = f"{case_info['meshes_folder_path']}/{mesh_file}"
+                        aero_grid_fpath = os.path.join(case_info['meshes_folder_path'], mesh_file)
                         # If struct_mesh_file is not given, sets to zero
                         try: 
                             struct_mesh_file = case_info['struct_options']['struct_mesh_fpath']
@@ -175,9 +175,8 @@ class run_sim():
                             date_string = current_date.strftime("%Y-%m-%d")
 
                             aoa = float(aoa) # making sure aoa is a float
-                            aoa_out_dir = f"{refinement_out_dir}/aoa_{aoa}" # aoa output directory -- Written to store in the parent directory
-                            aoa_info_file = f"{aoa_out_dir}/aoa_{aoa}.yaml" # name of the simulation info file at the aoa level directory
-
+                            aoa_out_dir = os.path.join(refinement_out_dir, f"aoa_{aoa}") # aoa output directory -- Written to store in the parent directory
+                            aoa_info_file = os.path.join(aoa_out_dir ,f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
                             aoa_level_dict = {} # Creating aoa level sim info dictionary for overall sim info file
 
                             # Checking for existing sucessful simualtion info, 
@@ -234,7 +233,7 @@ class run_sim():
 
                         # Define the output file path
                         refinement_level_dir = os.path.dirname(aoa_out_dir)
-                        ADflow_out_file = f"{refinement_level_dir}/ADflow_output.csv"
+                        ADflow_out_file = os.path.join(refinement_level_dir, "ADflow_output.csv")
                         
                         df = pd.DataFrame(refinement_level_data) # Create a panda DataFrame
                         df.to_csv(ADflow_out_file, index=False)# Write the DataFrame to a CSV file
@@ -359,8 +358,8 @@ class run_sim():
                     exp_out_dir = exp_info['sim_info']['exp_set_out_dir']
                     sim_data = {}
                     for ii, mesh_file in enumerate(case_info['mesh_files']): # Loop for refinement levels
-                        refinement_level_dir = f"{exp_out_dir}/L{ii}"
-                        ADflow_out_file = f"{refinement_level_dir}/ADflow_output.csv"
+                        refinement_level_dir = os.path.join(exp_out_dir, f"L{ii}")
+                        ADflow_out_file = os.path.join(refinement_level_dir, "ADflow_output.csv")
                         sim_data = load_csv_data(ADflow_out_file, comm)
                         if sim_data is not None:  # Only plot if data loaded successfully
                             label = f"L{ii}"
@@ -381,4 +380,4 @@ class run_sim():
                     axs[1].grid(True)
 
                     plt.tight_layout(rect=[0, 0, 1, 0.96])  # Adjust layout to fit title
-                    plt.savefig(f"{exp_out_dir}/ADflow_Results.png")
+                    plt.savefig(os.path.join(exp_out_dir, "ADflow_Results.png"))
