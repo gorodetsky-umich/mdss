@@ -148,20 +148,12 @@ class Top(Multipoint):
             self.add_subsystem("mesh_aero", aero_builder.get_mesh_coordinate_subsystem())
 
             ################################################################################
-            # MPHY setup for Aero Problem
+            # MPHYS setup for Aero Problem
             ################################################################################
             # ivc to keep the top level DVs
             self.add_subsystem("dvs", om.IndepVarComp(), promotes=["*"])
             self.mphys_add_scenario(scenario, ScenarioAerodynamic(aero_builder=aero_builder))
-            self.connect(
-                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}",
-                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.COORDINATES}",
-            )
-            self.connect(
-                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}",
-                f"{scenario}.{MPhysVariables.Aerodynamics.Surface.COORDINATES_INITIAL}",
-            )
-            self.connect("mesh_aero.x_aero0", "cruise.x_aero")
+            self.connect(f"mesh_aero.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}", "cruise.x_aero")
             
     def configure(self): # Set Angle of attack
         aoa = 0.0 # Set Angle of attack. Will be changed when running the problem
