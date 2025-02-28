@@ -182,12 +182,35 @@ def check_input_yaml(yaml_file):
                 print(e)
 
             if problem_type == ProblemType.AEROSTRUCTURAL: # If the problem is aerostructural, validate structural properties and load info
+                # Check if modules required for aerostructural probelm is available.
+                try:
+                    from tacs.mphys import TacsBuilder
+                    from funtofem.mphys import MeldBuilder
+                except ImportError:
+                    try:
+                        subprocess.run(
+                            f"{sim_info['python_version']} -c 'from tacs.mphys import TacsBuilder; from funtofem.mphys import MeldBuilder'", 
+                            shell=True, check=True
+                        )
+                    except:
+                        raise ModuleNotFoundError(
+                            "TACS and FuntoFEM packages are required for aerostructural problems. "
+                            "If available in another Python environment, specify its path in the input YAML under 'python_version'."
+                        )
+
                 struct_options = case_info['struct_options']
                 yc.ref_struct_options.model_validate(struct_options)
                 yc.ref_structural_properties.model_validate(struct_options['structural_properties'])
                 yc.ref_load_info.model_validate(struct_options['load_info'])
+                struct_mesh_file = case_info['struct_options']['struct_mesh_fpath']
+                if not os.path.isfile(struct_mesh_file):
+                    raise FileNotFoundError(f"Structural Mesh: {struct_mesh_file} does not exist. Please provide a valid path")
 
-            
+
+            for ii, mesh_file in enumerate(case_info['mesh_files']): # Loop for refinement levels to check if the grid files exist
+                aero_mesh_file  = os.path.join(os.path.abspath(case_info['meshes_folder_path']), mesh_file)
+                if not os.path.isfile(aero_mesh_file):
+                    raise FileNotFoundError(f"Aero Mesh: {aero_mesh_file} does not exist. Please provide a valid path")
 
             for exp_set, exp_info in enumerate(case_info['exp_sets']): # loop for experimental datasets that may present
                 yc.ref_exp_set_info.model_validate(exp_info)
@@ -221,7 +244,7 @@ def submit_job_on_hpc(sim_info, yaml_file_path, comm):
     out_dir = os.path.abspath(sim_info['out_dir'])
     hpc_info = sim_info['hpc_info'] # Extract HPC info
     python_fname = os.path.join(out_dir, "run_sim.py") # Python script to be run on on HPC
-    out_file = os.path.join(out_dir,f"{hpc_info['job_name']}_job_out.txt")
+    out_file = os.path.join(out_dir, f"{hpc_info['job_name']}_job_out.txt")
     
     if hpc_info['cluster'] == 'GL':
         # Set default time if not provided
@@ -237,7 +260,6 @@ def submit_job_on_hpc(sim_info, yaml_file_path, comm):
             time=job_time,
             account_name=hpc_info['account_name'],
             email_id=hpc_info['email_id'],
-            out_dir=sim_info['out_dir'],
             out_file=out_file,
             python_file_path=python_fname,
             yaml_file_path=yaml_file_path

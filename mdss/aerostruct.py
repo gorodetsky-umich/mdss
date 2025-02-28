@@ -9,15 +9,20 @@ from mphys.scenarios import ScenarioAeroStructural, ScenarioAerodynamic
 from mpi4py import MPI
 from adflow.mphys import ADflowBuilder
 from baseclasses import AeroProblem
-from tacs.mphys import TacsBuilder
-from funtofem.mphys import MeldBuilder
+try: # The following modules are required only for Aerostructural problems
+    from tacs.mphys import TacsBuilder
+    from funtofem.mphys import MeldBuilder
+    from mdss.tacs_setup import tacs_setup
+except:
+    pass
+
 
 import openmdao.api as om
 from mpi4py import MPI
 
 from mdss.helpers import load_yaml_file, ProblemType
 from mdss.templates import default_aero_options_aerodynamic, default_aero_options_aerostructural, default_structural_properties, default_solver_options
-from mdss.tacs_setup import tacs_setup
+
 
 comm = MPI.COMM_WORLD
 

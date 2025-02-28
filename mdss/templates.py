@@ -165,7 +165,7 @@ gl_job_script = """#!/bin/bash
 #SBATCH --partition=standard
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user={email_id}
-#SBATCH --output={out_dir}/{out_file}
+#SBATCH --output={out_file}
 
 python {python_file_path} --inputFile {yaml_file_path}
 """
