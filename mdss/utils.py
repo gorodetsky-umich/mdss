@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from typing import Optional, Literal
 
 from mdss.run_sim import run_sim
-from mdss.helpers import load_yaml_file, load_csv_data, check_input_yaml
+from mdss.helpers import *
 
 
 comm = MPI.COMM_WORLD
@@ -20,6 +20,35 @@ size = comm.Get_size()
 class RunFlag(Enum):
     skip = 0  # Exit without running the simulation
     run = 1   # Run the simulation and populate the data
+
+################################################################################
+# Functions to aid pre and post processing
+################################################################################
+class update_info_file():
+
+    def __init__(self, info_file):
+        check_input_yaml(info_file)
+        self.info_file = info_file
+        self.sim_info = load_yaml_file(self.info_file, comm)
+
+    def modify_aero_options(self, aero_options_updt, case_names):
+        for hierarchy, hierarchy_info in enumerate(self.sim_info['hierarchies']): # loop for Hierarchy level
+            for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
+                if case_info['name'] in case_names:
+                    case_info['aero_options'].update(aero_options_updt)
+    
+    def append_aoa(self, aoa_list, case_names, exp_sets):
+        for hierarchy, hierarchy_info in enumerate(self.sim_info['hierarchies']): # loop for Hierarchy level
+            for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
+                if case_info['name'] in case_names:
+                    for exp_set, exp_info in enumerate(case_info['exp_sets']): # loop for experimental datasets that may present
+                        if exp_set in exp_sets:
+                            exp_info['aoa_list'] = list(set(exp_info['aoa_list']) | set(aoa_list))  # Convert both to sets to remove duplicates, then back to a list
+    
+    def write_mod_info_file(self):
+        if comm.rank == 0:
+            with open(self.info_file, 'w') as info_file_fhandle:
+                yaml.dump(self.sim_info, info_file_fhandle, sort_keys=False)
 
 def get_sim_data(info_file, run_flag=RunFlag.skip):
     """
