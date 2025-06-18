@@ -1,9 +1,5 @@
-import os
-import time
-import copy
-from datetime import date, datetime
+import os, time, tempfile, copy, yaml, shutil
 
-import yaml
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.legend import Legend
@@ -11,9 +7,10 @@ import niceplots
 from mpi4py import MPI
 
 from mdss.utils.helpers import load_yaml_input, load_csv_data, make_dir, print_msg, MachineType, YAMLInputType
+from mdss.utils.tools import get_sim_data
 from mdss.src.main_helper import execute, submit_job_on_hpc
 from mdss.resources.misc_defaults import def_plot_options
-from mdss.resources.yaml_config import ref_plot_options, check_input_yaml
+from mdss.resources.yaml_config import ref_plot_options, check_input_yaml, custom_sim_ref_case_info, ref_scenario_info
 
 
 comm = MPI.COMM_WORLD
@@ -85,7 +82,117 @@ class simulation():
                 simulation_results = execute(self)
         
         return simulation_results
-                       
+    
+################################################################################
+# Class to run custom simulations
+################################################################################
+class custom_sim(simulation):
+    """
+    Class to Run a predefined case simulation
+
+    It sets up and executes a simulation based on the provided case information.
+    It validates the input, prepares a temporary directory for files, and cleans up after the run.
+
+    Parameters
+    ----------
+    yaml_input: str
+        The YAML file path or raw YAML string for the simulation.
+
+    Notes
+    ------
+    - Creates a temporary directory for the simulation input and output files.
+    - Deletes the temporary directory after the simulation run.
+    """
+    def __init__(self, yaml_input:str, out_dir:str=None):
+        self.yaml_input = yaml_input
+        super().__init__(yaml_input)  # Leverages validation, parsing, and setup from `simulation`
+        if comm.rank == 0:
+            if os.path.exists(self.sim_info['out_dir']) and not os.listdir(self.sim_info['out_dir']):  # Check if the output directory exits and is empty
+                os.rmdir(self.sim_info['out_dir'])  # Remove the directory only if it is empty
+    
+    def run(self, case_info):
+        """
+        Parameters
+        ----------
+        case_info: dict
+            A dictionary containing the case information. It should follow the structure defined by the `ref_case_info` class:
+            
+            - `out_dir` (str): Path to the output directory.
+            - `meshes_folder_path` (str): Path to the directory containing mesh files.
+            - `mesh_files` (list[str]): List of mesh file names.
+            - `aoa_list` (list[float]): List of angles of attack for the simulation.
+            - `aero_options` (Optional[dict]): Dictionary containing ADflow solver parameters (optional).
+            - `struct_options` (Optional[dict]): Dictionary containing structural info for aero structural problem (optional).
+        """
+        custom_sim_ref_case_info.model_validate(case_info)
+        
+        case = self.sim_info['hierarchies'][0]['cases'][0]
+        case_info['aoa_list'] = [float(aoa) for aoa in case_info['aoa_list']]  # Ensures all angles of attack to float and converts a numpy array to a list
+        # Extract only fields that were explicitly provided (non-None)
+        for key, value in case_info.items():
+            if value is None or key in ['out_dir', 'aoa_list']:
+                continue  # Skip unset or None fields
+            elif key in {'aero_options', 'struct_options'}:
+                case.setdefault(key, {}).update(value)
+            else:
+                case[key] = value
+
+        # Update the angle of attack in the scenario and scenario information
+        scenario = case['scenarios'][0]
+        scenario['aoa_list'] = case_info['aoa_list']
+        ref_scenario_info.model_validate(scenario)
+        # Update the scenario information in the case
+        for key, value in scenario.items():
+            if value is None or key in ['name', 'aoa_list', 'exp_data']:
+                continue
+            else:
+                scenario[key] = float(value)  # Convert all the other values to float
+
+        temp_dir_obj = None
+        cwd = os.getcwd()
+        if 'out_dir' in case_info.keys():
+            if not os.path.exists(case_info['out_dir']) and comm.rank == 0:
+                os.mkdir(case_info['out_dir'])
+            self.sim_info['out_dir'] = case_info['out_dir']
+            self.out_dir = case_info['out_dir']
+        else:
+            if comm.rank == 0:
+                temp_dir_obj = tempfile.TemporaryDirectory(dir = cwd ,prefix=f"mdss_temp_")
+                temp_dir = temp_dir_obj.name
+            temp_dir = comm.bcast(temp_dir, root=0) # Broadcast the temporary directory path to all ranks
+            self.sim_info['out_dir'] = temp_dir
+            self.out_dir = temp_dir
+        comm.Barrier()
+        self.final_out_file = os.path.join(self.out_dir, "overall_sim_info.yaml")  # Set the final output file path
+        modified_yaml_input = yaml.dump(self.sim_info, sort_keys=False)
+        check_input_yaml(modified_yaml_input)  # Validate the modified YAML input
+        # Write the modified YAML input to a file
+        if not os.path.exists(self.out_dir):
+            if comm.rank == 0:
+                os.mkdir(self.out_dir)
+        self.info_file = os.path.join(self.out_dir, "input.yaml")  # Set the path for the input YAML file
+        with open(self.info_file, 'w') as f:
+            yaml.dump(self.sim_info, f, sort_keys=False)
+
+        if self.machine_type == MachineType.HPC:
+            self.wait_for_job = True # To toggle to wait for the job to finish.
+            
+        # Call the parent class's run method to execute the simulation
+        simulation_results = super().run()  
+
+        comm.Barrier() 
+        
+        # Cleanup temp directory if created
+        if comm.rank == 0 and temp_dir_obj is not None:
+            temp_dir_obj.cleanup()
+
+        # Reset sim_info
+        self.sim_info, self.yaml_input_type = load_yaml_input(self.yaml_input, comm)
+        self.sim_info['out_dir'] = os.path.abspath(self.sim_info['out_dir'])
+        self.out_dir = self.sim_info['out_dir']
+        
+        return simulation_results
+
 ################################################################################
 # Code for Post Processing
 ################################################################################

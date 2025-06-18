@@ -213,6 +213,17 @@ class ref_plot_options(BaseModel):
             )
         return values
 
+################################################################################
+# Reference Case Info for Custom Simulations
+################################################################################
+class custom_sim_ref_case_info(BaseModel):
+    out_dir: str=None
+    meshes_folder_path: Optional[str]=None
+    mesh_files: Optional[list[str]]=None
+    aoa_list: list[float]
+    aero_options: Optional[dict]=None
+    struct_options: Optional[dict]=None
+
 def check_input_yaml(yaml_input):
     """
     Validates the structure of the input YAML file or raw yaml string against predefined templates.
