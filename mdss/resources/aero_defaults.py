@@ -18,12 +18,6 @@ default_aero_options_aerodynamic = {
     # Physics Parameters
     "equationType": "RANS",
     "liftindex": 3,  # z is the lift direction
-    # Solver Parameters
-    "smoother": "DADI",
-    "CFL": 0.5,
-    "CFLCoarse": 0.25,
-    "MGCycle": "sg",
-    "MGStartLevel": -1,
     # ANK Solver Parameters
     "useANKSolver": True,
     # Termination Criteria

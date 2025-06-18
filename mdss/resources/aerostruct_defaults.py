@@ -16,12 +16,6 @@ default_aero_options_aerostructural = {
     # Physics Parameters
     "equationType": "RANS",
     "liftindex": 3,  # z is the lift direction
-    # Solver Parameters
-    "smoother": "DADI",
-    "CFL": 1.5,
-    "CFLCoarse": 1.25,
-    "MGCycle": "sg",
-    "MGStartLevel": -1,
     # ANK Solver Parameters
     "useANKSolver": True,
     # Termination Criteria
