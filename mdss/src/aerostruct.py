@@ -264,6 +264,8 @@ class Problem:
             restart_mesh_file = get_restart_file(restart_angle_dir)
             if restart_mesh_file is not None:
                 aero_options['restartFile'] = restart_mesh_file  # Update the restart file in the aero_options
+                msg = f"Restarting from angle of attack: {restart_angle} | Restart file: {restart_mesh_file}"
+                print_msg(msg, 'notice', comm)
         sim_info = {
                 'aoa_list': aoa_list,
                 'ref_level_dir': ref_level_dir,
