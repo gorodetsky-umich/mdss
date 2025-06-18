@@ -11,19 +11,13 @@ default_aero_options_aerostructural = {
     "outputDirectory": '.', 
     "monitorvariables": ["resrho", "resturb", "cl", "cd", "yplus"],
     "writeTecplotSurfaceSolution": True,
+    "solutionPrecision": "double", #  Best for restart
+    "volumeVariables": ['resrho', 'mach'],
     # Physics Parameters
     "equationType": "RANS",
     "liftindex": 3,  # z is the lift direction
-    # Solver Parameters
-    "smoother": "DADI",
-    "CFL": 1.5,
-    "CFLCoarse": 1.25,
-    "MGCycle": "sg",
-    "MGStartLevel": -1,
-    "nCyclesCoarse": 250,
     # ANK Solver Parameters
     "useANKSolver": True,
-    "nSubiterTurb": 5,
     # Termination Criteria
     "L2Convergence": 1e-12,
     "L2ConvergenceCoarse": 1e-2,
