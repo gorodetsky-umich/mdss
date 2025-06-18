@@ -237,3 +237,14 @@ def check_input_yaml(yaml_input):
     sim_info,_ = load_yaml_input(yaml_input)
     
     ref_sim_info.model_validate(sim_info)               
+
+################################################################################
+# Refined Case Info for Custom Simulations
+################################################################################
+class custom_sim_ref_case_info(BaseModel):
+    out_dir: str=None
+    meshes_folder_path: Optional[str]=None
+    mesh_files: Optional[list[str]]=None
+    aoa_list: list[float]
+    aero_options: Optional[dict]=None
+    struct_options: Optional[dict]=None
