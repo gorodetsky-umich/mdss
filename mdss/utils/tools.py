@@ -6,7 +6,6 @@ from typing import Optional
 
 from mpi4py import MPI
 
-from mdss.src.main import simulation
 from mdss.utils.helpers import *
 from mdss.resources.yaml_config import check_input_yaml, ref_scenario_info
 
