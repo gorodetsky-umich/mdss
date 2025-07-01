@@ -212,6 +212,7 @@ class Problem:
 
         problem_info = ensure_dict(problem_info)  # Ensure problem_info is a dictionary (Also converts from json)
         self.write_mdss_files = True
+        self.skip_successful_simulations = True
 
         # Extract the required info
         self.case_info = problem_info['case_info']
@@ -323,7 +324,7 @@ class Problem:
                 with open(aoa_info_file, 'r') as aoa_file:
                     aoa_sim_info = yaml.safe_load(aoa_file)
                 fail_flag = aoa_sim_info['fail_flag']
-                if fail_flag == 0:
+                if fail_flag == 0 and self.skip_successful_simulations: # If a successful simulation is found and skip_successful_simulations is True
                     msg = f"Skipping Angle of Attack (AoA): {float(aoa):<5} | Reason: Existing successful simulation found"
                     print_msg(msg, 'notice', comm)
                     continue # Continue to next loop if there exists a successful simulation
