@@ -2,28 +2,25 @@
 # Python script to run subprocesses - DO NOT MODIFY
 ################################################################################
 python_code_for_subprocess = """
-import argparse
+import argparse, json
+from mpi4py import MPI
 from mdss import Problem
 
+comm = MPI.COMM_WORLD
 parser = argparse.ArgumentParser()
-parser.add_argument("--caseInfoFile", type=str)
-parser.add_argument("--scenarioInfoFile", type=str)
-parser.add_argument("--refLevelDir", type=str)
-parser.add_argument("--aoaList", type=str)
-parser.add_argument("--aeroGrid", type=str)
-parser.add_argument("--structMesh", type=str)
-
+parser.add_argument("--problemInfo", type=str)
 args = parser.parse_args()
-
-problem = Problem(args.caseInfoFile, args.scenarioInfoFile, args.refLevelDir, args.aoaList, args.aeroGrid, args.structMesh)
-problem.run()
+problem_info = json.loads(args.problemInfo)
+problem = Problem(problem_info)
+problem_results = problem.run()
+print("::SUBPROCESS_RESULT::" + json.dumps(problem_results) + "::SUBPROCESS_RESULT::")
 """
 
 ################################################################################
 # Python script to run on a HPC - DO NOT MODIFY
 ################################################################################
 python_code_for_hpc = """
-import argparse
+import argparse, json
 from mdss import simulation
 from mdss import execute
 
@@ -31,11 +28,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--inputFile", type=str)
 args = parser.parse_args()
 sim = simulation(args.inputFile) # Input the simulation info and output dir
-execute(sim) # Run the simulation
+sim.submit_job = False
+simulation_results = sim.run()
+print("::FINAL_JOB_RESULT::" + json.dumps(simulation_results) + "::FINAL_JOB_RESULT::")
 """
 
 ################################################################################
-# Template for Greatlakes Job script
+# Template for Great Lakes Job script
 ################################################################################
 gl_job_script = """#!/bin/bash
 #SBATCH --job-name={job_name}

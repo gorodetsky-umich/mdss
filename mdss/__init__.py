@@ -9,4 +9,4 @@ try:
 except:
     pass
 
-__all__ = ["main", "tools", "Problem", "simulation", "custom_sim", "execute", "post_process"]
+__all__ = ["main", "tools", "utils", "Problem", "simulation", "execute", "post_process", "custom_sim"]

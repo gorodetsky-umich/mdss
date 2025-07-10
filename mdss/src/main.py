@@ -1,7 +1,5 @@
-import os, shutil, random, copy, time
-from datetime import date, datetime
+import os, time, tempfile, copy, yaml, shutil
 
-import yaml
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.legend import Legend
@@ -41,12 +39,11 @@ class simulation():
         if self.yaml_input_type == YAMLInputType.FILE:
             self.info_file = yaml_input
         elif self.yaml_input_type == YAMLInputType.STRING:
-            self.info_file = os.path.join(self.out_dir, "input.yaml")
-            with open(self.info_file, 'w') as f:
-                yaml.dump(self.sim_info, f, sort_keys=False)
+            self.info_file = os.path.join(self.out_dir, "input_file.yaml")
 
         self.machine_type = MachineType.from_string(self.sim_info['machine_type'])  # Convert string to enum
         # Additional options
+        self.write_mdss_files = True # To toggle writing MDSS files.
         self.final_out_file = os.path.join(self.out_dir, "overall_sim_info.yaml") # Set the overall simulation info file name.
         self.subprocess_flag = True # To toggle opting subprocess.
         self.record_subprocess = False # To toggle to record subprocess output.
@@ -76,15 +73,18 @@ class simulation():
         """
         sim_info_copy = copy.deepcopy(self.sim_info)
         if self.machine_type == MachineType.LOCAL: # Running on a local machine
-            execute(self)
+            simulation_results = execute(self)
 
         elif self.machine_type == MachineType.HPC: # Running on a HPC currently supports Great Lakes.
             if self.submit_job:
-                job_id = submit_job_on_hpc(sim_info_copy, self.info_file, self.wait_for_job, comm) # Submit job script
+                job_id, simulation_results = submit_job_on_hpc(sim_info_copy, self.info_file, self.wait_for_job, comm) # Submit job script
             else:
-                execute(self)
+                simulation_results = execute(self)
+        
+        return simulation_results
+    
 ################################################################################
-# Class to Run Custom Simulation
+# Class to run custom simulations
 ################################################################################
 class custom_sim(simulation):
     """
@@ -147,16 +147,8 @@ class custom_sim(simulation):
                 continue
             else:
                 scenario[key] = float(value)  # Convert all the other values to float
-        
-        
-        if comm.rank == 0:
-            randn = random.randint(1000, 9999)
-        else:
-            # Other processes initialize the variable
-            randn = None
-        
-        # Broadcast the random number to all processes
-        randn = comm.bcast(randn, root=0)
+
+        temp_dir_obj = None
         cwd = os.getcwd()
         if 'out_dir' in case_info.keys():
             if not os.path.exists(case_info['out_dir']) and comm.rank == 0:
@@ -164,11 +156,10 @@ class custom_sim(simulation):
             self.sim_info['out_dir'] = case_info['out_dir']
             self.out_dir = case_info['out_dir']
         else:
-            temp_dir = os.path.join(cwd, f"temp_{randn}")
-            msg = f"Creating a temporary folder to run simulations: {temp_dir}"
-            print_msg(msg, 'notice', comm)
             if comm.rank == 0:
-                os.mkdir(temp_dir)
+                temp_dir_obj = tempfile.TemporaryDirectory(dir = cwd ,prefix=f"mdss_temp_")
+                temp_dir = temp_dir_obj.name
+            temp_dir = comm.bcast(temp_dir, root=0) # Broadcast the temporary directory path to all ranks
             self.sim_info['out_dir'] = temp_dir
             self.out_dir = temp_dir
         comm.Barrier()
@@ -187,30 +178,21 @@ class custom_sim(simulation):
             self.wait_for_job = True # To toggle to wait for the job to finish.
             
         # Call the parent class's run method to execute the simulation
-        super().run()  
+        simulation_results = super().run()  
 
         comm.Barrier() 
-
-        # Read the simulation data from the final output file
-        if os.path.exists(self.final_out_file):
-            sim_data = get_sim_data(self.final_out_file)
-        else:
-            raise FileNotFoundError(f"Expected output file not found: {self.final_out_file}")
-
-        sim_data = comm.bcast(sim_data, root=0)
-        comm.Barrier()  # Ensure all ranks are done reading
         
         # Cleanup temp directory if created
-        if 'out_dir' not in case_info and comm.rank == 0:
-            shutil.rmtree(self.out_dir)
+        if comm.rank == 0 and temp_dir_obj is not None:
+            temp_dir_obj.cleanup()
 
         # Reset sim_info
         self.sim_info, self.yaml_input_type = load_yaml_input(self.yaml_input, comm)
         self.sim_info['out_dir'] = os.path.abspath(self.sim_info['out_dir'])
         self.out_dir = self.sim_info['out_dir']
         
-        return sim_data
-                       
+        return simulation_results
+
 ################################################################################
 # Code for Post Processing
 ################################################################################
