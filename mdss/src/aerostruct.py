@@ -461,12 +461,12 @@ class Problem:
         problem_results = {} # Dictionary to store results of the problem
         for aoa in self.aoa_list:
             aoa_key = f"aoa_{aoa}"
-            self.prob["aoa"] = float(aoa) # Set Angle of attack
+            self.om_problem["aoa"] = float(aoa) # Set Angle of attack
             aoa_out_dir = os.path.join(self.sim_info.get('ref_level_dir'), f"aoa_{aoa}") # name of the aoa output directory
             aoa_out_dir = os.path.abspath(aoa_out_dir)
             aoa_info_file = os.path.join(aoa_out_dir, f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
             # Update options specific to this aoa
-            prob_updt = update_om_instance(self.prob, self.sim_info['scenario_name'], self.sim_info['problem'])
+            prob_updt = update_om_instance(self.om_problem, self.sim_info['scenario_name'], self.sim_info['problem'])
             prob_updt.outdir(aoa_out_dir)
             
             u_struct = None
@@ -511,8 +511,8 @@ class Problem:
                     'cd': self.om_problem[f"{self.sim_info['scenario_name']}.aero_post.cd"][0],
                 }
                 if self.problem_type == ProblemType.AEROSTRUCTURAL:
-                    u_struct = self.om_problem[f"{self.sim_info['scenario_name']}.u_struct"]
-                    f_aero = self.om_problem[f"{self.sim_info['scenario_name']}.f_aero"]
+                    u_struct = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.u_struct", get_remote=True)  # Get structural displacements
+                    f_aero = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.f_aero", get_remote=True) # Get aerodynamic forces
 
             if  not self.write_mdss_files:
                 continue # Skip writing mdss files if write_mdss_files is False
@@ -527,8 +527,8 @@ class Problem:
                 'problem': self.case_info['problem'],
                 'aero_mesh_fpath': self.sim_info.get('aero_options', {}).get('gridFile', None),
                 'scenario_info': self.scenario_info,
-                'cl': float(self.prob[f"{self.sim_info['scenario_name']}.aero_post.cl"][0]),
-                'cd': float(self.prob[f"{self.sim_info['scenario_name']}.aero_post.cd"][0]),
+                'cl': float(self.om_problem[f"{self.sim_info['scenario_name']}.aero_post.cl"][0]),
+                'cd': float(self.om_problem[f"{self.sim_info['scenario_name']}.aero_post.cd"][0]),
                 'wall_time': f"{aoa_run_time:.2f} sec",
                 'aero_options': self.sim_info['aero_options'],
             }
@@ -550,8 +550,7 @@ class Problem:
                     yaml.dump(aoa_out_dic, interim_out_yaml, sort_keys=False)
 
                 # Store u_struct and f_aero
-                if u_struct:
+                if self.problem_type == ProblemType.AEROSTRUCTURAL:
                     np.save(os.path.join(aoa_out_dir, "u_struct.npy"), u_struct)
-                if f_aero:
                     np.save(os.path.join(aoa_out_dir, "f_aero.npy"), f_aero)
         return problem_results

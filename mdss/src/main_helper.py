@@ -96,150 +96,162 @@ def execute(simulation):
                 scenario_sim_info = {} # Creating scenario level sim info dictionary for overall sim info file
                 scenario_sim_info['scenario_out_dir'] = scenario_out_dir
 
-                for ii, mesh_file in enumerate(case_info['mesh_files']): # Loop for refinement levels
-                    # Print simulation info message
-                    msg = f"{'Hierarchy':<20}: {hierarchy_info['name']}\n{'Case Name':<20}: {case_info['name']}\n{'Scenario':<20}: {scenario_info['name']}\n{'Aero Mesh File':<20}: {mesh_file}"
-                    print_msg(msg, f"{'SIMULATION INFO':^30}", comm)
-                    AOAList = []
-                    CLList = []
-                    CDList = []
-                    TList = []
-                    FList = [] # Fail flag list
-                    failed_aoa_list = [] # List to store the failed aoa
+                for ii, aero_mesh_file in enumerate(case_info['mesh_files']): # Loop for aero refinement levels
+                    struct_mesh_files = case_info.get('struct_options', {}).get('mesh_files', [None])
+                    if problem_type == ProblemType.AERODYNAMIC:
+                        struct_mesh_files = [None]
+                    for struct_mesh_file in struct_mesh_files: # Loop for struct refinement levels
+                        # Print simulation info message
+                        msg = f"{'Hierarchy':<20}: {hierarchy_info['name']}\n{'Case Name':<20}: {case_info['name']}\n{'Scenario':<20}: {scenario_info['name']}\n{'Aero Mesh File':<20}: {aero_mesh_file}\n{'Struct Mesh File':<20}: {struct_mesh_file}"
+                        print_msg(msg, f"{'SIMULATION INFO':^30}", comm)
 
-                    refinement_level_dict = {} # Creating refinement level sim info dictionary for overall sim info file
-                    refinement_out_dir = os.path.join(scenario_out_dir, f"{mesh_file}")
-                    make_dir(refinement_out_dir, comm)
-                    refinement_level_csv_out_file = os.path.join(refinement_out_dir, f"{mesh_file}_output.csv")
-                    aero_grid_fpath = os.path.join(case_info['meshes_folder_path'], mesh_file)
-                    # Add struct mesh file for aerostructural case else set it to none
-                    if problem_type == ProblemType.AEROSTRUCTURAL:
-                        struct_mesh_file = case_info['struct_options']['mesh_fpath']
-                    else:
-                        struct_mesh_file = 'none'
+                        if problem_type == ProblemType.AEROSTRUCTURAL:
+                            refinement_tag = f"{aero_mesh_file}_{struct_mesh_file}"
+                        else:
+                            refinement_tag = f"{aero_mesh_file}"
+                        
+                        AOAList = []
+                        CLList = []
+                        CDList = []
+                        TList = []
+                        FList = [] # Fail flag list
+                        failed_aoa_list = [] # List to store the failed aoa
 
-                    # Loop to check for existing successful simulations
-                    filtered_aoa_list = aoa_list.copy() # Copying the aoa_list to filter out the failed aoa later
-                    skipped_aoa_list = [] # List to store the skipped aoa due to existing successful simulation
-                    skipped_aoa_info = {} # Dictionary to store the skipped aoa info
-                    for aoa in aoa_list:
-                        aoa_key = f"aoa_{aoa}"
-                        aoa_out_dir = os.path.join(refinement_out_dir, f"aoa_{aoa}") # aoa output directory -- Written to store in the parent directory
-                        aoa_info_file = os.path.join(aoa_out_dir ,f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
-                        # Checking for existing successful simulation info, 
-                        try:
-                            with open(aoa_info_file, 'r') as aoa_file: # open the simulation info file
-                                aoa_sim_info = yaml.safe_load(aoa_file)
+                        refinement_level_dict = {} # Creating refinement level sim info dictionary for overall sim info file
+                        refinement_out_dir = os.path.join(scenario_out_dir, f"{refinement_tag}")
+                        make_dir(refinement_out_dir, comm)
+                        refinement_level_csv_out_file = os.path.join(refinement_out_dir, f"{refinement_tag}_output.csv")
+                        aero_grid_fpath = os.path.join(case_info['meshes_folder_path'], aero_mesh_file)
+                        # Add struct mesh file for aerostructural case else set it to none
+                        if problem_type == ProblemType.AEROSTRUCTURAL:
+                            struct_mesh_file = os.path.join(case_info['struct_options']['meshes_folder_path'], struct_mesh_file)
+                        elif problem_type == ProblemType.AERODYNAMIC:
+                            struct_mesh_file = 'none'
 
-                            fail_flag = aoa_sim_info['fail_flag'] # Read the fail flag
+                        # Loop to check for existing successful simulations
+                        filtered_aoa_list = aoa_list.copy() # Copying the aoa_list to filter out the failed aoa later
+                        skipped_aoa_list = [] # List to store the skipped aoa due to existing successful simulation
+                        skipped_aoa_info = {} # Dictionary to store the skipped aoa info
+                        for aoa in aoa_list:
+                            aoa = float(aoa)
+                            aoa_key = f"aoa_{aoa}"
+                            aoa_out_dir = os.path.join(refinement_out_dir, f"aoa_{aoa}") # aoa output directory -- Written to store in the parent directory
+                            aoa_info_file = os.path.join(aoa_out_dir ,f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
+                            # Checking for existing successful simulation info, 
+                            try:
+                                with open(aoa_info_file, 'r') as aoa_file: # open the simulation info file
+                                    aoa_sim_info = yaml.safe_load(aoa_file)
 
-                            if fail_flag == 0: # Refers successful simulation and makes sure only the successful simulations are added to the csv file.
-                                filtered_aoa_list.remove(aoa) # Remove the aoa from the filtered aoa list
-                                skipped_aoa_list.append(aoa) # Add the aoa to the skipped aoa list
-                                skipped_aoa_info[aoa_key] = {key : value for key, value in aoa_sim_info.items() if key in ['cl', 'cd', 'wall_time']} # Add the aoa info to the skipped aoa info
-                        except:
-                            continue
-                    
-                    filtered_aoa_csv_string = '"' + ",".join(map(str, [float(aoa) for aoa in filtered_aoa_list])) + '"' # Convert the filtered aoa list to a csv string
-                    skipped_aoa_csv_string = '"' + ",".join(map(str, [float(aoa) for aoa in skipped_aoa_list])) + '"' # Convert the skipped aoa list to a csv string
+                                fail_flag = aoa_sim_info['fail_flag'] # Read the fail flag
+                                print(aoa_sim_info)
+                                if fail_flag == 0: # Refers successful simulation and makes sure only the successful simulations are added to the csv file.
+                                    filtered_aoa_list.remove(aoa) # Remove the aoa from the filtered aoa list
+                                    skipped_aoa_list.append(aoa) # Add the aoa to the skipped aoa list
+                                    skipped_aoa_info[aoa_key] = {key : value for key, value in aoa_sim_info.items() if key in ['cl', 'cd', 'wall_time']} # Add the aoa info to the skipped aoa info
+                            except:
+                                continue
+                        
+                        filtered_aoa_csv_string = '"' + ",".join(map(str, [float(aoa) for aoa in filtered_aoa_list])) + '"' # Convert the filtered aoa list to a csv string
+                        skipped_aoa_csv_string = '"' + ",".join(map(str, [float(aoa) for aoa in skipped_aoa_list])) + '"' # Convert the skipped aoa list to a csv string
 
-                    problem_results = {} # Dictionary to store the basic simulation results for the current refinement level
-                    if len(skipped_aoa_list) != 0: # If no aoa is left to run, then skip the simulation
-                        msg = f"Skipping the following AoA: {skipped_aoa_csv_string}\nReason: Existing successful simulation found"
-                        print_msg(msg, 'notice', comm)
-                    
-                    if len(filtered_aoa_list) != 0: # If no aoa is left to run, then skip the simulation
-                        # Initially running all the aoa in a subprocess. However the optimal number of aoa for single subprocess should be determined and modified accordingly.
-                        other_sim_info = {key: value for key, value in sim_info_copy.items() if key != 'hierarchies'} # To pass just the sim_info without hierarchies
-                        problem_input['ref_level_dir'] = refinement_out_dir # Adding the refinement out directory to the problem input
-                        problem_input['aoa_csv_str'] = filtered_aoa_csv_string # Adding the aoa csv string to the problem input
-                        problem_input['aero_grid_fpath'] = aero_grid_fpath # Adding the aero grid file path to the problem input
-                        problem_input['struct_mesh_fpath'] = struct_mesh_file # Adding the struct mesh file path to the problem input
-                        if simulation.subprocess_flag is True:
-                            new_aoa_results = run_as_subprocess(other_sim_info, problem_input, simulation.record_subprocess, comm)
-                        elif simulation.subprocess_flag is False:
-                            problem = Problem(problem_input)
-                            new_aoa_results = problem.run() # Run the simulation using the Problem class
+                        problem_results = {} # Dictionary to store the basic simulation results for the current refinement level
+                        if len(skipped_aoa_list) != 0: # If no aoa is left to run, then skip the simulation
+                            msg = f"Skipping the following AoA: {skipped_aoa_csv_string}\nReason: Existing successful simulation found"
+                            print_msg(msg, 'notice', comm)
+                        
+                        if len(filtered_aoa_list) != 0: # If no aoa is left to run, then skip the simulation
+                            # Initially running all the aoa in a subprocess. However the optimal number of aoa for single subprocess should be determined and modified accordingly.
+                            other_sim_info = {key: value for key, value in sim_info_copy.items() if key != 'hierarchies'} # To pass just the sim_info without hierarchies
+                            problem_input['ref_level_dir'] = refinement_out_dir # Adding the refinement out directory to the problem input
+                            problem_input['aoa_csv_str'] = filtered_aoa_csv_string # Adding the aoa csv string to the problem input
+                            problem_input['aero_grid_fpath'] = aero_grid_fpath # Adding the aero grid file path to the problem input
+                            problem_input['struct_mesh_fpath'] = struct_mesh_file # Adding the struct mesh file path to the problem input
+                            if simulation.subprocess_flag is True:
+                                new_aoa_results = run_as_subprocess(other_sim_info, problem_input, simulation.record_subprocess, comm)
+                            elif simulation.subprocess_flag is False:
+                                problem = Problem(problem_input)
+                                new_aoa_results = problem.run() # Run the simulation using the Problem class
 
-                        problem_results.update(new_aoa_results) # Update the problem results with the new results
-                    problem_results.update(skipped_aoa_info) # Add the skipped aoa info to the problem results
+                            problem_results.update(new_aoa_results) # Update the problem results with the new results
+                        problem_results.update(skipped_aoa_info) # Add the skipped aoa info to the problem results
 
-                    simulation_results[hierarchy_info['name']][case_info['name']][scenario_info['name']][mesh_file] = problem_results # Store the simulation results for the current refinement level.
-                    if not simulation.write_mdss_files:
-                        continue # If false, then skip writing the mdss files
+                        simulation_results[hierarchy_info['name']][case_info['name']][scenario_info['name']][refinement_tag] = problem_results # Store the simulation results for the current refinement level.
+                        if not simulation.write_mdss_files:
+                            continue # If false, then skip writing the mdss files
 
-                    for aoa in aoa_list: # loop for angles of attack reads the info, adds additional info if needed for the output file for each aoa
-                        aoa = float(aoa) # making sure aoa is a float
+                        for aoa in aoa_list: # loop for angles of attack reads the info, adds additional info if needed for the output file for each aoa
+                            aoa = float(aoa) # making sure aoa is a float
 
-                        aoa_out_dir = os.path.join(refinement_out_dir, f"aoa_{aoa}") # aoa output directory -- Written to store in the parent directory
-                        aoa_info_file = os.path.join(aoa_out_dir ,f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
-                        aoa_level_dict = {} # Creating aoa level sim info dictionary for overall sim info file
+                            aoa_out_dir = os.path.join(refinement_out_dir, f"aoa_{aoa}") # aoa output directory -- Written to store in the parent directory
+                            aoa_info_file = os.path.join(aoa_out_dir ,f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
+                            aoa_level_dict = {} # Creating aoa level sim info dictionary for overall sim info file
 
-                        # Checking for existing successful simulation info, 
-                        try:
-                            with open(aoa_info_file, 'r') as aoa_file: # open the simulation info file
-                                aoa_sim_info = yaml.safe_load(aoa_file)
+                            # Checking for existing successful simulation info, 
+                            try:
+                                with open(aoa_info_file, 'r') as aoa_file: # open the simulation info file
+                                    aoa_sim_info = yaml.safe_load(aoa_file)
 
-                            fail_flag = aoa_sim_info['fail_flag'] # Read the fail flag
+                                fail_flag = aoa_sim_info['fail_flag'] # Read the fail flag
 
-                            if fail_flag == 0: # Refers successful simulation and makes sure only the successful simulations are added to the csv file.
-                                # Add the simulation info to list to be saved as a csv file in the refinement out directory
-                                AOAList.append(aoa_sim_info['AOA'])
-                                CLList.append(aoa_sim_info['cl'])
-                                CDList.append(aoa_sim_info['cd'])
-                                TList.append(float(aoa_sim_info['wall_time'].replace(" sec", "")))
-                                FList.append(fail_flag)
+                                if fail_flag == 0: # Refers successful simulation and makes sure only the successful simulations are added to the csv file.
+                                    # Add the simulation info to list to be saved as a csv file in the refinement out directory
+                                    AOAList.append(aoa_sim_info['AOA'])
+                                    CLList.append(aoa_sim_info['cl'])
+                                    CDList.append(aoa_sim_info['cd'])
+                                    TList.append(float(aoa_sim_info['wall_time'].replace(" sec", "")))
+                                    FList.append(fail_flag)
 
-                                # Store the basic info that is needed to be stored in refinement level dictionary
-                                aoa_level_dict = {
-                                    'cl': float(aoa_sim_info['cl']),
-                                    'cd': float(aoa_sim_info['cd']),
-                                    'wall_time': aoa_sim_info['wall_time'],
-                                    'fail_flag': int(fail_flag),
-                                    'out_dir': aoa_out_dir,
-                                }
-                                refinement_level_dict[f"aoa_{aoa}"] = aoa_level_dict
-                            else: # If the simulation failed, then add the aoa to the failed aoa list
-                                if aoa not in failed_aoa_list:
-                                    failed_aoa_list.append(aoa)
-                            # Save the aoa_out_dict as an yaml file with the updated info
-                            with open(aoa_info_file, 'w') as interim_out_yaml:
-                                yaml.dump(aoa_sim_info, interim_out_yaml, sort_keys=False)
-                        except:
-                            if aoa not in failed_aoa_list: # If aoa is not in the failed aoa list, then add it to the failed aoa list
-                                failed_aoa_list.append(aoa) # Add to the list of failed aoa
-                    ################################# End of AOA loop ########################################
-                    refinement_level_dict["failed_aoa"] = failed_aoa_list
-                    # Write simulation results to a csv file
-                    refinement_level_data = {
-                        "Alpha": [f"{alpha:6.2f}" for alpha in AOAList],
-                        "CL": [f"{cl:8.4f}" for cl in CLList],
-                        "CD": [f"{cd:8.4f}" for cd in CDList],
-                        "FFlag": [f"{int(FF):12f}" for FF in FList],
-                        "WTime": [f"{wall_time:10.2f}" for wall_time in TList]
-                    }
-                    
-                    df_new = pd.DataFrame(refinement_level_data) # Create a panda DataFrame
-                    # If the file exists, load existing data and append new data
-                    if os.path.exists(refinement_level_csv_out_file):
-                        df_existing = load_csv_data(refinement_level_csv_out_file, comm)
-                        df_combined = pd.concat([df for df in [df_existing, df_new] if df is not None], ignore_index=True) 
-                    else:
-                        df_combined = df_new
-                    # Ensure Alpha column is float for sorting and deduplication
-                    df_combined['Alpha'] = pd.to_numeric(df_combined['Alpha'], errors='coerce')
-                    df_combined.dropna(subset=['Alpha'], inplace=True)
-                    df_combined.drop_duplicates(subset='Alpha', keep='last', inplace=True)
-                    df_combined.sort_values(by='Alpha', inplace=True)
-                    df_combined.to_csv(refinement_level_csv_out_file, index=False)
-                    
-                    # Add csv file location to the overall simulation out file
-                    refinement_level_dict['csv_file'] = refinement_level_csv_out_file
-                    refinement_level_dict['refinement_out_dir'] = refinement_out_dir
+                                    # Store the basic info that is needed to be stored in refinement level dictionary
+                                    aoa_level_dict = {
+                                        'cl': float(aoa_sim_info['cl']),
+                                        'cd': float(aoa_sim_info['cd']),
+                                        'wall_time': aoa_sim_info['wall_time'],
+                                        'fail_flag': int(fail_flag),
+                                        'out_dir': aoa_out_dir,
+                                    }
+                                    refinement_level_dict[f"aoa_{aoa}"] = aoa_level_dict
+                                else: # If the simulation failed, then add the aoa to the failed aoa list
+                                    if aoa not in failed_aoa_list:
+                                        failed_aoa_list.append(aoa)
+                                # Save the aoa_out_dict as an yaml file with the updated info
+                                with open(aoa_info_file, 'w') as interim_out_yaml:
+                                    yaml.dump(aoa_sim_info, interim_out_yaml, sort_keys=False)
+                            except:
+                                if aoa not in failed_aoa_list: # If aoa is not in the failed aoa list, then add it to the failed aoa list
+                                    failed_aoa_list.append(aoa) # Add to the list of failed aoa
+                        ################################# End of AOA loop ########################################
+                        refinement_level_dict["failed_aoa"] = failed_aoa_list
+                        # Write simulation results to a csv file
+                        refinement_level_data = {
+                            "Alpha": [f"{alpha:6.2f}" for alpha in AOAList],
+                            "CL": [f"{cl:8.4f}" for cl in CLList],
+                            "CD": [f"{cd:8.4f}" for cd in CDList],
+                            "FFlag": [f"{int(FF):12f}" for FF in FList],
+                            "WTime": [f"{wall_time:10.2f}" for wall_time in TList]
+                        }
+                        
+                        df_new = pd.DataFrame(refinement_level_data) # Create a panda DataFrame
+                        # If the file exists, load existing data and append new data
+                        if os.path.exists(refinement_level_csv_out_file):
+                            df_existing = load_csv_data(refinement_level_csv_out_file, comm)
+                            df_combined = pd.concat([df for df in [df_existing, df_new] if df is not None], ignore_index=True) 
+                        else:
+                            df_combined = df_new
+                        # Ensure Alpha column is float for sorting and deduplication
+                        df_combined['Alpha'] = pd.to_numeric(df_combined['Alpha'], errors='coerce')
+                        df_combined.dropna(subset=['Alpha'], inplace=True)
+                        df_combined.drop_duplicates(subset='Alpha', keep='last', inplace=True)
+                        df_combined.sort_values(by='Alpha', inplace=True)
+                        df_combined.to_csv(refinement_level_csv_out_file, index=False)
+                        
+                        # Add csv file location to the overall simulation out file
+                        refinement_level_dict['csv_file'] = refinement_level_csv_out_file
+                        refinement_level_dict['refinement_out_dir'] = refinement_out_dir
 
-                    # Add refinement level dict to scenario level dict
-                    scenario_sim_info[f"{mesh_file}"] = refinement_level_dict
-                ################################# End of refinement loop ###################################
+                        # Add refinement level dict to scenario level dict
+                        scenario_sim_info[f"{refinement_tag}"] = refinement_level_dict
+                    ################################# End of structural refinement loop ###################################
+                ################################# End of aero refinement loop ###################################
                 if not simulation.write_mdss_files:
                         continue # If false, then skip writing the mdss files
                 

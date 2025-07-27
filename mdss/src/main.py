@@ -6,7 +6,7 @@ from matplotlib.legend import Legend
 import niceplots
 from mpi4py import MPI
 
-from mdss.utils.helpers import load_yaml_input, load_csv_data, make_dir, print_msg, MachineType, YAMLInputType
+from mdss.utils.helpers import load_yaml_input, load_csv_data, make_dir, print_msg, MachineType, YAMLInputType, ProblemType
 from mdss.utils.tools import get_sim_data
 from mdss.src.main_helper import execute, submit_job_on_hpc
 from mdss.resources.misc_defaults import def_plot_options
@@ -249,6 +249,7 @@ class post_process:
         sim_out_info = copy.deepcopy(self.sim_out_info)
         for hierarchy, hierarchy_info in enumerate(sim_out_info['hierarchies']): # loop for Hierarchy level
             for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
+                problem_type = ProblemType.from_string(case_info['problem'])
                 scenario_legend_entries = []
                 fig, axs = self._create_fig(case_info["name"].replace("_", " ").upper()) # Create Figure
                 colors = self.plot_options.colors
@@ -257,6 +258,18 @@ class post_process:
                 colors = self.plot_options.colors
                 if not colors:  # Checks if the list is empty
                     colors = niceplots.get_colors_list()
+                
+                aero_mesh_files = case_info.get('mesh_files')
+                struct_mesh_files = case_info.get('struct_options', {}).get('mesh_files', [None])
+                refinement_tags = []
+                # Loop through the mesh files to create refinement tags
+                for aero_mesh_file in aero_mesh_files:
+                    for struct_mesh_file in struct_mesh_files:
+                        if problem_type == ProblemType.AEROSTRUCTURAL and struct_mesh_file:
+                            refinement_tags.append(f"{aero_mesh_file}_{struct_mesh_file}")
+                        else:
+                            refinement_tags.append(f"{aero_mesh_file}")
+                
                 for scenario, scenario_info in enumerate(case_info['scenarios']): # loop for scenarios that may present
                     scenario_out_dir = scenario_info['sim_info']['scenario_out_dir']
                     plot_args = {
@@ -264,7 +277,7 @@ class post_process:
                         'color': colors[scenario],
                     }
                     # To generate plots comparing the refinement levels
-                    scenario_legend_entry = self._add_scenario_level_plots(axs, scenario_info['name'], scenario_info.get('exp_data', None), case_info['mesh_files'], scenario_out_dir, **plot_args)
+                    scenario_legend_entry = self._add_scenario_level_plots(axs, scenario_info['name'], scenario_info.get('exp_data', None), refinement_tags, scenario_out_dir, **plot_args)
                     scenario_legend_entries.append(scenario_legend_entry)
                 ################################# End of Scenario loop ########################################
                 self._set_legends(fig, axs, scenario_legend_entries)
@@ -291,7 +304,8 @@ class post_process:
                     "hierarchy_name": {
                         "case_name": {
                             "scenarios": ["scenario_name_1", "scenario_name_2"],
-                            "mesh_files": ["mesh_level_1", "mesh_level_2"]  # Optional
+                            "aero_mesh_files": ["mesh_level_1", "mesh_level_2"],  # Optional
+                            "struct_mesh_files": ["mesh_level_1", "mesh_level_2"],  # Optional
                         }
                     }
                 }
@@ -302,8 +316,10 @@ class post_process:
                 Name of the case within the hierarchy.
             - *scenarios*: list[str]  
                 List of scenario names to be plotted.
-            - *mesh_files*: list[str], optional  
-                List of mesh refinement levels to include for that scenario. If not specified, defaults to all mesh files under the case.
+            - *aero_mesh_files*: list[str], optional  
+                List of aero mesh refinement levels to include for that scenario. If not specified, defaults to all aero mesh files under the case.
+            - *struct_mesh_files*: list[str], optional  
+                List of structural mesh refinement levels to include for that scenario. If not specified, defaults to all structural mesh files under the case.
 
         plt_name: str  
             Name used for the plot title and the saved file name (PNG format).
@@ -331,28 +347,41 @@ class post_process:
             for case, case_info in hierarchy_info.items():
                 for scenario in case_info['scenarios']:
                     scenario_info = {'hierarchy':hierarchy, 'case': case, 'scenario': scenario}
-                    if 'mesh_files' in case_info.keys():
-                        scenario_info['mesh_files'] = case_info['mesh_files']
+                    if 'aero_mesh_files' in case_info.keys():
+                        scenario_info['aero_mesh_files'] = case_info['aero_mesh_files']
+                    if 'struct_mesh_files' in case_info.keys():
+                        scenario_info['struct_mesh_files'] = case_info['struct_mesh_files']
                     scenarios_list.append(scenario_info)
         for s in scenarios_list:
             for hierarchy_info in sim_out_info['hierarchies']:
                 if hierarchy_info['name'] != s['hierarchy']:
                     continue
                 for case_info in hierarchy_info['cases']:
+                    problem_type = ProblemType.from_string(case_info['problem'])
                     if case_info['name'] != s['case']:
                         continue
                     for scenario_info in case_info['scenarios']:
                         if scenario_info['name'] != s['scenario']:
                             continue
                         found_scenarios = True
-                        mesh_files = s.get('mesh_files', case_info['mesh_files'])
+                        aero_mesh_files = s.get('aero_mesh_files', case_info['aero_mesh_files']) # Get all the aero mesh files when not specified
+                        struct_mesh_files = s.get('struct_mesh_files', case_info.get('struct_options', {}).get('mesh_files', [None])) # Get all the structural mesh files when not specified
+                        refinement_tags = []
+                        # Loop through the mesh files to create refinement tags
+                        for aero_mesh_file in aero_mesh_files:
+                            for struct_mesh_file in struct_mesh_files:
+                                if problem_type == ProblemType.AEROSTRUCTURAL and struct_mesh_file:
+                                    refinement_tags.append(f"{aero_mesh_file}_{struct_mesh_file}")
+                                else:
+                                    refinement_tags.append(f"{aero_mesh_file}")
+                        
                         scenario_out_dir = scenario_info['sim_info'].get('scenario_out_dir', '.')
                         label = f"{case_info['name']} - {scenario_info['name']}"
                         plot_args = {
                             'label': label.replace("_", " ").upper(),
                             'color': colors[count]
                         }
-                        scenario_legend_entry = self._add_scenario_level_plots(axs, scenario_info['name'], scenario_info.get('exp_data', None), mesh_files, scenario_out_dir, **plot_args)
+                        scenario_legend_entry = self._add_scenario_level_plots(axs, scenario_info['name'], scenario_info.get('exp_data', None), refinement_tags, scenario_out_dir, **plot_args)
                         scenario_legend_entries.append(scenario_legend_entry)
                         count+=1
 
@@ -418,7 +447,7 @@ class post_process:
             msg = f"{csv_file} is not readable.\nContinuing to plot without '{label}' data."
             print_msg(msg, 'warning', comm)
 
-    def _add_scenario_level_plots(self, axs, scenario_name, exp_data, mesh_files, scenario_out_dir, **kwargs):
+    def _add_scenario_level_plots(self, axs, scenario_name, exp_data, refinement_tags, scenario_out_dir, **kwargs):
         """
         Adds plots for a specific scenario (experimental + simulation) to the existing subplots.
 
@@ -438,8 +467,8 @@ class post_process:
         exp_data: str or None  
             Path to the experimental data CSV file. If None, no experimental data is plotted.
 
-        mesh_files: list[str]  
-            List of mesh refinement levels to be plotted (e.g., ['coarse', 'medium', 'fine']).
+        refinement_tags: list[str]  
+            A combined list of refinement tags for both aero and structural mesh files. Each tag corresponds to a specific mesh refinement level.
 
         scenario_out_dir: str  
             Path to the scenario's output directory, where refinement-level folders are located.
@@ -484,12 +513,12 @@ class post_process:
                 'markersize': markersize + 4,
             }
             self._add_plot_from_csv(axs, exp_data, **exp_args)
-        for ii, mesh_file in enumerate(mesh_files): # Loop for refinement levels
-            refinement_level_dir = os.path.join(scenario_out_dir, f"{mesh_file}")
-            refinement_level_csv_out_file = os.path.join(refinement_level_dir, f"{mesh_file}_output.csv")
+        for ii, refinement_tag in enumerate(refinement_tags): # Loop for refinement levels
+            refinement_level_dir = os.path.join(scenario_out_dir, f"{refinement_tag}")
+            refinement_level_csv_out_file = os.path.join(refinement_level_dir, f"{refinement_tag}_output.csv")
             # Update kwargs
             plot_args = {
-                    'label': f"{label} - {mesh_file}",
+                    'label': f"{label} - {refinement_tag}",
                     'color': color,
                     'linestyle': '-',
                     'marker': self._get_marker_style(ii),

@@ -80,7 +80,8 @@ class ref_load_info(BaseModel):
 class ref_struct_options(BaseModel):
     isym: int # Symmetry direction
     t: float  # Shell thickness in m
-    mesh_fpath: str
+    meshes_folder_path: str
+    mesh_files: list[str]
     properties: Optional[ref_struct_properties]=None
     load_info: Optional[ref_load_info]=None
     solver_options: Optional[dict]=None
@@ -109,8 +110,10 @@ class ref_case_info(BaseModel):
             if not struct_options:
                 raise ValidationError("`struct_options` must be provided when running an aerostructural problem")
             
-            if not os.path.isfile(struct_options.get("mesh_fpath", "")):
-                raise FileNotFoundError(f"Structural Mesh file not found: {struct_options.get('mesh_fpath')}")
+            for ii, mesh_file in enumerate(struct_options.get('mesh_files')):
+                structural_mesh_file = os.path.join(os.path.abspath(struct_options.get("meshes_folder_path")), mesh_file)
+                if not os.path.isfile(structural_mesh_file):
+                    raise FileNotFoundError(f"Structural Mesh file not found: {structural_mesh_file}. Please provide a valid path")
         
         return values
     

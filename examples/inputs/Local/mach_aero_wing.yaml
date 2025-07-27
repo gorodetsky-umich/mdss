@@ -8,7 +8,6 @@ hierarchies:
     problem: AeroStructural
     meshes_folder_path: ../grids
     mesh_files:
-    - wing_vol_L1.cgns
     - wing_vol_L2.cgns
     - wing_vol_L3.cgns
     geometry_info:
@@ -19,8 +18,8 @@ hierarchies:
       CFL: 1.5
       useANKSolver: true
       nsubiterturb: 10
-      ANKSecondOrdSwitchTol: 1.0e-8
-      ANKCoupledSwitchTol: 1.0e-06
+      ANKSecondOrdSwitchTol: 1.0e-12
+      ANKCoupledSwitchTol: 1.0e-012
       anklinresmax: 0.1
       L2Convergence: 1.0e-14
       L2ConvergenceRel: 0.001
@@ -28,7 +27,9 @@ hierarchies:
     struct_options:
       isym: 1
       t: 0.01
-      mesh_fpath: ../grids/wingbox.bdf
+      meshes_folder_path: ../grids
+      mesh_files:
+      - wingbox.bdf
       properties:
         ys: 400.0e6
       load_info:
