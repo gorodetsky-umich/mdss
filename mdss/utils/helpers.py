@@ -15,10 +15,16 @@ class ProblemType(Enum):
     Attributes
     ----------
     - **AERODYNAMIC** (ProblemType): Represents aerodynamic problems with associated aliases.
+    - **STRUCTURAL** (ProblemType): Represents structural problems with associated aliases.
     - **AEROSTRUCTURAL** (ProblemType): Represents aerostructural problems with associated aliases.
     """
-    AERODYNAMIC = 1, ["Aerodynamic", "Aero", "Flow"]
-    AEROSTRUCTURAL = 2, ["AeroStructural", "Structural", "Combined"]
+    AERODYNAMIC = 1, ["Aerodynamic", "Aero"]
+    STRUCTURAL = 2, ["Structural", "Struct"]
+    AEROSTRUCTURAL = 3, ["AeroStructural", "Structural", "AeroStruct", "Aero-Struct", "Aero-Structural"]
+    AERO_LD_XFER = 4, ["AeroLDXfer", "Aero-LD-Xfer", "AeroLDXfer", "Aero-LD-Xfer"]
+    STRUCT_LD_XFER = 5, ["StructLDXfer", "Struct-LD-Xfer", "StructLDXfer", "Struct-LD-Xfer"]
+
+
 
     def __init__(self, id, aliases):
         self.id = id

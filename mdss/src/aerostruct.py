@@ -1,9 +1,10 @@
 # Imports
 import os, time, yaml, json
 from mpi4py import MPI
+import numpy as np
 
 # MDO tool imports
-from mphys import MPhysVariables, Multipoint
+from mphys import MPhysVariables, Multipoint, Builder
 from mphys.scenarios import ScenarioAeroStructural, ScenarioAerodynamic
 from mpi4py import MPI
 from adflow.mphys import ADflowBuilder
@@ -22,8 +23,50 @@ from mdss.resources.aero_defaults import default_aero_options_aerodynamic
 from mdss.resources.aerostruct_defaults import *
 
 
-
 comm = MPI.COMM_WORLD
+
+class DummyBuilder(Builder):
+    def __init__(self, actual_builder=None):
+        super().__init__()
+        self.actual_builder = actual_builder
+    def initialize(self, comm):
+        pass  # No solver to initialize
+
+    def get_mesh_coordinate_subsystem(self, scenario_name=None):
+        if self.actual_builder:
+            return self.actual_builder.get_mesh_coordinate_subsystem(scenario_name)
+        return om.Group()  # Return empty, valid component
+
+    def get_coupling_group_subsystem(self, scenario_name=None):
+        # if self.actual_builder:
+        #     return self.actual_builder.get_coupling_group_subsystem(scenario_name)
+        return om.Group()
+
+    def get_pre_coupling_subsystem(self, scenario_name=None):
+        # if self.actual_builder:
+        #     return self.actual_builder.get_pre_coupling_subsystem(scenario_name)
+        return om.Group()
+
+    def get_post_coupling_subsystem(self, scenario_name=None):
+        # if self.actual_builder:
+        #     return self.actual_builder.get_post_coupling_subsystem(scenario_name)
+        return om.Group()
+    
+    def get_number_of_nodes(self):
+        if self.actual_builder:
+            return self.actual_builder.get_number_of_nodes()
+        return 0
+
+    def get_ndof(self):
+        if self.actual_builder:
+            return self.actual_builder.get_ndof()
+        return 0
+
+    def get_tagged_indices(self, tags):
+        # if self.actual_builder:
+        #     return self.actual_builder.get_tagged_indices(tags)
+        return []
+
 
 class Top(Multipoint):
     """
@@ -87,7 +130,6 @@ class Top(Multipoint):
                                         coupling_loads=[MPhysVariables.Structures.Loads.AERODYNAMIC], 
                                         problem_setup=tacs_config.problem_setup)
             struct_builder.initialize(self.comm)
-
             self.add_subsystem("mesh_struct", struct_builder.get_mesh_coordinate_subsystem())
 
             ################################################################################
@@ -143,6 +185,119 @@ class Top(Multipoint):
             self.add_subsystem("dvs", om.IndepVarComp(), promotes=["*"])
             self.mphys_add_scenario(self.sim_info['scenario_name'], ScenarioAerodynamic(aero_builder=aero_builder))
             self.connect(f"mesh_aero.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}", f"{self.sim_info['scenario_name']}.x_aero")
+        
+        elif self.problem_type == ProblemType.STRUCTURAL:        
+            # ################################################################################
+            # # TACS Setup (Needs to be implemented)
+            # ################################################################################
+            # tacs_config = tacs_setup(self.sim_info['structural_properties'], self.sim_info['load_info'], self.sim_info['tacs_out_dir'])
+
+            # struct_builder = TacsBuilder(mesh_file=self.sim_info['struct_mesh_fpath'], 
+            #                             element_callback=tacs_config.element_callback, 
+            #                             coupling_loads=[MPhysVariables.Structures.Loads.AERODYNAMIC], 
+            #                             problem_setup=tacs_config.problem_setup)
+            # struct_builder.initialize(self.comm)
+
+            # ################################################################################
+            # # MPHYS setup for Structural Problem
+            # ################################################################################
+            # self.add_subsystem("mesh_struct", struct_builder.get_mesh_coordinate_subsystem())
+
+            # dvs = self.add_subsystem("dvs", om.IndepVarComp(), promotes=["*"])
+            # init_dvs = struct_builder.get_initial_dvs()
+            # dvs.add_output("dv_struct", init_dvs)
+
+            # self.add_subsystem("mesh_struct", struct_builder.get_mesh_coordinate_subsystem())
+            # self.mphys_add_scenario(self.sim_info['scenario_name'], ScenarioAeroStructural(struct_builder=struct_builder))
+            # self.connect(
+            #     f"mesh_struct.{MPhysVariables.Structures.Mesh.COORDINATES}",
+            #     f"{self.sim_info['scenario_name']}.{MPhysVariables.Structures.COORDINATES}",
+            # )
+            # self.connect("dv_struct", f"{self.sim_info['scenario_name']}.dv_struct")
+
+            raise ValueError("Structural problems are not supported in this class. Use TACSBuilder directly for structural analysis.")
+        
+        elif self.problem_type == ProblemType.AERO_LD_XFER or self.problem_type == ProblemType.STRUCT_LD_XFER:
+            ################################################################################
+            # ADflow Setup
+            ################################################################################
+            aero_builder = ADflowBuilder(self.sim_info['aero_options'], scenario="aerostructural")
+            aero_builder.initialize(self.comm)
+            aero_builder.err_on_convergence_fail = False
+            self.add_subsystem("mesh_aero", aero_builder.get_mesh_coordinate_subsystem())
+            ################################################################################
+            # TACS Setup
+            ################################################################################
+            tacs_config = tacs_setup(self.sim_info['structural_properties'], self.sim_info['load_info'], self.sim_info['tacs_out_dir'])
+
+            struct_builder = TacsBuilder(mesh_file=self.sim_info['struct_mesh_fpath'], 
+                                        element_callback=tacs_config.element_callback, 
+                                        coupling_loads=[MPhysVariables.Structures.Loads.AERODYNAMIC], 
+                                        problem_setup=tacs_config.problem_setup)
+            struct_builder.initialize(self.comm)
+            self.add_subsystem("mesh_struct", struct_builder.get_mesh_coordinate_subsystem())
+
+            ################################################################################
+            # Transfer Scheme Setup
+            ################################################################################
+            isym = int(self.sim_info['isym'])  # y-symmetry
+            ldxfer_builder = MeldBuilder(aero_builder, struct_builder, isym=isym)
+            # ldxfer_builder = MeldBuilder(DummyBuilder(), struct_builder, isym=isym)
+            ldxfer_builder.initialize(self.comm)
+            
+
+            ################################################################################
+            # MPHYS Setup for AeroStructural Problem
+            ################################################################################
+            # ivc to keep the top level DVs
+            dvs = self.add_subsystem("dvs", om.IndepVarComp(), promotes=["*"])
+            init_dvs = struct_builder.get_initial_dvs()
+            dvs.add_output("dv_struct", init_dvs)
+            nonlinear_solver = om.NonlinearRunOnce()
+
+            if self.problem_type == ProblemType.AERO_LD_XFER:
+                nnodes = struct_builder.get_number_of_nodes()
+                ndof = struct_builder.get_ndof()
+                self.add_subsystem(
+                    "u_struct",
+                    om.IndepVarComp("u_struct", val=np.zeros(nnodes*ndof), distributed=True),
+                    promotes_outputs=["u_struct"]  # Makes structural displacement a top-level input
+                )
+                self.connect("u_struct", f"{self.sim_info['scenario_name']}.u_struct")
+                # self.connect("u_struct", f"{self.sim_info['scenario_name']}.coupling.load_xfer.u_struct")
+                self.mphys_add_scenario(
+                    self.sim_info['scenario_name'],
+                    ScenarioAeroStructural(
+                        aero_builder=aero_builder, struct_builder=DummyBuilder(), ldxfer_builder=ldxfer_builder,
+                    ),
+                    coupling_nonlinear_solver=nonlinear_solver,
+                )
+            elif self.problem_type == ProblemType.STRUCT_LD_XFER:
+                f_aero_size = aero_builder.solver.getSurfaceCoordinates(includeZipper=True).size
+                self.add_subsystem(
+                    "f_aero",
+                    om.IndepVarComp("f_aero", val=np.zeros(f_aero_size), distributed=True),
+                    promotes_outputs=["f_aero"]  # Makes structural displacement a top-level input
+                )
+                self.connect("f_aero", f"{self.sim_info['scenario_name']}.f_aero")
+                self.mphys_add_scenario(
+                    self.sim_info['scenario_name'],
+                    ScenarioAeroStructural(
+                        aero_builder=DummyBuilder(aero_builder), struct_builder=struct_builder, ldxfer_builder=ldxfer_builder,
+                    ),
+                    coupling_nonlinear_solver=nonlinear_solver,
+                )
+            self.connect(
+                f"mesh_aero.{MPhysVariables.Aerodynamics.Surface.Mesh.COORDINATES}",
+                f"{self.sim_info['scenario_name']}.{MPhysVariables.Aerodynamics.Surface.COORDINATES_INITIAL}",
+            )
+            self.connect(
+                f"mesh_struct.{MPhysVariables.Structures.Mesh.COORDINATES}",
+                f"{self.sim_info['scenario_name']}.{MPhysVariables.Structures.COORDINATES}",
+            )
+
+            # self.connect("dv_struct", f"{self.sim_info['scenario_name']}.dv_struct")
+
             
     def configure(self): # Set Angle of attack
         """
@@ -171,7 +326,7 @@ class Top(Multipoint):
         ap = AeroProblem(**ap_inputs)
         ap.addDV("alpha", value=aoa, name="aoa", units="deg")
 
-        if self.problem_type == ProblemType.AEROSTRUCTURAL:
+        if self.problem_type == ProblemType.AEROSTRUCTURAL or self.problem_type == ProblemType.AERO_LD_XFER:
             scenario_attr.coupling.aero.mphys_set_ap(ap)
             variable_to_connect = f"{self.sim_info['scenario_name']}.coupling.aero.aoa"
 
@@ -179,13 +334,10 @@ class Top(Multipoint):
             scenario_attr.coupling.mphys_set_ap(ap)
             variable_to_connect = f"{self.sim_info['scenario_name']}.coupling.aoa"
 
-        scenario_attr.aero_post.mphys_set_ap(ap)
-
-        # define the aero DVs in the IVC
-        self.dvs.add_output("aoa", val=aoa, units="deg")
-
-        # connect to the aero for each scenario
-        self.connect("aoa", [variable_to_connect, f"{self.sim_info['scenario_name']}.aero_post.aoa"])
+        if self.problem_type != ProblemType.STRUCTURAL and self.problem_type != ProblemType.STRUCT_LD_XFER:
+            scenario_attr.aero_post.mphys_set_ap(ap)
+            self.dvs.add_output("aoa", val=aoa, units="deg") # define the aero DVs in the IVC           
+            self.connect("aoa", [variable_to_connect, f"{self.sim_info['scenario_name']}.aero_post.aoa"]) # connect to the aero for each scenario
     
 class Problem:
     """
@@ -237,7 +389,7 @@ class Problem:
         # Read the respective default_aero_options
         if problem_type == ProblemType.AERODYNAMIC:
             aero_options = default_aero_options_aerodynamic.copy() # Assign default options for aerodynamic case
-        elif problem_type == ProblemType.AEROSTRUCTURAL:
+        elif problem_type == ProblemType.AEROSTRUCTURAL or problem_type == ProblemType.AERO_LD_XFER or problem_type == ProblemType.STRUCT_LD_XFER:
             isym = self.case_info['struct_options']['isym']
             solver_options = default_solver_options
             aero_options = default_aero_options_aerostructural.copy() # Assign default aero_options for aerostructural case
@@ -289,11 +441,11 @@ class Problem:
         # OpenMDAO setup
         ################################################################################
         os.environ["OPENMDAO_REPORTS"]="0" # Do this to disable report generation by OpenMDAO
-        prob = om.Problem()
-        prob.model = Top(sim_info)
-        prob.setup() # Setup the problem
+        om_problem = om.Problem()
+        om_problem.model = Top(sim_info)
+        om_problem.setup() # Setup the problem
 
-        self.prob = prob
+        self.om_problem = om_problem
         self.sim_info = sim_info
 
     def run(self):
@@ -317,6 +469,8 @@ class Problem:
             prob_updt = update_om_instance(self.prob, self.sim_info['scenario_name'], self.sim_info['problem'])
             prob_updt.outdir(aoa_out_dir)
             
+            u_struct = None
+            f_aero = None
             ################################################################################
             # Checking for existing successful simulation info
             ################################################################################ 
@@ -338,24 +492,27 @@ class Problem:
             # Run the model
             aoa_start_time = time.time() # Store the start time
             try:
-                self.prob.run_model()
+                self.om_problem.run_model()
                 fail_flag = 0
             except:
                 fail_flag = 1
 
-            om.n2(self.prob, show_browser=False, outfile=os.path.join(aoa_out_dir, "mphys_n2.html")) # Store n2 diagram in the output_directory
+            om.n2(self.om_problem, show_browser=False, outfile=os.path.join(aoa_out_dir, "mphys_n2.html")) # Store n2 diagram in the output_directory
 
             aoa_end_time = time.time() # Store the end time
             aoa_run_time = aoa_end_time - aoa_start_time # Compute the run time
 
-            self.prob.model.list_inputs(units=True)
-            self.prob.model.list_outputs(units=True)
+            self.om_problem.model.list_inputs(units=True)
+            self.om_problem.model.list_outputs(units=True)
 
             if fail_flag == 0:
                 problem_results[aoa_key] = {
-                    'cl': self.prob[f"{self.sim_info['scenario_name']}.aero_post.cl"][0],
-                    'cd': self.prob[f"{self.sim_info['scenario_name']}.aero_post.cd"][0],
+                    'cl': self.om_problem[f"{self.sim_info['scenario_name']}.aero_post.cl"][0],
+                    'cd': self.om_problem[f"{self.sim_info['scenario_name']}.aero_post.cd"][0],
                 }
+                if self.problem_type == ProblemType.AEROSTRUCTURAL:
+                    u_struct = self.om_problem[f"{self.sim_info['scenario_name']}.u_struct"]
+                    f_aero = self.om_problem[f"{self.sim_info['scenario_name']}.f_aero"]
 
             if  not self.write_mdss_files:
                 continue # Skip writing mdss files if write_mdss_files is False
@@ -388,7 +545,13 @@ class Problem:
                     'solver_options': self.sim_info['solver_options'],
                 }
                 aoa_out_dic.update(struct_info_dict)
-            with open(aoa_info_file, 'w') as interim_out_yaml:
-                yaml.dump(aoa_out_dic, interim_out_yaml, sort_keys=False)
-        
+            if comm.rank == 0:
+                with open(aoa_info_file, 'w') as interim_out_yaml:
+                    yaml.dump(aoa_out_dic, interim_out_yaml, sort_keys=False)
+
+                # Store u_struct and f_aero
+                if u_struct:
+                    np.save(os.path.join(aoa_out_dir, "u_struct.npy"), u_struct)
+                if f_aero:
+                    np.save(os.path.join(aoa_out_dir, "f_aero.npy"), f_aero)
         return problem_results
