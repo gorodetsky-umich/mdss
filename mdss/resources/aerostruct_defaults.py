@@ -36,7 +36,7 @@ default_struct_properties = {
     'E': 70.0e9,        # Young's modulus in N/m^2
     'nu': 0.30,         # Poisson's ratio
     'kcorr': 5.0/6.0,   # Shear correction factor
-    'ys': 350.0e6,      # Yeild stress
+    'ys': 350.0e6,      # Yield stress
 }
 
 ################################################################################
@@ -45,7 +45,7 @@ default_struct_properties = {
 default_solver_options = {
     'linear_solver_options': {
         'atol': 1e-08, # absolute error tolerance
-        'err_on_non_converge': True, # When True, AnalysisError will be raised if not convereged
+        'err_on_non_converge': True, # When True, AnalysisError will be raised if not converged
         'maxiter': 25, # maximum number of iterations
         'rtol': 1e-8, # relative error tolerance
         'use_aitken': True, # set to True to use Aitken
@@ -53,11 +53,12 @@ default_solver_options = {
 
     'nonlinear_solver_options': {
         'atol': 1e-08, # absolute error tolerance
-        'err_on_non_converge': True, # When True, AnalysisError will be raised if not convereged
-        'reraise_child_analysiserror': False, # When the option is true, a solver will reraise any AnalysisError that arises during subsolve; when false, it will continue solving.
+        'err_on_non_converge': True, # When True, AnalysisError will be raised if not converged
+        'reraise_child_analysiserror': False, # When the option is true, a solver will reraise any AnalysisError that arises during sub-solve; when false, it will continue solving.
         'maxiter': 25, # maximum number of iterations
         'rtol': 1e-08, # relative error tolerance
         'use_aitken': True, # set to True to use Aitken
+        'iprint': 2
     }
 }
 

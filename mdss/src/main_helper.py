@@ -143,7 +143,6 @@ def execute(simulation):
                                     aoa_sim_info = yaml.safe_load(aoa_file)
 
                                 fail_flag = aoa_sim_info['fail_flag'] # Read the fail flag
-                                print(aoa_sim_info)
                                 if fail_flag == 0: # Refers successful simulation and makes sure only the successful simulations are added to the csv file.
                                     filtered_aoa_list.remove(aoa) # Remove the aoa from the filtered aoa list
                                     skipped_aoa_list.append(aoa) # Add the aoa to the skipped aoa list

@@ -3,6 +3,7 @@ output/
 /build/
 /docs/build/
 *.egg-info/
+.vscode/
 # mkdocs documentation
 /site
 /old_docs
