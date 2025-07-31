@@ -43,12 +43,12 @@ class simulation():
 
         self.machine_type = MachineType.from_string(self.sim_info['machine_type'])  # Convert string to enum
         # Additional options
-        self.write_mdss_files = True # To toggle writing MDSS files.
+        self.write_mdss_files = self.sim_info.get('write_mdss_files', True) # To toggle writing MDSS files.
         self.final_out_file = os.path.join(self.out_dir, "overall_sim_info.yaml") # Set the overall simulation info file name.
-        self.subprocess_flag = True # To toggle opting subprocess.
-        self.record_subprocess = False # To toggle to record subprocess output.
-        self.skip_successful_simulations = True # To toggle skipping successful simulations.
-        
+        self.subprocess_flag = self.sim_info.get('subprocess_flag', True) # To toggle opting subprocess.
+        self.record_subprocess = self.sim_info.get('record_subprocess', False) # To toggle to record subprocess output.
+        self.skip_successful_simulations = self.sim_info.get('skip_successful_simulations', True) # To toggle skipping successful simulations.
+
         if self.machine_type == MachineType.HPC:
             self.submit_job = True # Toggle to run directly without submitting a Job. Intended for testing in interactive mode.
             self.wait_for_job = False # To toggle to wait for the job to finish.
