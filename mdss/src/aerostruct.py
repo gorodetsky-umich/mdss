@@ -363,8 +363,8 @@ class Problem:
     def __init__(self, problem_info):
 
         problem_info = ensure_dict(problem_info)  # Ensure problem_info is a dictionary (Also converts from json)
-        self.write_mdss_files = True
-        self.skip_successful_simulations = True
+        self.write_mdss_files = problem_info.get('write_mdss_files')  # Toggle to write MDSS files
+        self.skip_successful_simulations = problem_info.get('skip_successful_simulations')  # Flag to skip successful simulations
 
         # Extract the required info
         self.case_info = problem_info['case_info']

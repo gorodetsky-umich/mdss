@@ -67,6 +67,9 @@ def execute(simulation):
     problem_input = {} # Dictionary to store the input for the Problem class
     simulation_results = {} # Dictionary to store the simulation results for all hierarchies, cases, and scenarios
 
+    problem_input['write_mdss_files'] = simulation.write_mdss_files # Flag to write mdss files
+    problem_input['skip_successful_simulations'] = simulation.skip_successful_simulations # Flag to skip successful simulations
+
     for hierarchy, hierarchy_info in enumerate(sim_info_copy['hierarchies']): # loop for Hierarchy level
         simulation_results[hierarchy_info['name']] = {} # Initialize hierarchy level results
         for case, case_info in enumerate(hierarchy_info['cases']): # loop for cases in hierarchy
@@ -132,23 +135,24 @@ def execute(simulation):
                         filtered_aoa_list = aoa_list.copy() # Copying the aoa_list to filter out the failed aoa later
                         skipped_aoa_list = [] # List to store the skipped aoa due to existing successful simulation
                         skipped_aoa_info = {} # Dictionary to store the skipped aoa info
-                        for aoa in aoa_list:
-                            aoa = float(aoa)
-                            aoa_key = f"aoa_{aoa}"
-                            aoa_out_dir = os.path.join(refinement_out_dir, f"aoa_{aoa}") # aoa output directory -- Written to store in the parent directory
-                            aoa_info_file = os.path.join(aoa_out_dir ,f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
-                            # Checking for existing successful simulation info, 
-                            try:
-                                with open(aoa_info_file, 'r') as aoa_file: # open the simulation info file
-                                    aoa_sim_info = yaml.safe_load(aoa_file)
+                        if simulation.skip_successful_simulations: 
+                            for aoa in aoa_list:
+                                aoa = float(aoa)
+                                aoa_key = f"aoa_{aoa}"
+                                aoa_out_dir = os.path.join(refinement_out_dir, f"aoa_{aoa}") # aoa output directory -- Written to store in the parent directory
+                                aoa_info_file = os.path.join(aoa_out_dir ,f"aoa_{aoa}.yaml") # name of the simulation info file at the aoa level directory
+                                # Checking for existing successful simulation info, 
+                                try:
+                                    with open(aoa_info_file, 'r') as aoa_file: # open the simulation info file
+                                        aoa_sim_info = yaml.safe_load(aoa_file)
 
-                                fail_flag = aoa_sim_info['fail_flag'] # Read the fail flag
-                                if fail_flag == 0: # Refers successful simulation and makes sure only the successful simulations are added to the csv file.
-                                    filtered_aoa_list.remove(aoa) # Remove the aoa from the filtered aoa list
-                                    skipped_aoa_list.append(aoa) # Add the aoa to the skipped aoa list
-                                    skipped_aoa_info[aoa_key] = {key : value for key, value in aoa_sim_info.items() if key in ['cl', 'cd', 'wall_time']} # Add the aoa info to the skipped aoa info
-                            except:
-                                continue
+                                    fail_flag = aoa_sim_info['fail_flag'] # Read the fail flag
+                                    if fail_flag == 0: # Refers successful simulation and makes sure only the successful simulations are added to the csv file.
+                                        filtered_aoa_list.remove(aoa) # Remove the aoa from the filtered aoa list
+                                        skipped_aoa_list.append(aoa) # Add the aoa to the skipped aoa list
+                                        skipped_aoa_info[aoa_key] = {key : value for key, value in aoa_sim_info.items() if key in ['cl', 'cd', 'wall_time']} # Add the aoa info to the skipped aoa info
+                                except:
+                                    continue
                         
                         filtered_aoa_csv_string = '"' + ",".join(map(str, [float(aoa) for aoa in filtered_aoa_list])) + '"' # Convert the filtered aoa list to a csv string
                         skipped_aoa_csv_string = '"' + ",".join(map(str, [float(aoa) for aoa in skipped_aoa_list])) + '"' # Convert the skipped aoa list to a csv string
