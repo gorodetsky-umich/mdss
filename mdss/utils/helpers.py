@@ -264,6 +264,11 @@ class update_om_instance:
         elif self.problem_type == ProblemType.AEROSTRUCTURAL:
             self.scenario_attr.coupling.aero.options['solver'].options['outputDirectory'] = new_outdir
             self.scenario_attr.struct_post.eval_funcs.sp.setOption('outputdir', new_outdir)
+        elif self.problem_type == ProblemType.STRUCTURAL:
+            self.scenario_attr.struct_post.eval_funcs.sp.setOption('outputdir', new_outdir)
+        elif self.problem_type == ProblemType.AERO_LD_XFER:
+            self.scenario_attr.coupling.aero.options['solver'].options['outputDirectory'] = new_outdir
+        
 
     def aero_options(self, new_aero_options):
         # Currently do not work
