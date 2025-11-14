@@ -377,7 +377,7 @@ class Problem:
         # Extract the required info
         self.case_info = problem_info['case_info']
         self.scenario_info = problem_info['scenario_info']
-        self.other_sim_info = problem_info['other_sim_info']
+        self.other_sim_info = problem_info.get('other_sim_info', {})  # Optional additional simulation info
         ref_level_dir = problem_info['ref_level_dir']
         aero_grid_fpath = problem_info['aero_grid_fpath']
         struct_mesh_fpath = problem_info.get('struct_mesh_fpath', None) # Optional structural mesh file path
