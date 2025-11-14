@@ -491,6 +491,7 @@ class Problem:
             prob_updt.outdir(aoa_out_dir)
             
             u_struct = None
+            f_aero = None
             f_aero_struct = None
             ################################################################################
             # Checking for existing successful simulation info
