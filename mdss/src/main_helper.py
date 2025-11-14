@@ -169,6 +169,7 @@ def execute(simulation):
                             problem_input['aoa_csv_str'] = filtered_aoa_csv_string # Adding the aoa csv string to the problem input
                             problem_input['aero_grid_fpath'] = aero_grid_fpath # Adding the aero grid file path to the problem input
                             problem_input['struct_mesh_fpath'] = struct_mesh_file # Adding the struct mesh file path to the problem input
+                            problem_input['other_sim_info'] = other_sim_info # Adding other simulation information to the problem input
                             if simulation.subprocess_flag is True:
                                 new_aoa_results = run_as_subprocess(other_sim_info, problem_input, simulation.record_subprocess, comm)
                             elif simulation.subprocess_flag is False:

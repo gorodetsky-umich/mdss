@@ -377,6 +377,7 @@ class Problem:
         # Extract the required info
         self.case_info = problem_info['case_info']
         self.scenario_info = problem_info['scenario_info']
+        self.other_sim_info = problem_info['other_sim_info']
         ref_level_dir = problem_info['ref_level_dir']
         aero_grid_fpath = problem_info['aero_grid_fpath']
         struct_mesh_fpath = problem_info.get('struct_mesh_fpath', None) # Optional structural mesh file path
@@ -533,6 +534,7 @@ class Problem:
                 if self.problem_type == ProblemType.AEROSTRUCTURAL:
                     u_struct = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.u_struct", get_remote=True)  # Get structural displacements
                     f_aero_struct = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.f_aero_struct", get_remote=True) # Get aerodynamic forces on the structure
+                    f_aero = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.f_aero", get_remote=True) # Get aerodynamic forces
 
             if  not self.write_mdss_files:
                 continue # Skip writing mdss files if write_mdss_files is False
@@ -551,6 +553,7 @@ class Problem:
                 'cd': float(self.om_problem[f"{self.sim_info['scenario_name']}.aero_post.cd"][0]),
                 'wall_time': f"{aoa_run_time:.2f} sec",
                 'aero_options': self.sim_info['aero_options'],
+                'other_sim_info': self.other_sim_info,
             }
             try:
                 aoa_out_dic['scenario_info']['exp_data'] = self.scenario_info['exp_data']
@@ -573,4 +576,5 @@ class Problem:
                 if self.problem_type == ProblemType.AEROSTRUCTURAL:
                     np.save(os.path.join(aoa_out_dir, "u_struct.npy"), u_struct)
                     np.save(os.path.join(aoa_out_dir, "f_aero_struct.npy"), f_aero_struct)
+                    np.save(os.path.join(aoa_out_dir, "f_aero.npy"), f_aero)
         return problem_results
