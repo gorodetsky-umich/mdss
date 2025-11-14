@@ -577,7 +577,7 @@ class Problem:
                     yaml.dump(aoa_out_dic, interim_out_yaml, sort_keys=False)
 
                 # Store u_struct and f_aero_struct
-                if self.problem_type == ProblemType.AEROSTRUCTURAL:
+                if self.problem_type == ProblemType.AEROSTRUCTURAL and fail_flag == 0:
                     np.save(os.path.join(aoa_out_dir, "u_struct.npy"), u_struct)
                     np.save(os.path.join(aoa_out_dir, "f_aero.npy"), f_aero)
                     np.save(os.path.join(aoa_out_dir, "f_aero_struct.npy"), f_aero_struct)
