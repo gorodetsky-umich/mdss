@@ -493,6 +493,7 @@ class Problem:
             u_struct = None
             f_aero = None
             f_aero_struct = None
+            x_struct_mesh = None
             ################################################################################
             # Checking for existing successful simulation info
             ################################################################################ 
@@ -534,8 +535,10 @@ class Problem:
                 }
                 if self.problem_type == ProblemType.AEROSTRUCTURAL:
                     u_struct = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.u_struct", get_remote=True)  # Get structural displacements
-                    f_aero_struct = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.f_aero_struct", get_remote=True) # Get aerodynamic forces on the structure
                     f_aero = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.f_aero", get_remote=True) # Get aerodynamic forces
+                    f_aero_struct = self.om_problem.get_val(f"{self.sim_info['scenario_name']}.f_aero_struct", get_remote=True) # Get aerodynamic forces on the structure
+                    x_struct_mesh = self.om_problem.get_val(f"mesh_struct.x_struct0_mesh", get_remote=True)  # Get structural mesh coordinates
+                    
 
             if  not self.write_mdss_files:
                 continue # Skip writing mdss files if write_mdss_files is False
@@ -576,6 +579,8 @@ class Problem:
                 # Store u_struct and f_aero_struct
                 if self.problem_type == ProblemType.AEROSTRUCTURAL:
                     np.save(os.path.join(aoa_out_dir, "u_struct.npy"), u_struct)
-                    np.save(os.path.join(aoa_out_dir, "f_aero_struct.npy"), f_aero_struct)
                     np.save(os.path.join(aoa_out_dir, "f_aero.npy"), f_aero)
+                    np.save(os.path.join(aoa_out_dir, "f_aero_struct.npy"), f_aero_struct)
+                    np.save(os.path.join(aoa_out_dir, "x_struct_mesh.npy"), x_struct_mesh)
+               
         return problem_results
