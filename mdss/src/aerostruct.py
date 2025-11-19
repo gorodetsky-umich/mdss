@@ -2,11 +2,9 @@
 import os, time, yaml, json
 from mpi4py import MPI
 import numpy as np
-
-# MDO tool imports
-from mphys import MPhysVariables, Multipoint, Builder
-from mphys.scenarios import ScenarioAeroStructural, ScenarioAerodynamic, ScenarioStructural
 from mpi4py import MPI
+
+# Solver imports
 from adflow.mphys import ADflowBuilder
 from baseclasses import AeroProblem
 try: # The following modules are required only for Aerostructural problems
@@ -16,8 +14,14 @@ try: # The following modules are required only for Aerostructural problems
 
 except:
     pass
+
+# MDO tool imports
+from mphys import MPhysVariables, Multipoint, Builder
+from mphys.scenarios import ScenarioAeroStructural, ScenarioAerodynamic, ScenarioStructural
+
 import openmdao.api as om
 
+# MDSS imports
 from mdss.utils.helpers import ProblemType, load_yaml_input, print_msg, update_om_instance, get_restart_file, ensure_dict
 from mdss.resources.aero_defaults import default_aero_options_aerodynamic
 from mdss.resources.aerostruct_defaults import *
